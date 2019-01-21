@@ -100,6 +100,8 @@ static int get_slave_ports(unsigned int part_num)
 		num_slave_ports = CCI550_SLAVE_PORTS;
 		break;
 	default:
+		num_slave_ports = CCI400_SLAVE_PORTS;
+		WARN("CCI: invalid part number: %d\n", part_num);
 		/* Do nothing in default case */
 		break;
 	}
