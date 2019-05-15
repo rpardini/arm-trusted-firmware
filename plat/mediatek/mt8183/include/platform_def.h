@@ -9,6 +9,7 @@
 
 #include <arch.h>
 #include <drivers/arm/gic_common.h>
+#include <common/tbbr/tbbr_img_def.h>
 
 #define PLAT_PRIMARY_CPU   0x0
 
@@ -255,7 +256,7 @@ INTR_PROP_DESC(MT_IRQ_SEC_SGI_7, GIC_HIGHEST_SEC_PRIORITY, grp, \
 #elif IMAGE_BL1
 #define PLATFORM_STACK_SIZE    0x440
 #elif IMAGE_BL2
-#define PLATFORM_STACK_SIZE    0x400
+#define PLATFORM_STACK_SIZE    0x1000
 #elif IMAGE_BL31
 #define PLATFORM_STACK_SIZE    0x800
 #elif IMAGE_BL32
@@ -287,6 +288,26 @@ INTR_PROP_DESC(MT_IRQ_SEC_SGI_7, GIC_HIGHEST_SEC_PRIORITY, grp, \
 
 #define TZRAM_BASE          0x54600000
 #define TZRAM_SIZE          0x00030000
+
+/*******************************************************************************
+ * BL2 specific defines.
+******************************************************************************/
+#define BL2_BASE		(0x201000)
+#define BL2_LIMIT		(0x400000)
+
+#define MAX_IO_DEVICES			U(3)
+#define MAX_IO_HANDLES			U(4)
+#define MAX_IO_BLOCK_DEVICES			1
+
+#define BL31_BASE		(TZRAM_BASE + 0x1000)
+#define BL31_LIMIT		(TZRAM_BASE + TZRAM_SIZE)
+#define TZRAM2_LIMIT		(TZRAM2_BASE + TZRAM2_SIZE)
+
+#define BL32_BASE		(0x4FD00000)
+#define BL32_LIMIT		(0x300000)
+#define BL32_HEADER_SIZE	(0x1c)
+
+#define BL33_BASE		(0x4c000000)
 
 /*******************************************************************************
  * BL31 specific defines.

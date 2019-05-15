@@ -9,6 +9,7 @@ MTK_PLAT_SOC  := ${MTK_PLAT}/${PLAT}
 
 PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/common/drivers/uart/                \
+                 -I${MTK_PLAT}/common/drivers/                    \
                  -I${MTK_PLAT_SOC}/drivers/                       \
                  -I${MTK_PLAT_SOC}/drivers/emi_mpu/               \
                  -I${MTK_PLAT_SOC}/drivers/devapc/                \
@@ -29,6 +30,29 @@ PLAT_BL_COMMON_SOURCES := lib/xlat_tables/aarch64/xlat_tables.c       \
 
 # Include GICv3 driver files
 include drivers/arm/gic/v3/gicv3.mk
+
+BL2_SOURCES     += common/desc_image_load.c                              \
+                   ${GICV3_SOURCES}					 \
+                   drivers/delay_timer/delay_timer.c                     \
+                   drivers/delay_timer/generic_delay_timer.c             \
+                   drivers/io/io_storage.c                               \
+                   drivers/io/io_block.c                                 \
+                   drivers/io/io_fip.c                                   \
+                   drivers/mmc/mmc.c                                     \
+                   drivers/partition/gpt.c                               \
+                   drivers/partition/partition.c                         \
+                   drivers/ti/uart/aarch64/16550_console.S               \
+                   lib/cpus/aarch64/cortex_a53.S                         \
+                   lib/cpus/aarch64/cortex_a73.S                         \
+                   lib/libc/memset.c                                     \
+                   ${MTK_PLAT}/common/mtk_plat_common.c                  \
+                   ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c               \
+                   ${MTK_PLAT_SOC}/aarch64/plat_helpers.S                \
+                   ${MTK_PLAT_SOC}/aarch64/platform_common.c             \
+                   ${MTK_PLAT_SOC}/bl2_plat_setup.c                      \
+                   ${MTK_PLAT_SOC}/drivers/pll/pll.c
+
+BL2_LIBS += ${LIBDRAM}
 
 BL31_SOURCES    += common/desc_image_load.c                              \
                    drivers/arm/cci/cci.c                                 \
@@ -74,6 +98,8 @@ BL31_SOURCES    += common/desc_image_load.c                              \
 ERRATA_A53_826319 := 0
 ERRATA_A53_836870 := 1
 ERRATA_A53_855873 := 1
+
+BL2_AT_EL3 := 1
 
 # indicate the reset vector address can be programmed
 PROGRAMMABLE_RESET_ADDRESS := 1
