@@ -313,6 +313,10 @@ void bl2_platform_setup(void)
 	mt_pll_init();
 	mt_pll_post_init();
 
+
+signed int pwrap_init(void);
+	pwrap_init();
+
 	mt_mem_init();
 
 	mtk_mmc_init(0x11230000, &mt8183_compat, 384000000);

@@ -50,7 +50,8 @@ BL2_SOURCES     += common/desc_image_load.c                              \
                    ${MTK_PLAT_SOC}/aarch64/plat_helpers.S                \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c             \
                    ${MTK_PLAT_SOC}/bl2_plat_setup.c                      \
-                   ${MTK_PLAT_SOC}/drivers/pll/pll.c
+                   ${MTK_PLAT_SOC}/drivers/pll/pll.c                     \
+                   ${MTK_PLAT_SOC}/pmic_wrap_init.c
 
 BL2_LIBS += ${LIBDRAM}
 
