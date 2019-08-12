@@ -530,11 +530,14 @@ static void __dead2 plat_mtk_system_off(void)
 
 static void __dead2 plat_mtk_system_reset(void)
 {
-	struct bl_aux_gpio_info *gpio_reset = plat_get_mtk_gpio_reset();
+//	struct bl_aux_gpio_info *gpio_reset = plat_get_mtk_gpio_reset();
 
 	INFO("MTK System Reset\n");
 
-	mt_set_gpio_out(gpio_reset->index, gpio_reset->polarity);
+	mmio_clrbits_32(MTK_WDT_BASE,
+		(MTK_WDT_MODE_DUAL_MODE | MTK_WDT_MODE_IRQ));
+	mmio_setbits_32(MTK_WDT_BASE, (MTK_WDT_MODE_KEY | MTK_WDT_MODE_EXTEN));
+	mmio_setbits_32(MTK_WDT_SWRST, MTK_WDT_SWRST_KEY);
 
 	wfi();
 	ERROR("MTK System Reset: operation not handled.\n");
