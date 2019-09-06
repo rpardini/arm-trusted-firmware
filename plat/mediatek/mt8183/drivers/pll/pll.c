@@ -378,16 +378,14 @@ void mt_pll_init(void)
     DRV_WriteReg32(CLK_MISC_CFG_0, ( temp | 0x0004000)); // enable [14] dramc_pll104m_ck
 #endif
 
-#if 0
     /************
     	* MTCMOS 
     	*************/
 
     print("mtcmos Start..\n");
-    spm_mtcmos_ctrl_dis(STA_POWER_ON);	
+    spm_mtcmos_ctrl_dis(1);	
 
     print("mtcmos Done!\n");
-#endif
 
 #if 1
     /*for CG*/
