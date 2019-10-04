@@ -65,6 +65,40 @@ static int32_t Writeif_unlock(void)
 	return 1;
 }
 
+#define RTC_POWERKEY1		0x8028
+#define RTC_POWERKEY2		0x802a
+#define RTC_POWERKEY1_KEY	0xa357
+#define RTC_POWERKEY2_KEY	0x67d2
+#define RTC_CALI_BBPU_2SEC_EN		(1U << 8)
+#define RTC_CALI_BBPU_2SEC_MODE_SHIFT	9
+#define RTC_CALI_BBPU_2SEC_MODE_MSK	(3U << RTC_CALI_BBPU_2SEC_MODE_SHIFT)
+#define RTC_CALI_BBPU_2SEC_STAT		(1U << 11)
+
+void rtc_bbpu_power_up(void)
+{
+	uint16_t bbpu;
+	uint16_t cali;
+
+	/* pull PWRBB high */
+	bbpu = RTC_BBPU_KEY | RTC_BBPU_BBPU | RTC_BBPU_AUTO | RTC_BBPU_PWREN;
+	if (Writeif_unlock()) {
+
+		RTC_Write(RTC_POWERKEY1, RTC_POWERKEY1_KEY);
+		RTC_Write(RTC_POWERKEY2, RTC_POWERKEY2_KEY);
+		if (!Write_trigger())
+			assert(0);
+
+		RTC_Write(RTC_BBPU, bbpu);
+		if (!Write_trigger())
+			assert(0);
+
+		cali = RTC_Read(RTC_CALI);
+		RTC_Write(RTC_CALI, cali & ~RTC_CALI_BBPU_2SEC_EN);
+	} else {
+		assert(0);
+	}
+}
+
 void rtc_bbpu_power_down(void)
 {
 	uint16_t bbpu;

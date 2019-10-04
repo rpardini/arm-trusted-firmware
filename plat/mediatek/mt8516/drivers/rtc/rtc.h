@@ -9,26 +9,27 @@
 
 /* RTC registers */
 enum {
-	RTC_BBPU = 0xE000,
-	RTC_IRQ_STA = 0xE002,
-	RTC_IRQ_EN = 0xE004,
-	RTC_CII_EN = 0xE006
+	RTC_BBPU = 0x8000,
 };
 
 enum {
-	RTC_OSC32CON = 0xE026,
-	RTC_CON = 0xE03E,
-	RTC_WRTGR = 0xE03C
+	RTC_OSC32CON = 0x8026,
+	RTC_CON = 0x803E,
+	RTC_WRTGR = 0x803C
 };
 
 enum {
+/*
 	RTC_PDN1 = 0xE02C,
 	RTC_PDN2 = 0xE02E,
 	RTC_SPAR0 = 0xE030,
 	RTC_SPAR1 = 0xE032,
-	RTC_PROT = 0xE036,
+*/
+	RTC_PROT = 0x8036,
+	RTC_CALI = 0x803A
+/*
 	RTC_DIFF = 0xE038,
-	RTC_CALI = 0xE03A
+*/
 };
 
 enum {
@@ -49,6 +50,7 @@ enum {
 	RTC_BBPU_KEY	= 0x43 << 8
 };
 
+void rtc_bbpu_power_up(void);
 void rtc_bbpu_power_down(void);
 
 #endif /* RTC_H */
