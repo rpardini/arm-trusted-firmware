@@ -1320,7 +1320,7 @@ signed int pwrap_init_preloader(void)
 		if (pwrap_ret != 0) {
 			PWRAPERR("init fail, ret=%x.\n",pwrap_ret);
 			if (i >= 2)
-				ASSERT(0);
+				return -1;
 		} else {
 			PWRAPLOG("init pass, ret=%x.\n",pwrap_ret);
 			break;

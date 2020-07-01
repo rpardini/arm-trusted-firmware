@@ -21,6 +21,9 @@
 
 #include <mmc/mtk-sd.h>
 #include <pll/pll.h>
+#include <rtc/rtc.h>
+
+signed int pwrap_init_preloader(void);
 
 void mt_mem_init(void);
 
@@ -313,9 +316,9 @@ void bl2_platform_setup(void)
 	mt_pll_init();
 	mt_pll_post_init();
 
+	pwrap_init_preloader();
 
-signed int pwrap_init(void);
-	pwrap_init();
+	rtc_power_on_sequence();
 
 	mt_mem_init();
 
