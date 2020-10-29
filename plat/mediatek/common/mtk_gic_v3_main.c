@@ -1127,7 +1127,7 @@ uint64_t mt_irq_dump_status(uint32_t irq)
 	/* get router, occupy 16bit in rc [14:29] */
 	{
 		uint64_t route = mmio_read_64(dist_base + GICD_V3_IROUTER + (irq*8));
-		uint16_t cpu = 4*((route&0xff00)>>8) + (route&0xff);
+		uint16_t cpu = plat_core_pos_by_mpidr(route);
 
 		if (route & GICD_V3_IROUTER_SPI_MODE_ANY)
 			if (is_gic600 == 1)
@@ -1136,7 +1136,7 @@ uint64_t mt_irq_dump_status(uint32_t irq)
 				rc |= 0xffff << 14;
 		else
 			if (is_gic600 == 1)
-				rc |= (1<<cpu) << 15;
+				rc |= (1UL<<cpu) << 15;
 			else
 				rc |= 0xffff << 14;
 	}
