@@ -1127,7 +1127,12 @@ uint64_t mt_irq_dump_status(uint32_t irq)
 	/* get router, occupy 16bit in rc [14:29] */
 	{
 		uint64_t route = mmio_read_64(dist_base + GICD_V3_IROUTER + (irq*8));
-		uint16_t cpu = plat_core_pos_by_mpidr(route);
+		int cpu = plat_core_pos_by_mpidr(route);
+
+		if (cpu >= PLATFORM_CORE_COUNT || cpu < 0) {
+			ERROR("%s cannot get mpidr (%d)\n", __func__, cpu);
+			goto end;
+		}
 
 		if (route & GICD_V3_IROUTER_SPI_MODE_ANY)
 			if (is_gic600 == 1)
@@ -1140,7 +1145,7 @@ uint64_t mt_irq_dump_status(uint32_t irq)
 			else
 				rc |= 0xffff << 14;
 	}
-
+end:
 	return rc;
 }
 
