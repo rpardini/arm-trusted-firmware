@@ -94,8 +94,8 @@
 #define BL31_LIMIT		(TZRAM_BASE + TZRAM_SIZE)
 #define TZRAM2_LIMIT		(TZRAM2_BASE + TZRAM2_SIZE)
 
-#define BL32_BASE              (0x4FD00000)
-#define BL32_LIMIT             (0x300000)
+#define BL32_BASE		(0x43200000)
+#define BL32_LIMIT		(0x00a00000)
 
 #define BL33_BASE              (0x4c000000)
 
