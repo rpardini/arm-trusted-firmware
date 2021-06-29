@@ -151,7 +151,7 @@ void gicd_v3_do_wait_for_rwp(unsigned int gicd_base)
 
 int gic_populate_rdist(unsigned int *rdist_base)
 {
-	int cpuid = 0;
+	uint32_t cpuid = 0;
 	unsigned int reg = 0;
 	unsigned int base = 0;
 
@@ -173,8 +173,10 @@ int gic_populate_rdist(unsigned int *rdist_base)
 
 	*rdist_base = base;
 	/* save a copy for later save/restore use */
-	gic_data[0].rdist_base[cpuid] = base;
-
+	if (cpuid < PLATFORM_CORE_COUNT)
+		gic_data[0].rdist_base[cpuid] = base;
+	else
+		return -1;
 #ifdef GIC_DEBUG
 	INFO("cpu(%d), rdist_base = 0x%x\n", cpuid, *rdist_base);
 #endif
@@ -241,6 +243,7 @@ static uint32_t rdist_dpg[PLATFORM_CORE_COUNT];
 void gic_rdist_save(void)
 {
 	unsigned int rdist_base, i;
+	uint32_t cpuid = 0;
 
 	/* get the base of redistributor first */
 	if (gic_populate_rdist(&rdist_base) == -1)
@@ -260,15 +263,20 @@ void gic_rdist_save(void)
 	gic_data[0].saved_enable[0] = mmio_read_32(rdist_base + GICD_ISENABLER);
 	gic_data[0].saved_group[0] = mmio_read_32(rdist_base + GICD_IGROUPR);
 	gic_data[0].saved_grpmod[0] = mmio_read_32(rdist_base + GICE_V3_IGRPMOD0);
+	cpuid = plat_core_pos_by_mpidr(read_mpidr());
+
+	if (cpuid < PLATFORM_CORE_COUNT)
+	{
+		gic_data[0].saved_sgi[cpuid] =
+			mmio_read_32(rdist_base + GICD_ISPENDR) & SGI_MASK;
+		rdist_has_saved[cpuid] = 1;
+	}
 
 	if (plat_core_pos_by_mpidr(read_mpidr()) < 0) {
 		INFO("[%s] abnormal plat_core_pos_by_mpidr (%d)\n", __func__,
 				plat_core_pos_by_mpidr(read_mpidr()));
 		return;
 	}
-	gic_data[0].saved_sgi[plat_core_pos_by_mpidr(read_mpidr())] =
-		mmio_read_32(rdist_base + GICD_ISPENDR) & SGI_MASK;
-	rdist_has_saved[plat_core_pos_by_mpidr(read_mpidr())] = 1;
 	int_schedule_mode_save();
 }
 
@@ -426,6 +434,7 @@ void gic_sgi_restore_all(void)
 void gic_rdist_restore(void)
 {
 	unsigned int rdist_sgi_base, i;
+	uint32_t cpuid = 0;
 
 	if (plat_core_pos_by_mpidr(read_mpidr()) < 0) {
 		INFO("[%s] abnormal plat_core_pos_by_mpidr (%d)\n", __func__,
@@ -433,8 +442,17 @@ void gic_rdist_restore(void)
 		return;
 	}
 
-	if (rdist_has_saved[plat_core_pos_by_mpidr(read_mpidr())] == 0)
+	cpuid = plat_core_pos_by_mpidr(read_mpidr());
+
+	if (cpuid < PLATFORM_CORE_COUNT)
+	{
+		if (rdist_has_saved[cpuid] == 0)
+			return;
+	}
+	else
+	{
 		return;
+	}
 
 	/* get the base of redistributor first */
 	if (gic_populate_rdist(&rdist_sgi_base) == -1)
@@ -451,7 +469,10 @@ void gic_rdist_restore(void)
 	mmio_write_32(rdist_sgi_base + GICD_IGROUPR, gic_data[0].saved_group[0]);
 	mmio_write_32(rdist_sgi_base + GICE_V3_IGRPMOD0, gic_data[0].saved_grpmod[0]);
 
-	mmio_write_32(rdist_sgi_base + GICD_ISPENDR, gic_data[0].saved_sgi[plat_core_pos_by_mpidr(read_mpidr())]);
+	if (cpuid < PLATFORM_CORE_COUNT)
+	{
+		mmio_write_32(rdist_sgi_base + GICD_ISPENDR, gic_data[0].saved_sgi[cpuid]);
+	}
 }
 
 static uint16_t compute_target_list(uint8_t *cpu, unsigned int map, uint64_t cluster_id)
