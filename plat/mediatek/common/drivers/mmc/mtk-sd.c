@@ -324,8 +324,7 @@ struct msdc_host {
 
 	struct msdc_tune_para def_tune_para;
 	struct msdc_tune_para saved_tune_para;
-} _host;
-struct msdc_host *host = &_host;
+} msdc_host;
 
 #define setbits_le32(addr, set) mmio_setbits_32((uintptr_t) addr, set)
 #define clrbits_le32(addr, clr) mmio_clrbits_32((uintptr_t) addr, clr)
@@ -355,6 +354,7 @@ static int msdc_ops_set_ios(unsigned int clock, unsigned int bus_width)
 static void msdc_init_hw(void)
 {
 	u32 val;
+	struct msdc_host *host = &msdc_host;
 	u32 *tune_reg = &host->base->pad_tune;
 
 	if (host->dev_comp->pad_tune0)
@@ -667,6 +667,7 @@ static int msdc_start_command(struct msdc_host *host, struct mmc_cmd *cmd)
 static int mtk_mmc_send_cmd(struct mmc_cmd *cmd)
 {
 	int ret;
+	struct msdc_host *host = &msdc_host;
 
 	ret = msdc_start_command(host, cmd);
 	if (ret) {
@@ -841,6 +842,8 @@ static void msdc_set_mclk(struct msdc_host *host, u32 hz)
 
 static int msdc_ops_set_ios(unsigned int clock, unsigned int bus_width)
 {
+	struct msdc_host *host = &msdc_host;
+
 	msdc_set_buswidth(host, bus_width);
 
 #if 0
@@ -893,6 +896,7 @@ static int mtk_mmc_read(int lba, uintptr_t buf, size_t size)
 	u32 status;
 	u32 chksz;
 	int ret = 0;
+	struct msdc_host *host = &msdc_host;
 
 	while (1) {
 		status = readl(&host->base->msdc_int);
@@ -951,12 +955,12 @@ static struct mmc_device_info mtk_mmc_device_info = {
 void mtk_mmc_init(uintptr_t reg_base, struct msdc_compatible *compat,
 				  uint32_t src_clk)
 {
-	host->base = (struct mtk_sd_regs*) reg_base;
-	host->dev_comp = compat;
+	msdc_host.base = (struct mtk_sd_regs*) reg_base;
+	msdc_host.dev_comp = compat;
 
-	host->src_clk_freq = src_clk;
-	host->timeout_ns = 100000000;
-	host->timeout_clks = 3 * 1048576;
+	msdc_host.src_clk_freq = src_clk;
+	msdc_host.timeout_ns = 100000000;
+	msdc_host.timeout_clks = 3 * 1048576;
 
 	mmc_init(&mtk_mmc_ops, 50000000, MMC_BUS_WIDTH_1, 0, &mtk_mmc_device_info);
 }
