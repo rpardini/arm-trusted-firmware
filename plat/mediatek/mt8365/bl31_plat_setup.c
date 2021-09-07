@@ -23,7 +23,9 @@
 #include <mtspmc.h>
 #include <mt_spm.h>
 #include <mtk_mcdi.h>
-#include "scu.h"
+#include <mt_timer.h>
+#include "plat/mediatek/mt8365/include/scu.h"
+#include <mtk_gic_v3_main.h>
 
 static entry_point_info_t bl32_ep_info;
 static entry_point_info_t bl33_ep_info;
@@ -96,8 +98,7 @@ void bl31_platform_setup(void)
 	generic_delay_timer_init();
 
 	/* Initialize the GIC driver, CPU and distributor interfaces */
-	plat_mt_gic_driver_init();
-	plat_mt_gic_init();
+	gic_setup();
 
 	spm_boot_init();
 

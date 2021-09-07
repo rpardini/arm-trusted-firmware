@@ -1,76 +1,145 @@
 /*
- * Copyright (c) 2016-2018, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2016, ARM Limited and Contributors. All rights reserved.
  *
- * SPDX-License-Identifier: BSD-3-Clause
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * Neither the name of ARM nor the names of its contributors may be used
+ * to endorse or promote products derived from this software without specific
+ * prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <arch_helpers.h>
+#include <assert.h>
+#include <bl_common.h>
+#include <bl31_fiq_handler.h>
+#include <debug.h>
+#include <gicv3.h>
+#include <plat_mtk_gic.h>
+#include <mtk_aee_debug.h>
+#include <platform.h>
 #include <platform_def.h>
+#include <mtk_gic_v3_main.h>
+//#include <pccif.h>
 
-#include <arch/aarch64/arch_helpers.h>
-#include <common/interrupt_props.h>
-#include <drivers/arm/gicv3.h>
-#include <lib/mmio.h>
-#include <plat/common/platform.h>
-#include <mt_gic_v3.h>
-
-void gicr_write_ipriorityr(uintptr_t base, unsigned int id, unsigned int val);
-
-uintptr_t rdistif_base_addrs[PLATFORM_CORE_COUNT];
-
-static unsigned int mt_mpidr_to_core_pos(u_register_t mpidr)
+/* override setup_int_schedule_mode for platform */
+void setup_int_schedule_mode(enum irq_schedule_mode mode, unsigned int active_cpu)
 {
-	return plat_core_pos_by_mpidr(mpidr);
+	assert(mode <= HW_MODE);
+	assert(active_cpu <= 0xFF);
+
+	if (mode == HW_MODE) {
+		mmio_write_32(GIC_INT_MASK,
+				(mmio_read_32(GIC_INT_MASK) & ~(GIC500_ACTIVE_SEL_MASK)) |
+				(0x1 << GIC500_ACTIVE_SEL_SHIFT));
+		mmio_write_32(GIC_INT_MASK,
+				(mmio_read_32(GIC_INT_MASK) & ~(GIC500_ACTIVE_CPU_MASK)) |
+				(active_cpu << GIC500_ACTIVE_CPU_SHIFT));
+	} else if (mode == SW_MODE) {
+		mmio_write_32(GIC_INT_MASK,
+				(mmio_read_32(GIC_INT_MASK) & ~(GIC500_ACTIVE_SEL_MASK)));
+		mmio_write_32(GIC_INT_MASK,
+				(mmio_read_32(GIC_INT_MASK) & ~(GIC500_ACTIVE_CPU_MASK)) |
+				(active_cpu << GIC500_ACTIVE_CPU_SHIFT));
+	}
 }
 
-static gicv3_driver_data_t mt_gic_data = {
-	.gicd_base = MT_GIC_BASE,
-	.gicr_base = MT_GIC_RDIST_BASE,
-	.rdistif_num = PLATFORM_CORE_COUNT,
-	.rdistif_base_addrs = rdistif_base_addrs,
-	.mpidr_to_core_pos = mt_mpidr_to_core_pos,
-};
+/* override int_schedule_mode_save for platform */
+void int_schedule_mode_save(void)
+{
+	gic_data[0].saved_active_sel = mmio_read_32(GIC_INT_MASK);
+}
+
+/* override int_schedule_mode_restore for platform */
+void int_schedule_mode_restore(void)
+{
+	mmio_write_32(GIC_INT_MASK, gic_data[0].saved_active_sel);
+}
+
+/* override mt_irq_set_polarity for platform */
+void mt_irq_set_polarity(unsigned int irq, unsigned int polarity)
+{
+	unsigned int offset, reg_index, value;
+
+	offset = (irq - GIC_PRIVATE_SIGNALS) & 0x1F;
+	reg_index = (irq - GIC_PRIVATE_SIGNALS) >> 5;
+
+	if (polarity == 0) {
+		/* active low */
+		value = mmio_read_32(INT_POL_CTL0 + (reg_index * 4));
+		value |= (1 << offset);
+		mmio_write_32((INT_POL_CTL0 + (reg_index * 4)), value);
+	} else {
+		/* active high */
+		value = mmio_read_32(INT_POL_CTL0 + (reg_index * 4));
+		value &= ~(0x1 << offset);
+		mmio_write_32(INT_POL_CTL0 + (reg_index * 4), value);
+	}
+}
 
 static void clear_sec_pol_ctl_en(void)
 {
 	unsigned int i;
 
-	for (i = 0; i <= NR_INT_POL_CTL - 1; i++) {
+	/* total 19 polarity ctrl registers */
+	for (i = 0; i <= NR_INT_POL_CTL-1; i++)
 		mmio_write_32((SEC_POL_CTL_EN0 + (i * 4)), 0);
-	}
 
 	dsb();
 }
 
-void plat_mt_gic_driver_init(void)
+void gic_setup(void)
 {
-	gicv3_driver_init(&mt_gic_data);
-}
+	unsigned int gicd_base = 0;
+	int	i;
 
+	/* Init cpu logic map to avoid unnecessary SGI interrupt
+	 * to cpu0 if WDT happens before cpu1~cpu7 on
+	 */
+	for (i = 0 ; i < sizeof(cpu_logical_map)/sizeof(uint64_t); i++)
+		cpu_logical_map[i] = CPU_LOGIC_MAP_RESET_VAL;
 
-void mt_gic_rdistif_init(void)
-{
-	unsigned int proc_num;
-	unsigned int index;
-	uintptr_t gicr_base;
+	gicd_base = MT_GIC_BASE; /* get_plat_config()->gicd_base; */
+	gic_distif_init(gicd_base);
 
-	proc_num = plat_my_core_pos();
-	gicr_base = rdistif_base_addrs[proc_num];
+	gic_cpuif_init();
 
-	/* set all SGI/PPI as non-secure GROUP1 by default */
-	mmio_write_32(gicr_base + GICR_IGROUPR0, ~0U);
-	mmio_write_32(gicr_base + GICR_IGRPMODR0, 0x0);
-
-	/* setup the default PPI/SGI priorities */
-	for (index = 0; index < TOTAL_PCPU_INTR_NUM; index += 4U)
-		gicr_write_ipriorityr(gicr_base, index,
-				GICD_IPRIORITYR_DEF_VAL);
-}
-
-void plat_mt_gic_init(void)
-{
-	gicv3_distif_init();
-	gicv3_cpuif_enable(plat_my_core_pos());
-	mt_gic_rdistif_init();
-
+	/* INFO("[ATF GIC] before clear_sec_pol_ctl_en\n"); */
 	clear_sec_pol_ctl_en();
+
+	setup_int_schedule_mode(SW_MODE, 0xF);
+}
+
+uint32_t mt_irq_get_pending(uint32_t irq)
+{
+	uint32_t bit = 1 << (irq % 32);
+
+	return (mmio_read_32(BASE_GICD_BASE + GICD_ISPENDR + irq / 32 * 4) & bit) ? 1 : 0;
+}
+
+
+void mt_irq_set_pending(uint32_t irq)
+{
+	uint32_t bit = 1 << (irq % 32);
+
+	mmio_write_32(BASE_GICD_BASE + GICD_ISPENDR + irq / 32 * 4, bit);
 }

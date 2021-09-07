@@ -99,7 +99,7 @@
 
 #define PLAT_MAX_PWR_LVL        U(2)
 #define PLAT_MAX_RET_STATE      U(1)
-#define PLAT_MAX_OFF_STATE      U(2)
+#define PLAT_MAX_OFF_STATE      U(3)
 
 #define PLATFORM_SYSTEM_COUNT           U(1)
 #define PLATFORM_CLUSTER_COUNT          U(1)
@@ -160,13 +160,20 @@
 #define PLAT_ARM_GICD_BASE BASE_GICD_BASE
 #define PLAT_ARM_GICC_BASE BASE_GICC_BASE
 
+#define SYS_CIRQ_BASE                   0x10204000
 #define CIRQ_REG_NUM                    7
+#define CIRQ_IRQ_NUM                    209
 #define CIRQ_SPI_START                  48
 #define MD_WDT_IRQ_BIT_ID               (115)
 
 #define INT_POL_CTL0                    (MCUCFG_BASE + 0xa80)
 #define SEC_POL_CTL_EN0			(MCUCFG_BASE + 0xa00)
+#define EMI_WFIFO                       (MCUCFG_BASE + 0x0b5c)
 #define INT_MSK_CTL0                    (MCUCFG_BASE + 0xa6a0)
+
+#define NR_INT_POL_CTL                  (20)
+
+#define GIC_PRIVATE_SIGNALS             (32)
 
 /*******************************************************************************
  * WDT Registers
@@ -232,6 +239,10 @@
 #define TRNG_CTRL_START      0x00000001
 #define TRNG_PDN_VALUE       0x200
 
+#define PLAT_MTK_DFD_SETUP_MAGIC        (0x99716150)
+#define PLAT_MTK_DFD_READ_MAGIC         (0x99716151)
+#define PLAT_MTK_DFD_WRITE_MAGIC        (0x99716152)
+
 /* FIQ platform related define */
 #define MT_IRQ_SEC_SGI_0    8
 #define MT_IRQ_SEC_SGI_1    9
@@ -276,9 +287,6 @@
 #endif
 
 #define FIRMWARE_WELCOME_STR    "Booting Trusted Firmware\n"
-#define PLAT_MAX_PWR_LVL        U(2)
-#define PLAT_MAX_RET_STATE		U(1)
-#define PLAT_MAX_OFF_STATE		U(2)
 
 #define PLATFORM_CACHE_LINE_SIZE        64
 #define PLATFORM_SYSTEM_COUNT           U(1)

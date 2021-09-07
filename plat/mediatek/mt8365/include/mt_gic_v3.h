@@ -15,8 +15,6 @@
 #define GIC500_ACTIVE_CPU_SHIFT 16
 #define GIC500_ACTIVE_CPU_MASK (0xff << GIC500_ACTIVE_CPU_SHIFT)
 
-#define NR_INT_POL_CTL 20
-
 void mt_gic_driver_init(void);
 void mt_gic_init(void);
 void mt_gic_set_pending(uint32_t irq);
@@ -28,7 +26,11 @@ void mt_gic_distif_save(void);
 void mt_gic_distif_restore(void);
 void mt_gic_rdistif_save(void);
 void mt_gic_rdistif_restore(void);
+void mt_gic_rdistif_restore_all(void);
 void mt_gic_sync_dcm_enable(void);
 void mt_gic_sync_dcm_disable(void);
+void mt_gic_sgi_save_all(void);
+void mt_gic_sgi_restore_all(void);
+void mt_irq_set_pending(uint32_t irq);
 
 #endif /* MT_GIC_V3_H */

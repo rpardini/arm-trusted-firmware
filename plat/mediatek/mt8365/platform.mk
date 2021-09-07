@@ -7,7 +7,8 @@
 MTK_PLAT      := plat/mediatek
 MTK_PLAT_SOC  := ${MTK_PLAT}/${PLAT}
 
-PLAT_INCLUDES := -Idrivers/arm/gic/v3/                            \
+PLAT_INCLUDES := -I.                                              \
+                 -Idrivers/arm/gic/v3/                            \
                  -Iinclude/bl31/                                  \
                  -Iinclude/common/                                \
                  -Iinclude/drivers/                               \
@@ -17,6 +18,7 @@ PLAT_INCLUDES := -Idrivers/arm/gic/v3/                            \
                  -Iinclude/plat/common                            \
                  -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/common/drivers/                    \
+                 -I${MTK_PLAT}/common/drivers/timer/              \
                  -I${MTK_PLAT_SOC}/drivers/                       \
                  -I${MTK_PLAT_SOC}/drivers/devapc/                \
                  -I${MTK_PLAT_SOC}/drivers/mcdi/                  \
@@ -76,7 +78,10 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    lib/cpus/aarch64/cortex_a53.S                         \
                    ${MTK_PLAT}/common/mtk_plat_common.c                  \
                    ${MTK_PLAT}/common/params_setup.c                     \
+                   ${MTK_PLAT}/common/drivers/timer/mt_timer.c           \
                    ${MTK_PLAT}/common/mtk_gic_v3_main.c                  \
+                   ${MTK_PLAT_SOC}/plat_mt_cirq.c                        \
+                   ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c         \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c             \
                    ${MTK_PLAT_SOC}/aarch64/plat_helpers.S                \
                    ${MTK_PLAT_SOC}/drivers/mcdi/mtk_mcdi.c               \
@@ -91,11 +96,15 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    ${MTK_PLAT_SOC}/drivers/spm/mt_spm_pmic_wrap.c        \
                    ${MTK_PLAT_SOC}/drivers/spm/mt_spm_mc_dsr.c           \
                    ${MTK_PLAT_SOC}/drivers/spmc/mtspmc.c                 \
+                   ${MTK_PLAT_SOC}/drivers/uart/uart.c                   \
                    ${MTK_PLAT_SOC}/plat_mt_gic.c                         \
                    ${MTK_PLAT_SOC}/bl31_plat_setup.c                     \
                    ${MTK_PLAT_SOC}/plat_pm.c                             \
                    ${MTK_PLAT_SOC}/plat_topology.c                       \
+                   ${MTK_PLAT_SOC}/plat_dfd.c                            \
                    ${MTK_PLAT_SOC}/scu.c
+
+BL31_LIBS += ${LIBDRAM}
 
 # Enable workarounds for selected Cortex-A53 erratas.
 ERRATA_A53_826319 := 0
@@ -115,6 +124,7 @@ MULTI_CONSOLE_API := 1
 MACH_MT8365 := 1
 $(eval $(call add_define,MACH_MT8365))
 
+<<<<<<< HEAD
 ifneq (${TRUSTED_BOARD_BOOT},0)
 
 include drivers/auth/mbedtls/mbedtls_crypto.mk
@@ -148,3 +158,10 @@ $(ROTPK_HASH): $(ROT_KEY)
 	$(Q)openssl rsa -in $< -pubout -outform DER 2>/dev/null |\
 	openssl dgst -sha512 -binary > $@ 2>/dev/null
 endif
+=======
+# Enable dynamic memory mapping
+PLAT_XLAT_TABLES_DYNAMIC :=    1
+
+# Enable dynamic memory mapping
+$(eval $(call add_define,PLAT_XLAT_TABLES_DYNAMIC))
+>>>>>>> e6c2ac191 (mt8365: Add support of CPU IDLE and suspend / resume)

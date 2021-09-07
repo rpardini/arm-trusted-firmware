@@ -17,7 +17,6 @@ void plat_configure_mmu_el3(uintptr_t total_base,
 
 void plat_mt_gic_driver_init(void);
 void plat_mt_gic_init(void);
-void mt_gic_rdistif_init(void);
 
 void plat_mtk_cci_init(void);
 void plat_mtk_cci_enable(void);
@@ -26,5 +25,7 @@ void plat_mtk_cci_init_sf(void);
 
 /* Declarations for plat_topology.c */
 int mt_setup_topology(void);
+
+extern void dfd_resume(void);
 
 #endif /* PLAT_PRIVATE_H */

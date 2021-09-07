@@ -35,8 +35,6 @@
 extern uintptr_t mtk_suspend_footprint_addr;
 extern uintptr_t mtk_suspend_timestamp_addr;
 
-extern void dfd_resume(void);
-
 void mtk_suspend_footprint_log(int idx);
 void mtk_suspend_timestamp_log(int idx);
 
