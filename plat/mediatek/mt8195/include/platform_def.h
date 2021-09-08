@@ -60,6 +60,7 @@
 #define UART0_BASE			(IO_PHYS + 0x01001100)
 #define UART1_BASE			(IO_PHYS + 0x01001200)
 
+#define UART_CLOCK    26000000
 #define UART_BAUDRATE			115200
 
 /*******************************************************************************
@@ -122,8 +123,28 @@
 /*******************************************************************************
  * Platform memory map related constants
  ******************************************************************************/
-#define TZRAM_BASE			0x54600000
-#define TZRAM_SIZE			0x00030000
+#define TZRAM_BASE          0x54600000
+#define TZRAM_SIZE          0x00030000
+
+/*******************************************************************************
+ * BL2 specific defines.
+******************************************************************************/
+#define BL2_BASE		(0x201000)
+#define BL2_LIMIT		(0x400000)
+
+#define MAX_IO_DEVICES			U(3)
+#define MAX_IO_HANDLES			U(4)
+#define MAX_IO_BLOCK_DEVICES			1
+
+#define BL31_BASE		(TZRAM_BASE + 0x1000)
+#define BL31_LIMIT		(TZRAM_BASE + TZRAM_SIZE)
+#define TZRAM2_LIMIT		(TZRAM2_BASE + TZRAM2_SIZE)
+
+#define BL32_BASE              (0x43200000)
+#define BL32_LIMIT             (0x00a00000)
+#define BL32_HEADER_SIZE	(0x1c)
+
+#define BL33_BASE		(0x4c000000)
 
 /*******************************************************************************
  * BL31 specific defines.

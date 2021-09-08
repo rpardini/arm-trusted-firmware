@@ -8,12 +8,14 @@ MTK_PLAT     := plat/mediatek
 MTK_PLAT_SOC := ${MTK_PLAT}/${PLAT}
 
 PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
+                 -I${MTK_PLAT}/common/drivers/                    \
                  -I${MTK_PLAT}/common/drivers/gic600/             \
                  -I${MTK_PLAT}/common/drivers/gpio/               \
                  -I${MTK_PLAT}/common/drivers/rtc/                \
                  -I${MTK_PLAT}/common/drivers/timer/              \
                  -I${MTK_PLAT}/common/drivers/uart/               \
                  -I${MTK_PLAT}/common/lpm/                        \
+                 -I${MTK_PLAT_SOC}/drivers/                       \
                  -I${MTK_PLAT_SOC}/drivers/dcm                    \
                  -I${MTK_PLAT_SOC}/drivers/dfd                    \
                  -I${MTK_PLAT_SOC}/drivers/dp/                    \
@@ -31,9 +33,33 @@ include lib/xlat_tables_v2/xlat_tables.mk
 
 PLAT_BL_COMMON_SOURCES := ${GICV3_SOURCES}                              \
                           ${XLAT_TABLES_LIB_SRCS}                       \
+                          lib/cpus/aarch64/cortex_a55.S                 \
+                          lib/cpus/aarch64/cortex_a78.S                 \
                           plat/common/aarch64/crash_console_helpers.S   \
                           plat/common/plat_psci_common.c
 
+BL2_SOURCES     += common/desc_image_load.c                           \
+                   drivers/delay_timer/delay_timer.c                  \
+                   drivers/delay_timer/generic_delay_timer.c          \
+                   drivers/io/io_storage.c                            \
+                   drivers/io/io_block.c                              \
+                   drivers/io/io_fip.c                                \
+                   drivers/mmc/mmc.c                                  \
+                   drivers/partition/gpt.c                            \
+                   drivers/partition/partition.c                      \
+                   drivers/ti/uart/aarch64/16550_console.S            \
+                   lib/libc/memset.c                                  \
+                   ${MTK_PLAT}/common/mtk_plat_common.c               \
+                   ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c            \
+                   ${MTK_PLAT}/common/drivers/rtc/rtc_common.c        \
+                   ${MTK_PLAT_SOC}/aarch64/plat_helpers.S             \
+                   ${MTK_PLAT_SOC}/aarch64/platform_common.c          \
+                   ${MTK_PLAT_SOC}/bl2_plat_setup.c                   \
+                   ${MTK_PLAT_SOC}/drivers/pll/pll.c                  \
+                   ${MTK_PLAT_SOC}/drivers/pll/spm_mtcmos.c                  \
+                   ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c
+
+BL2_LIBS += ${LIBDRAM}
 
 BL31_SOURCES += common/desc_image_load.c                              \
                 drivers/delay_timer/delay_timer.c                     \
@@ -41,8 +67,6 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 drivers/delay_timer/generic_delay_timer.c             \
                 drivers/ti/uart/aarch64/16550_console.S               \
                 lib/bl_aux_params/bl_aux_params.c                     \
-                lib/cpus/aarch64/cortex_a55.S                         \
-                lib/cpus/aarch64/cortex_a78.S                         \
                 plat/common/plat_gicv3.c                              \
                 ${MTK_PLAT}/common/drivers/gic600/mt_gic_v3.c         \
                 ${MTK_PLAT}/common/drivers/gpio/mtgpio_common.c       \
@@ -90,6 +114,8 @@ ERRATA_A55_1530923 := 1
 PROGRAMMABLE_RESET_ADDRESS := 1
 
 COLD_BOOT_SINGLE_CPU := 1
+
+BL2_AT_EL3 := 1
 
 MACH_MT8195 := 1
 $(eval $(call add_define,MACH_MT8195))
