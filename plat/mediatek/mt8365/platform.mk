@@ -102,6 +102,8 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    ${MTK_PLAT_SOC}/plat_pm.c                             \
                    ${MTK_PLAT_SOC}/plat_topology.c                       \
                    ${MTK_PLAT_SOC}/plat_dfd.c                            \
+                   ${MTK_PLAT_SOC}/plat_sip_svc.c                        \
+                   ${MTK_PLAT}/common/mtk_sip_svc.c                      \
                    ${MTK_PLAT_SOC}/scu.c
 
 BL31_LIBS += ${LIBDRAM}
@@ -124,7 +126,6 @@ MULTI_CONSOLE_API := 1
 MACH_MT8365 := 1
 $(eval $(call add_define,MACH_MT8365))
 
-<<<<<<< HEAD
 ifneq (${TRUSTED_BOARD_BOOT},0)
 
 include drivers/auth/mbedtls/mbedtls_crypto.mk
@@ -158,10 +159,9 @@ $(ROTPK_HASH): $(ROT_KEY)
 	$(Q)openssl rsa -in $< -pubout -outform DER 2>/dev/null |\
 	openssl dgst -sha512 -binary > $@ 2>/dev/null
 endif
-=======
+
 # Enable dynamic memory mapping
 PLAT_XLAT_TABLES_DYNAMIC :=    1
 
 # Enable dynamic memory mapping
 $(eval $(call add_define,PLAT_XLAT_TABLES_DYNAMIC))
->>>>>>> e6c2ac191 (mt8365: Add support of CPU IDLE and suspend / resume)
