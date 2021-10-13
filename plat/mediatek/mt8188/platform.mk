@@ -74,7 +74,8 @@ BL31_SOURCES += drivers/delay_timer/delay_timer.c \
 		plat/common/aarch64/crash_console_helpers.S \
 		${MTK_PLAT}/common/mtk_plat_common.c \
 		${MTK_PLAT}/common/params_setup.c \
-		$(MTK_PLAT)/$(MTK_SOC)/plat_mmap.c
+		$(MTK_PLAT)/$(MTK_SOC)/plat_mmap.c \
+		${MTK_PLAT_SOC}/drivers/l3c/l3c.c
 
 ifeq (${MTK_IOT_YOCTO},1)
 BL31_LIBS += ${LIBBASE}
