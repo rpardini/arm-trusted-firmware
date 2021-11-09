@@ -19,6 +19,7 @@ PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT_SOC}/drivers/spm/                   \
                  -I${MTK_PLAT_SOC}/drivers/spmc/                  \
                  -I${MTK_PLAT_SOC}/drivers/sspm/                  \
+		 -I${MTK_PLAT_SOC}/drivers/rng/                  \
                  -I${MTK_PLAT_SOC}/include/
 
 include drivers/arm/gic/v3/gicv3.mk
@@ -28,7 +29,12 @@ PLAT_BL_COMMON_SOURCES := ${GICV3_SOURCES}                              \
                           ${XLAT_TABLES_LIB_SRCS}                       \
                           plat/common/aarch64/crash_console_helpers.S   \
                           plat/common/plat_psci_common.c                \
-                          plat/common/plat_gicv3.c
+                          plat/common/plat_gicv3.c			\
+			  ${MTK_PLAT_SOC}/drivers/rng/rng.c
+
+ifneq (${ENABLE_STACK_PROTECTOR},0)
+PLAT_BL_COMMON_SOURCES	+=	${MTK_PLAT_SOC}/mtk_stack_protector.c
+endif
 
 BL2_SOURCES     += common/desc_image_load.c                              \
                    drivers/delay_timer/delay_timer.c                     \
