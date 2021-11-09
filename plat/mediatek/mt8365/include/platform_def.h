@@ -15,9 +15,9 @@
 
 #define IO_PHYS            0x10000000
 
-#define DVFSRC_BASE         (IO_PHYS + 0x12000)  
-#define PMIC_WRAP_BASE   (IO_PHYS + 0x0000D000) 
-#define SYSTIMER_BASE     (IO_PHYS + 0x00017000)  
+#define DVFSRC_BASE         (IO_PHYS + 0x12000)
+#define PMIC_WRAP_BASE   (IO_PHYS + 0x0000D000)
+#define SYSTIMER_BASE     (IO_PHYS + 0x00017000)
 #define MMSYS_BASE                (IO_PHYS + 0x04000000)
 #define INFRACFG_AO_BASE (IO_PHYS + 0x00001000)
 #define SPM_BASE           (IO_PHYS + 0x6000)
