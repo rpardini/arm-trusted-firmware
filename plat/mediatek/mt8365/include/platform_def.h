@@ -210,6 +210,7 @@
 /*******************************************************************************
  * TRNG Registers
  ******************************************************************************/
+#define TRNG_base            (IO_PHYS + 0x0020F000)
 #define TRNG_BASE_ADDR       TRNG_base
 #define TRNG_BASE_SIZE       0x1000
 #define TRNG_CTRL            (TRNG_base + 0x0000)
