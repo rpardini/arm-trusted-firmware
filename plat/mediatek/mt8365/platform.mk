@@ -7,7 +7,14 @@
 MTK_PLAT      := plat/mediatek
 MTK_PLAT_SOC  := ${MTK_PLAT}/${PLAT}
 
-PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
+PLAT_INCLUDES := -Idrivers/arm/gic/v3/                            \
+                 -Iinclude/bl31/                                  \
+                 -Iinclude/common/                                \
+                 -Iinclude/drivers/arm/                           \
+                 -Iinclude/lib/                                   \
+                 -Iinclude/lib/el3_runtime/                       \
+                 -Iinclude/plat/common                            \
+                 -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/common/drivers/                    \
                  -I${MTK_PLAT_SOC}/drivers/                       \
                  -I${MTK_PLAT_SOC}/drivers/devapc/                \
@@ -68,6 +75,7 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    lib/cpus/aarch64/cortex_a53.S                         \
                    ${MTK_PLAT}/common/mtk_plat_common.c                  \
                    ${MTK_PLAT}/common/params_setup.c                     \
+                   ${MTK_PLAT}/common/mtk_gic_v3_main.c                  \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c             \
                    ${MTK_PLAT_SOC}/aarch64/plat_helpers.S                \
                    ${MTK_PLAT_SOC}/drivers/mcdi/mtk_mcdi.c               \

@@ -160,7 +160,12 @@
 #define PLAT_ARM_GICD_BASE BASE_GICD_BASE
 #define PLAT_ARM_GICC_BASE BASE_GICC_BASE
 
+#define CIRQ_SPI_START                  48
+#define MD_WDT_IRQ_BIT_ID               (115)
+
+#define INT_POL_CTL0                    (MCUCFG_BASE + 0xa80)
 #define SEC_POL_CTL_EN0			(MCUCFG_BASE + 0xa00)
+#define INT_MSK_CTL0                    (MCUCFG_BASE + 0xa6a0)
 
 /*******************************************************************************
  * WDT Registers
