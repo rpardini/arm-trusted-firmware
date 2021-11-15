@@ -1,4 +1,4 @@
-#include <lib/mmio.h>
+#include <mmio.h>
 #include <platform_def.h>
 #include <mt_spm_reg.h>
 

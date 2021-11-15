@@ -1,16 +1,22 @@
 #include <arch_helpers.h>
-#include <lib/mmio.h>
+#include <debug.h>
+#include <console.h>
+#include <mmio.h>
 #include <mt_spm.h>
 #include <mt_spm_internal.h>
 #include <mt_spm_reg.h>
 #include <mt_spm_vcorefs.h>
 #include <mtk_mcdi.h>
+#include <plat_pm.h>
+#include <platform.h>
 #include <platform_def.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include <uart.h>
 
 /* for internal debug */
+static struct wake_status spm_wakesta; /* record last wakesta */
 static unsigned int resource_usage;
 
 /**************************************
@@ -200,4 +206,69 @@ void spm_suspend_args(uint64_t x1, uint64_t x2, uint64_t x3, uint64_t x4)
 
 	/* get spm resource request from kernel */
 	resource_usage = x4;
+}
+
+void go_to_sleep_before_wfi_no_resume(void)
+{
+	struct pwr_ctrl *pwrctrl;
+	uint64_t mpidr = read_mpidr();
+	uint32_t cpu = plat_core_pos_by_mpidr(mpidr), settle;
+
+	pwrctrl = __spm_suspend.pwrctrl;
+
+	settle = __spm_set_sysclk_settle();
+	__spm_set_cpu_status(cpu);
+	__spm_set_power_control(pwrctrl);
+	__spm_set_wakeup_event(pwrctrl);
+	__spm_sync_vcore_dvfs_power_control(pwrctrl, __spm_vcorefs.pwrctrl);
+	__spm_set_pcm_flags(pwrctrl);
+	if (!pwrctrl->wdt_disable)
+		__spm_set_pcm_wdt(1);
+	__spm_send_cpu_wakeup_event();
+
+	if (is_infra_pdn(pwrctrl->pcm_flags))
+		mtk_uart_save();
+
+	INFO("cpu%d: \"%s\", wakesrc = 0x%x, pcm_con1 = 0x%x\n",
+	     cpu, spm_get_firmware_version(), pwrctrl->wake_src,
+	     mmio_read_32(PCM_CON1));
+	INFO("settle = %u, sec = %u, sw_flag = 0x%x 0x%x, src_req = 0x%x\n",
+	     settle, mmio_read_32(PCM_TIMER_VAL) / 32768,
+	     pwrctrl->pcm_flags, pwrctrl->pcm_flags1,
+	     mmio_read_32(SPM_SRC_REQ));
+}
+
+static void go_to_sleep_after_wfi(void)
+{
+	struct pcm_desc *pcmdesc = NULL;
+	struct pwr_ctrl *pwrctrl;
+
+	pwrctrl = __spm_suspend.pwrctrl;
+
+	if (is_infra_pdn(pwrctrl->pcm_flags))
+		mtk_uart_restore();
+
+	if (!pwrctrl->wdt_disable)
+		__spm_set_pcm_wdt(0);
+
+	__spm_get_wakeup_status(&spm_wakesta);
+	/* __spm_clean_after_wakeup(); */
+	__spm_output_wake_reason(&spm_wakesta, pcmdesc);
+}
+
+void spm_suspend(void)
+{
+	spm_lock_get();
+	mcupm_hp_idle();
+	mcupm_hold_req();
+	go_to_sleep_before_wfi_no_resume();
+	spm_lock_release();
+}
+
+void spm_suspend_finish(void)
+{
+	spm_lock_get();
+	go_to_sleep_after_wfi();
+	mcupm_release_req();
+	spm_lock_release();
 }

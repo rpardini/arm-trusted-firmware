@@ -6,9 +6,9 @@
 
 #include <mtk_mcdi.h>
 #include <mtk_mcupm_reg.h>
-
-#define SPM_POWER_ON_VAL0              (SPM_BASE + 0x004)
-#define MCUPM_MCUSYS_REQ_CON           (SPM_BASE + 0x4A8)
+#include <mt_spm_reg.h>
+#include <plat_private.h>
+#include <mtk_plat_common.h>
 
 #define USE_MCUPM_DMA		1
 
@@ -222,12 +222,10 @@ void mcdi_args(uint64_t x1, uint64_t x2, uint64_t x3)
 
 	switch (cmd) {
 	case MCDI_ARGS_MCUPMFW_INIT:
-		console_init(gteearg.atf_log_port, UART_CLOCK, UART_BAUDRATE);
 		mcdi_config_mcupmfw_base(x2, x3);
 		mcdi_mcupm_sram_init(); /* init mcupm internal sram */
 		mcdi_parse_firmware();
 		mcdi_fw_init();
-		console_uninit();
 		break;
 	default:
 		break;

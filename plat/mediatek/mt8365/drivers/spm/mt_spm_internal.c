@@ -1,29 +1,16 @@
-#include <lib/mmio.h>
+#include <debug.h>
+#include <delay_timer.h>
+#include <mmio.h>
 #include <mt_spm.h>
 #include <mt_spm_idle.h>
 #include <mt_spm_internal.h>
 #include <mt_spm_reg.h>
+#include <mt_spm_resource_req.h>
+#include <platform.h>
 #include <platform_def.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <common/debug.h>
-
-enum {
-	SPM_RESOURCE_MAINPLL = 1 << 0,
-	SPM_RESOURCE_DRAM    = 1 << 1,
-	SPM_RESOURCE_CK_26M  = 1 << 2,
-	SPM_RESOURCE_AXI_BUS = 1 << 3,
-	NF_SPM_RESOURCE = 4
-};
-
-enum {
-	SPM_RESOURCE_USER_SPM = 0,
-	SPM_RESOURCE_USER_UFS,
-	SPM_RESOURCE_USER_SSUSB,
-	SPM_RESOURCE_USER_AUDIO,
-	NF_SPM_RESOURCE_USER
-};
 
 /**************************************
  * Config and Parameter
@@ -31,8 +18,6 @@ enum {
 #define CNTCV_L			(SYSTIMER_BASE + 0x8)
 #define CNTCV_H			(SYSTIMER_BASE + 0xc)
 #define SYSTEM_BOOTING_120S	(0x5CFBB600) /* 0x5CFBB600 / 13M = 120s */
-#define GPT1_COUNT		(0x10008018)
-#define GPT1_COMPARE		(0x1000801c)
 #define SPM_SYSCLK_SETTLE	99
 
 /**************************************
@@ -88,16 +73,6 @@ enum {
  **************************************/
 
 int spm_for_gps_flag;
-
-int __spm_gpt_countdown_time(void)
-{
-	int gpt_count, gpt_target_time;
-
-	gpt_count = mmio_read_32(GPT1_COUNT);
-	gpt_target_time = mmio_read_32(GPT1_COMPARE);
-
-	return (gpt_target_time - gpt_count);
-}
 
 int __spm_is_last_online_cpu(uint32_t cpu)
 {
@@ -187,6 +162,43 @@ uint32_t __spm_set_sysclk_settle(void)
 	return settle;
 }
 
+enum WAKE_REASON __spm_output_wake_reason(const struct wake_status *wakesta,
+					  const struct pcm_desc *pcmdesc)
+{
+	uint64_t mpidr = read_mpidr();
+	uint32_t cpu = plat_core_pos_by_mpidr(mpidr);
+	int i;
+
+	/* assert_pc shows 0 when normal */
+	for (i = 31; i >= 0; i--) {
+		if (wakesta->r12 & (1U << i)) {
+			INFO("cpu%u: wake up by %s, assert %u, timeout = %u\n",
+			     cpu, wakeup_src_str[i], wakesta->assert_pc,
+			     wakesta->timer_out);
+			break;
+		} else if (wakesta->r12 == 0) {
+			INFO("cpu%u: r12 = 0x%x? assert %u, timeout = %u\n",
+			     cpu, wakesta->r12, wakesta->assert_pc,
+			     wakesta->timer_out);
+			break;
+		}
+	}
+
+	INFO("r13 = 0x%x, debug_flag = 0x%x 0x%x, ddren_sta = 0x%x\n",
+	     wakesta->r13, wakesta->debug_flag, wakesta->debug_flag1,
+	     wakesta->ddren_sta);
+	INFO("r12 = 0x%x, r12_ext = 0x%x, raw_sta = 0x%x, idle_sta = 0x%x\n",
+	     wakesta->r12, wakesta->r12_ext, wakesta->raw_sta,
+	     wakesta->idle_sta);
+	INFO("req_sta = 0x%x, event_reg = 0x%x, isr = 0x%x, rsv_6 = 0x%x\n",
+	     wakesta->req_sta, wakesta->event_reg, wakesta->isr,
+	     wakesta->rsv_6);
+	INFO("raw_ext_sta = 0x%x, wake_misc = 0x%x, wake_event_mask = 0x%x\n",
+	     wakesta->raw_ext_sta, wakesta->wake_misc,
+	     wakesta->wake_event_mask);
+
+	return 0;
+}
 
 int __spm_get_spmfw_idx(void)
 {

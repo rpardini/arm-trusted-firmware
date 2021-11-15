@@ -1,15 +1,17 @@
 #include <arch_helpers.h>
-#include <lib/mmio.h>
+#include <debug.h>
+#include <mmio.h>
 #include <mt_spm.h>
 #include <mt_spm_internal.h>
 #include <mt_spm_reg.h>
 #include <mt_spm_vcorefs.h>
+#include <mt_spm_pmic_wrap.h>
+#include <plat_pm.h>
+#include <platform.h>
 #include <platform_def.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <mt_spm_pmic_wrap.h>
-#include <common/debug.h>
 
 /* PMIC_WRAP - MT6357 */
 #define VCORE_BASE_UV		51875 /* PMIC MT6357 */
@@ -65,6 +67,11 @@ static struct pmic_wrap_setting pw = {
 		.nr_idx = NR_IDX_ALL,
 	},
 };
+
+uint32_t mt_spm_pmic_wrap_get_1v_data(void)
+{
+	return VOLT_TO_PMIC_VAL(100000);
+}
 
 void _mt_spm_pmic_table_init(void)
 {

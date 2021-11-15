@@ -1,17 +1,18 @@
 #include <arch_helpers.h>
-#include <lib/mmio.h>
+#include <debug.h>
+#include <delay_timer.h>
+#include <mmio.h>
 #include <mt_spm.h>
 #include <mt_spm_internal.h>
 #include <mt_spm_reg.h>
 #include <mt_spm_vcorefs.h>
 #include <mt_spm_pmic_wrap.h>
+#include <plat_pm.h>
+#include <platform.h>
 #include <platform_def.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <drivers/delay_timer.h>
-#include <common/debug.h>
-
 #define DVFSRC_LEVEL         (DVFSRC_BASE + 0x50)
 #define DVFSRC_SEC_SW_REQ    (DVFSRC_BASE + 0x84)
 #define SPM_DVFS_TIMEOUT       1000     /* 1ms */
@@ -164,7 +165,7 @@ static void spm_dvfsfw_init(uint64_t boot_up_opp, uint64_t dram_issue)
 		/* default frequence level is 3200 */
 		mmio_write_32(SPM_DFS_LEVEL, (0x1 << 2));
 		/* select PHYPLL as default */
-		mmio_write_32(SPM_SW_RSV_9, (0x1u << 31));
+		mmio_write_32(SPM_SW_RSV_9, (0x1 << 31));
 	}
 	mmio_write_32(DVFSRC_EVENT_MASK_CON, 0x1FFFF);
 	mmio_write_32(DVFSRC_EVENT_SEL, 0x0);
@@ -186,44 +187,20 @@ void __spm_sync_vcore_dvfs_power_control(struct pwr_ctrl *dest_pwr_ctrl, const s
 
 static void spm_go_to_vcorefs(uint64_t spm_flags)
 {
-	struct pcm_desc *pcmdesc = NULL;
 	struct pwr_ctrl *pwrctrl;
-	int spmfw_idx = __spm_get_spmfw_idx();
 
 	pwrctrl = __spm_vcorefs.pwrctrl;
 
-	if (mmio_read_32(PCM_REG15_DATA) != 0) {
-		set_pwrctrl_pcm_flags(pwrctrl, spm_flags);
-		__spm_set_power_control(pwrctrl);
-		__spm_set_pcm_flags(pwrctrl);
-		__spm_send_cpu_wakeup_event();
-	} else {
-
-		if (dyna_load_pcm[spmfw_idx].ready) {
-			pcmdesc = &(dyna_load_pcm[spmfw_idx].desc);
-		} else {
-			INFO("firmware is not ready!!!\n");
-			return;
-		}
-
-		set_pwrctrl_pcm_flags(pwrctrl, spm_flags);
-
-		__spm_reset_and_init_pcm(pcmdesc);
-
-		__spm_kick_im_to_fetch(pcmdesc);
-
-		__spm_init_pcm_register();
-
-		__spm_init_event_vector(pcmdesc);
-
-		__spm_set_power_control(pwrctrl);
-
-		__spm_set_wakeup_event(pwrctrl);
-
-		__spm_sync_mc_dsr_power_control(pwrctrl, NULL);
-
-		__spm_kick_pcm_to_run();
+	if (!mmio_read_32(PCM_REG15_DATA)) {
+		ERROR("firmware is not ready!!!\n");
+		return;
 	}
+
+	set_pwrctrl_pcm_flags(pwrctrl, spm_flags);
+	__spm_set_power_control(pwrctrl);
+	__spm_set_pcm_flags(pwrctrl);
+	__spm_send_cpu_wakeup_event();
+
 }
 
 static void spm_vcorefs_freq_hopping(uint64_t gps_on)

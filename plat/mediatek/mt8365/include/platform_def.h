@@ -160,6 +160,7 @@
 #define PLAT_ARM_GICD_BASE BASE_GICD_BASE
 #define PLAT_ARM_GICC_BASE BASE_GICC_BASE
 
+#define CIRQ_REG_NUM                    7
 #define CIRQ_SPI_START                  48
 #define MD_WDT_IRQ_BIT_ID               (115)
 

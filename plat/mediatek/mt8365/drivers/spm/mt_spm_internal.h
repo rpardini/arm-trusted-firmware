@@ -1,8 +1,6 @@
 #ifndef __MT_SPM_INTERNAL__
 #define __MT_SPM_INTERNAL__
 
-#include <stdint.h>
-
 /**************************************
  * Config and Parameter
  **************************************/
@@ -16,7 +14,7 @@
 #define SPM_WAKEUP_EVENT_MASK_DEF	0xC0000000
 
 /* PCM_WDT_VAL */
-#define PCM_WDT_TIMEOUT		(30 * 32768)	/* 30s */
+#define PCM_WDT_TIMEOUT		(20 * 32768)	/* 20s */
 /* PCM_TIMER_VAL */
 #define PCM_TIMER_MAX		(0xffffffff - PCM_WDT_TIMEOUT)
 

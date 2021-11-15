@@ -1,5 +1,6 @@
 #include <arch_helpers.h>
-#include <lib/mmio.h>
+#include <debug.h>
+#include <mmio.h>
 #include <mt_spm.h>
 #include <mt_spm_internal.h>
 #include <mt_spm_pmic_wrap.h>
@@ -7,17 +8,20 @@
 #include <mt_spm_vcorefs.h>
 #include <mtk_mcdi.h>
 #include <mtk_plat_common.h>
+#include <plat_pm.h>
+#include <platform.h>
 #include <platform_def.h>
-//#include <plat_mt_cirq.h>
 #include <pmic_wrap_init.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include <mtk_cirq.h>
 
+static struct wake_status spm_wakesta; /* record last wakesta */
 static unsigned int resource_usage;
 static unsigned char is_sleep_sodi;
+static uint32_t idle_loop;
 
-#define MIN_GPT_TIME_IDLE	(0x9858) /* 39000 / 13M ~= 3ms */
 #define LOOP_THRESHOLD		(51)
 
 #define WAKE_SRC_FOR_SODI \
@@ -50,6 +54,7 @@ static unsigned char is_sleep_sodi;
 static struct pwr_ctrl sodi_ctrl = {
 	.wake_src = WAKE_SRC_FOR_SODI,
 	.pcm_flags = SODI_PCM_FLAGS,
+	.timer_val = 0x28000,
 
 	/* Auto-gen Start */
 
@@ -218,7 +223,136 @@ void spm_sodi_args(uint64_t x1, uint64_t x2, uint64_t x3)
 	resource_usage = x3;
 }
 
+static void spm_sodi_pre_process(void)
+{
+	uint32_t vproc, vproc_sram;
+
+	vproc = mt_spm_pmic_wrap_get_1v_data();
+	vproc_sram = mt_spm_pmic_wrap_get_1v_data();
+	pmic_read_interface(RG_BUCK_VPROC_VOSEL, &vproc, 0x7F, 0);
+	pmic_read_interface(RG_LDO_VSRAM_OTHERS_VOSEL, &vproc_sram, 0x7F, 0);
+	mt_spm_pmic_wrap_set_cmd(PMIC_WRAP_PHASE_ALLINONE, CMD_9, vproc);
+	mt_spm_pmic_wrap_set_cmd(PMIC_WRAP_PHASE_ALLINONE, CMD_11, vproc_sram);
+}
+
+void go_to_sodi_before_wfi_no_resume(void)
+{
+	struct pwr_ctrl *pwrctrl;
+	uint64_t mpidr = read_mpidr();
+	uint32_t cpu = plat_core_pos_by_mpidr(mpidr), settle;
+
+	pwrctrl = __spm_sodi.pwrctrl;
+
+	spm_sodi_pre_process();
+	settle = __spm_set_sysclk_settle();
+	__spm_set_cpu_status(cpu);
+	__spm_set_power_control(pwrctrl);
+	__spm_set_wakeup_event(pwrctrl);
+	__spm_sync_vcore_dvfs_power_control(pwrctrl, __spm_vcorefs.pwrctrl);
+	__spm_set_pcm_flags(pwrctrl);
+	if (!pwrctrl->wdt_disable)
+		__spm_set_pcm_wdt(1);
+
+	__spm_send_cpu_wakeup_event();
+	is_sleep_sodi = 1;
+
+	mt_cirq_enable();
+	mt_cirq_clone_gic();
+
+	if (pwrctrl->log_en && (idle_loop % LOOP_THRESHOLD == 0)) {
+		INFO("cpu%d: \"%s\", settle = %u\n",
+		     cpu, spm_get_firmware_version(), settle);
+		INFO("sec = %u, wake = 0x%x, sw = 0x%x 0x%x, req = 0x%x\n",
+		     mmio_read_32(PCM_TIMER_VAL) / 32768, pwrctrl->wake_src,
+		     pwrctrl->pcm_flags, pwrctrl->pcm_flags1,
+		     mmio_read_32(SPM_SRC_REQ));
+	}
+}
+
+static void go_to_sodi_after_wfi(void)
+{
+	struct pcm_desc *pcmdesc = NULL;
+	struct pwr_ctrl *pwrctrl;
+
+	pwrctrl = __spm_sodi.pwrctrl;
+
+	if (!pwrctrl->wdt_disable)
+		__spm_set_pcm_wdt(0);
+
+	__spm_get_wakeup_status(&spm_wakesta);
+	__spm_clean_after_wakeup();
+	__spm_clean_idle_block_cnt(pwrctrl);
+	is_sleep_sodi = 0;
+
+	mt_cirq_flush();
+	mt_cirq_disable();
+
+	if (pwrctrl->log_en && (idle_loop % LOOP_THRESHOLD == 0)) {
+		__spm_output_wake_reason(&spm_wakesta, pcmdesc);
+	}
+
+	idle_loop++;
+}
+
 int spm_is_sodi_resume(void)
 {
 	return is_sleep_sodi;
+}
+
+static int spm_is_last_cpu(uint32_t cpu)
+{
+	int ret;
+
+	mcupm_hp_idle();
+	ret = __spm_is_last_online_cpu(cpu);
+
+	return ret;
+}
+
+int spm_can_sodi_enter(void)
+{
+	struct pwr_ctrl *pwrctrl = __spm_sodi.pwrctrl;
+	uint64_t mpidr = read_mpidr();
+	uint32_t cpu = plat_core_pos_by_mpidr(mpidr);
+
+	if (!pwrctrl->idle_switch) {
+		pwrctrl->by_swt++;
+		goto sodi_enter_fail;
+	} else if (!__spm_does_system_boot_120s()) {
+		pwrctrl->by_boot++;
+		goto sodi_enter_fail;
+	} else if (__spm_is_idle_blocked_by_clk(pwrctrl)) {
+		pwrctrl->by_clk++;
+		goto sodi_enter_fail;
+	} else if (!spm_is_last_cpu(cpu)) {
+		pwrctrl->by_cpu++;
+		goto wake_mcupm_up;
+	}
+
+	pwrctrl->cpu_cnt[cpu]++;
+
+	return 1;
+
+wake_mcupm_up:
+	mcupm_hold_req();
+	mcupm_release_req();
+
+sodi_enter_fail:
+	return 0;
+}
+
+void spm_sodi(void)
+{
+	spm_lock_get();
+	go_to_sodi_before_wfi_no_resume();
+	spm_lock_release();
+}
+
+void spm_sodi_finish(void)
+{
+	spm_lock_get();
+	go_to_sodi_after_wfi();
+	mcupm_hold_req();
+	mcupm_release_req();
+	spm_lock_release();
 }

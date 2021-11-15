@@ -50,6 +50,7 @@ enum {
 };
 
 /* APIs */
+extern uint32_t mt_spm_pmic_wrap_get_1v_data(void);
 extern void mt_spm_pmic_wrap_set_phase(enum pmic_wrap_phase_id phase);
 extern void mt_spm_pmic_wrap_set_cmd(enum pmic_wrap_phase_id phase, uint32_t idx, uint32_t cmd_wdata);
 extern uint64_t mt_spm_pmic_wrap_get_cmd(enum pmic_wrap_phase_id phase, uint32_t idx);

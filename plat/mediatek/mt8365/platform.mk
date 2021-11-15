@@ -10,6 +10,7 @@ MTK_PLAT_SOC  := ${MTK_PLAT}/${PLAT}
 PLAT_INCLUDES := -Idrivers/arm/gic/v3/                            \
                  -Iinclude/bl31/                                  \
                  -Iinclude/common/                                \
+                 -Iinclude/drivers/                               \
                  -Iinclude/drivers/arm/                           \
                  -Iinclude/lib/                                   \
                  -Iinclude/lib/el3_runtime/                       \

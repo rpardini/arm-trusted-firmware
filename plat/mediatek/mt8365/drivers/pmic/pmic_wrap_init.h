@@ -110,6 +110,7 @@ extern signed int pwrap_init_preloader(void);
 extern signed int pwrap_init_lk(void);
 extern signed int pwrap_init_scp(void);
 extern signed int pwrap_init(void);
+extern int32_t pmic_read_interface(uint32_t RegNum, uint32_t *val, uint32_t MASK, uint32_t SHIFT);
 
 /******  DEBUG marco define *******************************/
 #define PWRAPTAG                "[PWRAP] "

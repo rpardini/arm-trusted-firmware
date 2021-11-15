@@ -21,7 +21,7 @@
 #include <plat_params.h>
 #include <plat_private.h>
 #include <mtspmc.h>
-#include <spm.h>
+#include <mt_spm.h>
 #include <mtk_mcdi.h>
 #include "scu.h"
 
