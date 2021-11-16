@@ -40,7 +40,7 @@
 #include <console.h>
 #include <ep_info.h>
 #include <context_mgmt.h>
-#include <debug.h>0
+#include <debug.h>
 #include <mt_spm.h>
 #include <mtk_plat_common.h>
 #include <plat_debug.h>
