@@ -44,7 +44,9 @@
 #include <mtk_plat_common.h>
 #include <mt_spm.h>
 #include <mt_spm_dpidle.h>
+#include <mt_spm_internal.h>
 #include <mt_spm_sodi.h>
+#include <sleep_def.h>
 #include <mtspmc.h>
 #include <mtk_mcdi.h>
 #include "plat/mediatek/mt8365/include/scu.h"
@@ -425,6 +427,15 @@ static const plat_psci_ops_t plat_plat_pm_ops = {
 	.get_sys_suspend_power_state	= plat_mtk_get_sys_suspend_power_state,
 };
 
+static void ssusb_infra_workaround(void)
+{
+	uint64_t flags;
+
+	flags = spm_get_pwr_ctrl_args(SPM_PWR_CTRL_SUSPEND, PWR_PCM_FLAGS, 0);
+	flags |= SPM_FLAG_DIS_INFRA_PDN;
+	spm_pwr_ctrl_args(SPM_PWR_CTRL_SUSPEND, PWR_PCM_FLAGS, flags);
+}
+
 /*******************************************************************************
  * Export the platform specific power ops & initialize the mtk_platform power
  * controller
@@ -447,6 +458,8 @@ int plat_setup_psci_ops(uintptr_t secure_entrypoint,
 	/* init cpu stall counter */
 	init_cpu_stall_counter_all();
 #endif /* MTK_CM_MGR */
+
+	ssusb_infra_workaround();
 
 	return 0;
 }
