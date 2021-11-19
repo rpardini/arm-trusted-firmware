@@ -68,7 +68,8 @@ BL2_SOURCES     += common/desc_image_load.c                              \
                    ${MTK_PLAT_SOC}/drivers/rtc/rtc.c                     \
                    ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c
 
-BL2_LIBS += ${LIBDRAM}
+BL2_LIBS += ${LIBDRAM} \
+            ${LIBBASE}
 
 BL31_SOURCES    += common/desc_image_load.c                              \
                    drivers/delay_timer/delay_timer.c                     \
