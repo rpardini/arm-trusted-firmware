@@ -44,13 +44,11 @@ BL2_SOURCES     += common/desc_image_load.c                           \
                    drivers/io/io_storage.c                            \
                    drivers/io/io_block.c                              \
                    drivers/io/io_fip.c                                \
-                   drivers/mmc/mmc.c                                  \
                    drivers/partition/gpt.c                            \
                    drivers/partition/partition.c                      \
                    drivers/ti/uart/aarch64/16550_console.S            \
                    lib/libc/memset.c                                  \
                    ${MTK_PLAT}/common/mtk_plat_common.c               \
-                   ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c            \
                    ${MTK_PLAT}/common/drivers/rtc/rtc_common.c        \
                    ${MTK_PLAT_SOC}/aarch64/plat_helpers.S             \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c          \
@@ -58,6 +56,17 @@ BL2_SOURCES     += common/desc_image_load.c                           \
                    ${MTK_PLAT_SOC}/drivers/pll/pll.c                  \
                    ${MTK_PLAT_SOC}/drivers/pll/spm_mtcmos.c                  \
                    ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c
+
+#if defined(STORAGE_UFS)
+BL2_SOURCES     += drivers/ufs/ufs.c                                  \
+                   ${MTK_PLAT}/common/drivers/ufs/mtk-ufs.c            \
+#else
+BL2_SOURCES     += drivers/mmc/mmc.c                                  \
+                   ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c            \
+#endif
+
+PLAT_PARTITION_BLOCK_SIZE := 4096
+$(eval $(call add_define,PLAT_PARTITION_BLOCK_SIZE))
 
 BL2_LIBS += ${LIBDRAM}
 

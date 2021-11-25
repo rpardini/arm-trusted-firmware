@@ -20,6 +20,7 @@
 #include <drivers/ti/uart/uart_16550.h>
 
 #include <mmc/mtk-sd.h>
+#include <ufs/mtk-ufs.h>
 #include <pll/pll.h>
 
 #include <rtc.h>
@@ -27,6 +28,14 @@
 void pwrap_init(void);
 void mt_mem_init(void);
 
+#if defined(STORAGE_UFS)
+static ufs_params_t mt8195_ufs_params = {
+	.reg_base = 0x11270000,
+	.desc_base = 0x50000000,
+	.desc_size = 0x8000,
+	.flags = 0
+};
+#else
 static struct msdc_compatible mt8183_compat = {
 	.clk_div_bits = 12,
 	.pad_tune0 = true,
@@ -35,6 +44,7 @@ static struct msdc_compatible mt8183_compat = {
 	.busy_check = true,
 	.stop_clk_fix = true,
 };
+#endif
 
 static bl_mem_params_node_t bl2_mem_params_descs[] = {
 	/* Fill BL31 related information */
@@ -101,18 +111,42 @@ struct plat_io_policy {
 	int (*check)(const uintptr_t spec);
 };
 
-static int check_emmc(const uintptr_t spec);
+static int check_storage(const uintptr_t spec);
 static int check_fip(const uintptr_t spec);
 
 
 uint32_t g_ddr_reserve_enable = 0;
 uint32_t g_ddr_reserve_success = 0;
 
-static uintptr_t emmc_dev_handle;
-static const io_dev_connector_t *emmc_dev_con;
+static uintptr_t storage_dev_handle;
+static const io_dev_connector_t *storage_dev_con;
 static const io_dev_connector_t *fip_dev_con;
 static uintptr_t fip_dev_handle;
 
+#if defined(STORAGE_UFS)
+#define MAIN_STORAGE_LUN 2
+static size_t mtk_ufs_read(int lba, uintptr_t buf, size_t size)
+{
+	return ufs_read_blocks(MAIN_STORAGE_LUN, lba, buf, size);
+}
+
+static const io_block_dev_spec_t ufs_dev_spec = {
+	.buffer = {
+		.offset = 0x41000000,
+		.length = 0x1000000,
+	},
+	.ops = {
+		.read = mtk_ufs_read,
+	},
+	.block_size = UFS_BLOCK_SIZE,
+};
+
+static const io_block_spec_t ufs_gpt_spec = {
+	.offset		= 0,
+	.length		= 0x1000 *
+			  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
+};
+#else
 static const io_block_dev_spec_t emmc_dev_spec = {
 	.buffer = {
 		.offset = 0x41000000,
@@ -129,8 +163,9 @@ static const io_block_spec_t emmc_gpt_spec = {
 	.length		= PLAT_PARTITION_BLOCK_SIZE *
 			  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
 };
+#endif
 
-static io_block_spec_t emmc_fip_spec;
+static io_block_spec_t storage_fip_spec;
 
 static const io_uuid_spec_t bl31_uuid_spec = {
 	.uuid = UUID_EL3_RUNTIME_FIRMWARE_BL31,
@@ -184,9 +219,9 @@ static const io_uuid_spec_t nt_fw_cert_uuid_spec = {
 
 static const struct plat_io_policy policies[] = {
 	[FIP_IMAGE_ID] = {
-		&emmc_dev_handle,
-		(uintptr_t) &emmc_fip_spec,
-		check_emmc
+		&storage_dev_handle,
+		(uintptr_t) &storage_fip_spec,
+		check_storage
 	},
 	[BL31_IMAGE_ID] = {
 		&fip_dev_handle,
@@ -204,9 +239,13 @@ static const struct plat_io_policy policies[] = {
 		check_fip
 	},
 	[GPT_IMAGE_ID] = {
-		&emmc_dev_handle,
+		&storage_dev_handle,
+#if defined(STORAGE_UFS)
+		(uintptr_t)&ufs_gpt_spec,
+#else
 		(uintptr_t)&emmc_gpt_spec,
-		check_emmc
+#endif
+		check_storage
 	},
 #if TRUSTED_BOARD_BOOT
 	[TRUSTED_KEY_CERT_ID] = {
@@ -257,14 +296,14 @@ static const struct plat_io_policy policies[] = {
 #endif /* TRUSTED_BOARD_BOOT */
 };
 
-static int check_emmc(const uintptr_t spec)
+static int check_storage(const uintptr_t spec)
 {
 	int result;
 	uintptr_t local_handle;
 
-	result = io_dev_init(emmc_dev_handle, (uintptr_t)NULL);
+	result = io_dev_init(storage_dev_handle, (uintptr_t)NULL);
 	if (result == 0) {
-		result = io_open(emmc_dev_handle, spec, &local_handle);
+		result = io_open(storage_dev_handle, spec, &local_handle);
 		if (result == 0)
 			io_close(local_handle);
 	}
@@ -292,14 +331,19 @@ void mtk_io_setup(void)
 {
 	int result;
 
-	result = register_io_dev_block(&emmc_dev_con);
+	result = register_io_dev_block(&storage_dev_con);
 	assert(result == 0);
 
 	result = register_io_dev_fip(&fip_dev_con);
 	assert(result == 0);
 
-	result = io_dev_open(emmc_dev_con, (uintptr_t)&emmc_dev_spec,
-			     &emmc_dev_handle);
+#if defined(STORAGE_UFS)
+	result = io_dev_open(storage_dev_con, (uintptr_t)&ufs_dev_spec,
+			     &storage_dev_handle);
+#else
+	result = io_dev_open(storage_dev_con, (uintptr_t)&emmc_dev_spec,
+			     &storage_dev_handle);
+#endif
 	assert(result == 0);
 
 	result = io_dev_open(fip_dev_con, (uintptr_t)NULL, &fip_dev_handle);
@@ -326,7 +370,11 @@ void bl2_platform_setup(void)
 
 	mt_mem_init();
 
+#if defined(STORAGE_UFS)
+	mtk_ufs_init(&mt8195_ufs_params);
+#else
 	mtk_mmc_init(0x11230000, &mt8183_compat, 400000000);
+#endif
 	mtk_io_setup();
 }
 
@@ -386,15 +434,15 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 	const partition_entry_t *entry;
 	const char *name = "bootloaders";
 
-	if (emmc_fip_spec.length == 0) {
+	if (storage_fip_spec.length == 0) {
 		partition_init(GPT_IMAGE_ID);
 		entry = get_partition_entry(name);
 		if (entry == NULL) {
 			ERROR("Could NOT find the %s partition!\n", name);
 			return -ENOENT;
 		}
-		emmc_fip_spec.offset = entry->start;
-		emmc_fip_spec.length = entry->length;
+		storage_fip_spec.offset = entry->start;
+		storage_fip_spec.length = entry->length;
 	}
 	return 0;
 }
