@@ -68,6 +68,7 @@
 
 /* Host Controller Enable */
 #define HCE				0x34
+#define HCE_DISABLE			0
 #define HCE_ENABLE			1
 
 /* Host UIC Error Code PHY Adapter Layer */

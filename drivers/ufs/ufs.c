@@ -128,6 +128,13 @@ static int ufshc_hce_enable(uintptr_t base)
 	unsigned int data;
 	int retries;
 
+	/* Disable Host Controller */
+	mmio_write_32(base + HCE, HCE_DISABLE);
+	/* Wait until the Host Controller is disabled */
+	do {
+		data = mmio_read_32(base + HCE);
+	} while ((data & HCE_ENABLE) != HCE_DISABLE);
+
 	/* Enable Host Controller */
 	mmio_write_32(base + HCE, HCE_ENABLE);
 
