@@ -752,6 +752,7 @@ static void ufs_enum(void)
 {
 	unsigned int blk_num, blk_size;
 	int i;
+	int flag = FLAG_DEVICE_INIT;
 
 	/* 0 means 1 slot */
 	nutrs = (mmio_read_32(ufs_params.reg_base + CAP) & CAP_NUTRS_MASK) + 1;
@@ -762,7 +763,11 @@ static void ufs_enum(void)
 	ufs_verify_ready();
 
 	ufs_set_flag(FLAG_DEVICE_INIT);
-	mdelay(200);
+
+	/* wait for the DEVICE_INIT flag to be reset by the device */
+	for (i = 0; i < 1000 && flag == FLAG_DEVICE_INIT; i++)
+		flag = ufs_read_flag(FLAG_DEVICE_INIT);
+
 	/* dump available LUNs */
 	for (i = 0; i < UFS_MAX_LUNS; i++) {
 		ufs_read_capacity(i, &blk_num, &blk_size);
