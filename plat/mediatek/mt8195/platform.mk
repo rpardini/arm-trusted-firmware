@@ -59,13 +59,14 @@ BL2_SOURCES     += common/desc_image_load.c                           \
 
 #if defined(STORAGE_UFS)
 BL2_SOURCES     += drivers/ufs/ufs.c                                  \
-                   ${MTK_PLAT}/common/drivers/ufs/mtk-ufs.c            \
+                   ${MTK_PLAT}/common/drivers/ufs/mtk-ufs.c
+PLAT_PARTITION_BLOCK_SIZE := 4096
 #else
 BL2_SOURCES     += drivers/mmc/mmc.c                                  \
-                   ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c            \
+                   ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c
+PLAT_PARTITION_BLOCK_SIZE := 512
 #endif
 
-PLAT_PARTITION_BLOCK_SIZE := 4096
 $(eval $(call add_define,PLAT_PARTITION_BLOCK_SIZE))
 
 BL2_LIBS += ${LIBDRAM}
