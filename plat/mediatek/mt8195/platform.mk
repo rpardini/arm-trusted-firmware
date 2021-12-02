@@ -57,15 +57,16 @@ BL2_SOURCES     += common/desc_image_load.c                           \
                    ${MTK_PLAT_SOC}/drivers/pll/spm_mtcmos.c                  \
                    ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c
 
-#if defined(STORAGE_UFS)
+ifeq (${STORAGE_UFS},1)
 BL2_SOURCES     += drivers/ufs/ufs.c                                  \
                    ${MTK_PLAT}/common/drivers/ufs/mtk-ufs.c
 PLAT_PARTITION_BLOCK_SIZE := 4096
-#else
+$(eval $(call add_define,STORAGE_UFS))
+else
 BL2_SOURCES     += drivers/mmc/mmc.c                                  \
                    ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c
 PLAT_PARTITION_BLOCK_SIZE := 512
-#endif
+endif
 
 $(eval $(call add_define,PLAT_PARTITION_BLOCK_SIZE))
 
