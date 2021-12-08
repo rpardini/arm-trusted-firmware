@@ -144,7 +144,7 @@ BL2_SOURCES		+=	${AUTH_SOURCES}				\
 				drivers/auth/tbbr/tbbr_cot_bl2.c
 
 ROT_KEY		=	$(BUILD_PLAT)/rot_key.pem
-ROTPK_HASH		=	$(BUILD_PLAT)/rotpk_sha512.bin
+ROTPK_HASH		=	$(BUILD_PLAT)/rotpk_sha256.bin
 
 $(eval $(call add_define_val,ROTPK_HASH,'"$(ROTPK_HASH)"'))
 $(BUILD_PLAT)/bl1/mtk_rotpk.o: $(ROTPK_HASH)
@@ -153,12 +153,12 @@ $(BUILD_PLAT)/bl2/mtk_rotpk.o: $(ROTPK_HASH)
 certificates: $(ROT_KEY)
 $(ROT_KEY): | $(BUILD_PLAT)
 	@echo "  OPENSSL $@"
-	$(Q)openssl genrsa 4096 > $@ 2>/dev/null
+	$(Q)openssl genrsa 2048 > $@ 2>/dev/null
 
 $(ROTPK_HASH): $(ROT_KEY)
 	@echo "  OPENSSL $@"
 	$(Q)openssl rsa -in $< -pubout -outform DER 2>/dev/null |\
-	openssl dgst -sha512 -binary > $@ 2>/dev/null
+	openssl dgst -sha256 -binary > $@ 2>/dev/null
 endif
 
 # Enable dynamic memory mapping
