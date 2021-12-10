@@ -4,6 +4,7 @@
 #include <common/debug.h>
 #include <drivers/console.h>
 #include <drivers/generic_delay_timer.h>
+#include <drivers/delay_timer.h>
 #include <plat/common/common_def.h>
 #include <lib/mmio.h>
 #include <drivers/io/io_driver.h>
@@ -23,6 +24,29 @@
 #include <pll/pll.h>
 
 #include <rtc.h>
+
+#define GPIO_MODEC 0x100052A0
+#define GPIO_DIR4 0x10005170
+#define GPIO_DIR4_SET 0x10005174
+#define GPIO_DIR4_CLR 0x10005178
+
+#if defined(BOARD_i350_pumpkin)
+#define GPIO_RESET_PINMODE GENMASK(20, 18)
+#define GPIO_RESET_PIN BIT(30)
+#else
+#define SKIP_WIFI_CHIP_RESET
+#endif
+
+#if !defined(SKIP_WIFI_CHIP_RESET)
+static void reset_mt7663_wifi_chip(void)
+{
+	mmio_clrbits_32(GPIO_MODEC, GPIO_RESET_PINMODE);
+	mmio_setbits_32(GPIO_DIR4, GPIO_RESET_PIN);
+
+	mmio_setbits_32(GPIO_DIR4_CLR, GPIO_RESET_PIN);
+	mdelay(30);
+}
+#endif
 
 void pwrap_init(void);
 void mt_mem_init(void);
@@ -324,6 +348,10 @@ void bl2_platform_setup(void)
 
 	mtk_mmc_init(0x11230000, &mt8183_compat, 400000000);
 	mtk_io_setup();
+
+#if !defined(SKIP_WIFI_CHIP_RESET)
+	reset_mt7663_wifi_chip();
+#endif
 }
 
 struct bl_load_info *plat_get_bl_image_load_info(void)
