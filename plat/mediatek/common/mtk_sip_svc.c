@@ -16,6 +16,8 @@
 #include <mtk_sip_svc.h>
 #include <plat_sip_calls.h>
 
+#include <mtk_hwid.h>
+
 /* Mediatek SiP Service UUID */
 DEFINE_SVC_UUID2(mtk_sip_svc_uid,
 	0xa42b58f7, 0x6242, 0x7d4d, 0x80, 0xe5,
@@ -47,6 +49,8 @@ uintptr_t mediatek_sip_handler(uint32_t smc_fid,
 			u_register_t flags)
 {
 	uint32_t ns;
+	uint32_t *hwid = NULL;
+	uint8_t hwid_size = 0;
 
 	/* if parameter is sent from SMC32. Clean top 32 bits */
 	clean_top_32b_of_param(smc_fid, &x1, &x2, &x3, &x4);
@@ -55,7 +59,21 @@ uintptr_t mediatek_sip_handler(uint32_t smc_fid,
 	ns = is_caller_non_secure(flags);
 	if (!ns) {
 		/* SiP SMC service secure world's call */
-		;
+		switch (smc_fid) {
+		case MTK_SIP_GET_HUK:
+			mtk_get_hwid(IO_PHYS, &hwid, &hwid_size);
+			if (hwid_size == 2) {
+				SMC_RET5(handle, 4, 0, 0, hwid[1], hwid[0]);
+			}
+			if (hwid_size == 4) {
+				SMC_RET5(handle, 4, hwid[3], hwid[2], hwid[1], hwid[0]);
+			}
+			ERROR("Unexpected hardware ID size\n");
+			SMC_RET1(handle, 0);
+		default:
+			/* Do nothing in default case */
+			break;
+		}
 	} else {
 		/* SiP SMC service normal world's call */
 		switch (smc_fid) {

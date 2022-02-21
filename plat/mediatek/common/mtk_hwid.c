@@ -9,5 +9,7 @@
 /* stub function */
 int mtk_get_hwid(uint64_t io_base, uint32_t** hardware_id, uint8_t *hwid_size)
 {
+	*hwid_size = 0;
+
 	return 0;
 }

@@ -56,6 +56,8 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				${MTK_PLAT_SOC}/power_tracer.c			\
 				${MTK_PLAT_SOC}/scu.c
 
+BL31_LIBS += ${LIBDEVINFO}
+
 # indicate the reset vector address can be programmed
 PROGRAMMABLE_RESET_ADDRESS	:=	1
 

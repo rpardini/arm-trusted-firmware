@@ -41,6 +41,7 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				${MTK_PLAT_SOC}/bl31_plat_setup.c		\
 				${MTK_PLAT_SOC}/plat_mt_gic.c			\
 				${MTK_PLAT}/common/mtk_sip_svc.c		\
+				${MTK_PLAT}/common/mtk_hwid.c		\
 				${MTK_PLAT}/common/mtk_plat_common.c		\
 				${MTK_PLAT}/common/drivers/uart/8250_console.S		\
 				${MTK_PLAT_SOC}/aarch64/plat_helpers.S		\

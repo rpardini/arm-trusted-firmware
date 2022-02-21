@@ -25,6 +25,7 @@
 
 /* Mediatek SiP Service Calls function IDs */
 #define MTK_SIP_SET_AUTHORIZED_SECURE_REG	0x82000001
+#define MTK_SIP_GET_HUK				0x82000010
 
 /* For MTK SMC from Secure OS */
 /* 0x82000000 - 0x820000FF & 0xC2000000 - 0xC20000FF */
