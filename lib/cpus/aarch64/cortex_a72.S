@@ -133,6 +133,15 @@ func check_errata_1319367
 	ret
 endfunc check_errata_1319367
 
+func check_smccc_arch_workaround_3
+	cpu_check_csv2  x0, 1f
+	mov	x0, #ERRATA_APPLIES
+	ret
+1:
+	mov	x0, #ERRATA_NOT_APPLIES
+	ret
+endfunc check_smccc_arch_workaround_3
+
 	/* -------------------------------------------------
 	 * The CPU Ops reset function for Cortex-A72.
 	 * -------------------------------------------------
@@ -330,5 +339,6 @@ declare_cpu_ops_wa cortex_a72, CORTEX_A72_MIDR, \
 	cortex_a72_reset_func, \
 	check_errata_cve_2017_5715, \
 	CPU_NO_EXTRA2_FUNC, \
+	check_smccc_arch_workaround_3, \
 	cortex_a72_core_pwr_dwn, \
 	cortex_a72_cluster_pwr_dwn
