@@ -23,6 +23,7 @@
 #include <plat_pm.h>
 #include <pmic.h>
 #include <rtc.h>
+#include <mtk_rgu.h>
 
 /*
  * Cluster state request:
@@ -350,7 +351,7 @@ static void __dead2 plat_mtk_system_reset(void)
 
 	INFO("MTK System Reset\n");
 
-	gpio_set_value(gpio_reset->index, gpio_reset->polarity);
+	plat_rgu_sw_reset(0);
 
 	wfi();
 	ERROR("MTK System Reset: operation not handled.\n");
@@ -361,6 +362,7 @@ static void __dead2 plat_mtk_system_off(void)
 {
 	INFO("MTK System Off\n");
 
+	plat_rgu_request_dis(MTK_WDT_REQ_MODE_SYSRST);
 	rtc_power_off_sequence();
 	pmic_power_off();
 

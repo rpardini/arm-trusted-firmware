@@ -89,6 +89,7 @@ BL31_SOURCES += common/desc_image_load.c                              \
 		${MTK_PLAT}/common/lpm/mt_lp_rm.c                     \
                 ${MTK_PLAT}/common/mtk_cirq.c                         \
                 ${MTK_PLAT}/common/mtk_plat_common.c                  \
+                ${MTK_PLAT}/common/mtk_rgu.c                          \
                 ${MTK_PLAT}/common/mtk_sip_svc.c                      \
                 ${MTK_PLAT}/common/params_setup.c                     \
                 ${MTK_PLAT_SOC}/aarch64/platform_common.c             \
