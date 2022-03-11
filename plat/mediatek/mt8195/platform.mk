@@ -70,7 +70,8 @@ endif
 
 $(eval $(call add_define,PLAT_PARTITION_BLOCK_SIZE))
 
-BL2_LIBS += ${LIBDRAM}
+BL2_LIBS += ${LIBDRAM} \
+            ${LIBBASE}
 
 BL31_SOURCES += common/desc_image_load.c                              \
                 drivers/delay_timer/delay_timer.c                     \
