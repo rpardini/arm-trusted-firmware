@@ -105,6 +105,7 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    ${MTK_PLAT_SOC}/plat_dfd.c                            \
                    ${MTK_PLAT_SOC}/plat_sip_svc.c                        \
                    ${MTK_PLAT}/common/mtk_sip_svc.c                      \
+                   ${MTK_PLAT}/common/mtk_hwid.c                         \
                    ${MTK_PLAT_SOC}/scu.c
 
 BL31_LIBS += ${LIBDRAM} ${LIBBASE}
