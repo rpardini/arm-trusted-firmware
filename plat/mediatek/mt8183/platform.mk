@@ -99,7 +99,7 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    ${MTK_PLAT_SOC}/scu.c                                 \
                    ${MTK_PLAT_SOC}/drivers/sspm/sspm.c
 
-BL31_LIBS += ${LIBDEVINFO}
+BL31_LIBS += ${LIBBASE}
 
 # Enable workarounds for selected Cortex-A53 erratas.
 ERRATA_A53_826319 := 0

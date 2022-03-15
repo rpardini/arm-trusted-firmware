@@ -114,7 +114,7 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 ${MTK_PLAT_SOC}/plat_sip_calls.c                      \
                 ${MTK_PLAT_SOC}/plat_topology.c
 
-BL31_LIBS += ${LIBDEVINFO}
+BL31_LIBS += ${LIBBASE}
 
 # Build SPM drivers
 include ${MTK_PLAT_SOC}/drivers/spm/build.mk
