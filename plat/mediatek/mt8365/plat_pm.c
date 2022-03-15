@@ -383,6 +383,21 @@ static void plat_power_domain_off(const psci_power_state_t *state)
 #endif
 }
 
+/*******************************************************************************
+ * MTK handlers to shutdown/reboot the system
+ ******************************************************************************/
+static void __dead2 plat_mtk_system_off(void)
+{
+	INFO("MTK System Off\n");
+
+	rtc_power_off_sequence();
+	pmic_power_off();
+
+	wfi();
+	ERROR("MTK System Off: operation not handled.\n");
+	panic();
+}
+
 static void __dead2 plat_system_reset(void)
 {
 	/* Write the System Configuration Control Register */
@@ -422,6 +437,7 @@ static const plat_psci_ops_t plat_plat_pm_ops = {
 	.pwr_domain_on_finish		= plat_power_domain_on_finish,
 	.pwr_domain_suspend		= plat_power_domain_suspend,
 	.pwr_domain_suspend_finish	= plat_power_domain_suspend_finish,
+	.system_off			= plat_mtk_system_off,
 	.system_reset			= plat_system_reset,
 	.validate_power_state		= plat_validate_power_state,
 	.get_sys_suspend_power_state	= plat_mtk_get_sys_suspend_power_state,
