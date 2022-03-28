@@ -7,6 +7,8 @@
 
 /* pmic voltage control */
 #define RG_BUCK_VPROC_VOSEL             0x14aa
+#define RG_SMPS_ANA_CON1                0x170a
+#define RG_SMPS_ANA_CON2                0x170c
 #define RG_LDO_VSRAM_OTHERS_VOSEL       0x19fc
 #define RG_BUCK_VCORE_VOSEL             0x152a
 #define RG_LDO_VSRAM_PROC_VOSEL         0x19fa

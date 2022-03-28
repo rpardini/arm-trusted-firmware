@@ -24,6 +24,11 @@ static unsigned int dpidle_pcm_timer_val;
 static unsigned int dpidle_wake_src;
 static uint32_t idle_loop;
 static uint32_t intbus_clock_mux;
+static uint32_t vcore_sram_sleep;
+static uint32_t vcore_sleep;
+
+#define VCORE_SLEEP_0P65V	(0x6)
+#define VCORE_SRAM_SLEEP_0P8V	(0x6)
 
 #define CLK_CFG_4		(0x10000080)
 #define CLK_CFG_UPDATE		(0x10000004)
@@ -245,6 +250,9 @@ void spm_sleep_dpidle_args(uint64_t x1, uint64_t x2, uint64_t x3)
 
 static void spm_dpidle_post_process(void)
 {
+	pmic_config_interface(RG_SMPS_ANA_CON1, vcore_sleep, 0x7, 5);
+	pmic_config_interface(RG_SMPS_ANA_CON2, vcore_sram_sleep, 0x7, 3);
+
 	/* audio intbus clk change back to normal clk */
 	mmio_write_32(CLK_CFG_4, (mmio_read_32(CLK_CFG_4) & ~0x3) |
 		      (intbus_clock_mux << 0));
@@ -260,6 +268,10 @@ static void spm_dpidle_pre_process(void)
 	vproc_sram = mt_spm_pmic_wrap_get_1v_data();
 	pmic_read_interface(RG_BUCK_VPROC_VOSEL, &vproc, 0x7F, 0);
 	pmic_read_interface(RG_LDO_VSRAM_OTHERS_VOSEL, &vproc_sram, 0x7F, 0);
+	pmic_read_interface(RG_SMPS_ANA_CON1, &vcore_sleep, 0x7, 5);
+	pmic_read_interface(RG_SMPS_ANA_CON2, &vcore_sram_sleep, 0x7, 3);
+	pmic_config_interface(RG_SMPS_ANA_CON1, VCORE_SLEEP_0P65V, 0x7, 5);
+	pmic_config_interface(RG_SMPS_ANA_CON2, VCORE_SRAM_SLEEP_0P8V, 0x7, 3);
 	mt_spm_pmic_wrap_set_cmd(PMIC_WRAP_PHASE_ALLINONE, CMD_9, vproc);
 	mt_spm_pmic_wrap_set_cmd(PMIC_WRAP_PHASE_ALLINONE, CMD_11, vproc_sram);
 
