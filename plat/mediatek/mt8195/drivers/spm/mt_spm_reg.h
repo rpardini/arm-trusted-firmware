@@ -2854,6 +2854,28 @@
 /* SPM_PMSR_LEN_CON2 (0x10006000+0xFF4) */
 #define REG_PMSR_WINDOW_LEN_SET2_LSB        (1U << 0)       /* 32b */
 
+/**************************************
+ * Config and Parameter
+ **************************************/
+#define POWER_ON_VAL1_DEF		0x80015860
+#define SPM_WAKEUP_EVENT_MASK_DEF	0xffffffff
+#define SPM_BUS_PROTECT_MASK_B_DEF	0xffffffff
+#define SPM_BUS_PROTECT2_MASK_B_DEF	0xffffffff
+#define MD32PCM_DMA0_CON_VAL		0x0003820e
+#define MD32PCM_DMA0_START_VAL		0x00008000
+#define MD32PCM_CFGREG_SW_RSTN_RUN	0x1
+#define SPM_DVFS_LEVEL_DEF		0x00000001
+#define SPM_DVS_DFS_LEVEL_DEF		0x00010001
+#define SPM_RESOURCE_ACK_CON0_DEF	0xffffffff
+#define SPM_RESOURCE_ACK_CON1_DEF	0xffffffff
+#define SPM_RESOURCE_ACK_CON2_DEF	0xffffffff
+#define SPM_RESOURCE_ACK_CON3_DEF	0xffffffff
+#define ARMPLL_CLK_SEL_DEF		0x3ff
+#define SPM_SYSCLK_SETTLE		0x60fe
+#define SPM_INIT_DONE_US		20
+#define PCM_WDT_TIMEOUT			(30 * 32768)
+#define PCM_TIMER_MAX			(0xffffffff - PCM_WDT_TIMEOUT)
+
 #define SPM_PROJECT_CODE	0xb16
 #define SPM_REGWR_CFG_KEY	(SPM_PROJECT_CODE << 16)
 #endif
