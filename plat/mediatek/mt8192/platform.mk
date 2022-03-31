@@ -56,7 +56,6 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    ${MTK_PLAT}/common/mtk_cirq.c                         \
                    ${MTK_PLAT}/common/mtk_plat_common.c                  \
                    ${MTK_PLAT}/common/mtk_sip_svc.c                      \
-                   ${MTK_PLAT}/common/mtk_hwid.c                         \
                    ${MTK_PLAT}/common/params_setup.c                     \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c             \
                    ${MTK_PLAT_SOC}/aarch64/plat_helpers.S                \
@@ -79,6 +78,10 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    ${MTK_PLAT_SOC}/drivers/mcdi/mt_mcdi.c                \
                    ${MTK_PLAT_SOC}/drivers/ptp3/mtk_ptp3_main.c          \
                    ${MTK_PLAT_SOC}/drivers/spmc/mtspmc.c
+
+ifndef LIBBASE
+BL31_SOURCES    += ${MTK_PLAT}/common/mtk_hwid.c
+endif
 
 # Build SPM drivers
 include ${MTK_PLAT_SOC}/drivers/spm/build.mk
