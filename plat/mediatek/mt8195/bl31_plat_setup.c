@@ -18,6 +18,7 @@
 /* Platform Includes */
 #include <emi_mpu.h>
 #include <mt_gic_v3.h>
+#include <mt_dpm.h>
 #include <mt_spm.h>
 #include <mt_timer.h>
 #include <mtk_dcm.h>
@@ -101,6 +102,7 @@ void bl31_platform_setup(void)
 	mt_gpio_init();
 	mt_systimer_init();
 	generic_delay_timer_init();
+	dpm_init();
 	spm_boot_init();
 }
 

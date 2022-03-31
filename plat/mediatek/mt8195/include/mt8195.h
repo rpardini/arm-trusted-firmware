@@ -97,6 +97,12 @@
 //#define PERI_CON_BASE       (IO_PHYS + 0x00003000)
 
 #define GPIO_BASE           (IO_PHYS + 0x00005000)
+#define	DPM_PM_SRAM_BASE    (IO_PHYS + 0x00900000)
+#define	DPM_DM_SRAM_BASE    (IO_PHYS + 0x00920000)
+#define	DPM_CFG_BASE	    (IO_PHYS + 0x00940000)
+#define	DPM_PM_SRAM_BASE2   (IO_PHYS + 0x00A00000)
+#define	DPM_DM_SRAM_BASE2   (IO_PHYS + 0x00A20000)
+#define	DPM_CFG_BASE2	    (IO_PHYS + 0x00A40000)
 #define SPM_BASE            (IO_PHYS + 0x00006000)
 #define RGU_BASE            (IO_PHYS + 0x00007000)
 #define GPT_BASE            (IO_PHYS + 0x00008000)
