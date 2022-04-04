@@ -20,6 +20,7 @@
 #include <mt_gic_v3.h>
 #include <mt_dpm.h>
 #include <mt_spm.h>
+#include <mt_mcupm.h>
 #include <mt_timer.h>
 #include <mtk_dcm.h>
 #include <mtgpio.h>
@@ -104,6 +105,7 @@ void bl31_platform_setup(void)
 	generic_delay_timer_init();
 	dpm_init();
 	spm_boot_init();
+	mcupm_init();
 }
 
 /*******************************************************************************
