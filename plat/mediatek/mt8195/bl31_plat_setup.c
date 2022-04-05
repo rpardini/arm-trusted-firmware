@@ -21,6 +21,7 @@
 #include <mt_dpm.h>
 #include <mt_spm.h>
 #include <mt_mcupm.h>
+#include <mt_sspm.h>
 #include <mt_timer.h>
 #include <mtk_dcm.h>
 #include <mtgpio.h>
@@ -106,6 +107,7 @@ void bl31_platform_setup(void)
 	dpm_init();
 	spm_boot_init();
 	mcupm_init();
+	sspm_init();
 }
 
 /*******************************************************************************

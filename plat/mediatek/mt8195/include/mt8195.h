@@ -97,6 +97,8 @@
 //#define PERI_CON_BASE       (IO_PHYS + 0x00003000)
 
 #define GPIO_BASE           (IO_PHYS + 0x00005000)
+#define SSPM_SRAM_BASE      (IO_PHYS + 0x00400000)
+#define SSPM_CFG_BASE       (IO_PHYS + 0x00440000)
 #define	MCUPM_SRAM_BASE	    (0x0C540000)
 #define	MCUPM_CFG_BASE	    (0x0C560000)
 #define	DPM_PM_SRAM_BASE    (IO_PHYS + 0x00900000)
