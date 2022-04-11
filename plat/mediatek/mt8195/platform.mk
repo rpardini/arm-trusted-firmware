@@ -55,7 +55,8 @@ BL2_SOURCES     += common/desc_image_load.c                           \
                    ${MTK_PLAT_SOC}/bl2_plat_setup.c                   \
                    ${MTK_PLAT_SOC}/drivers/pll/pll.c                  \
                    ${MTK_PLAT_SOC}/drivers/pll/spm_mtcmos.c                  \
-                   ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c
+                   ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c      \
+                   ${MTK_PLAT_SOC}/drivers/pmic/pmic_initial_setting.c
 
 ifeq (${STORAGE_UFS},1)
 BL2_SOURCES     += drivers/ufs/ufs.c                                  \

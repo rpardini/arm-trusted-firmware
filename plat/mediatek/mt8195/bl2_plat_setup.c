@@ -24,6 +24,7 @@
 #include <pll/pll.h>
 
 #include <rtc.h>
+#include <pmic_initial_setting.h>
 
 void pwrap_init(void);
 void mt_mem_init(void);
@@ -367,6 +368,7 @@ void bl2_platform_setup(void)
 
 	i2c_hw_init();
 	pmic_init();
+	pmic_initial_setting();
 
 	mt_mem_init();
 
