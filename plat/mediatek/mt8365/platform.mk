@@ -18,6 +18,7 @@ PLAT_INCLUDES := -I.                                              \
                  -Iinclude/plat/common                            \
                  -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/common/drivers/                    \
+                 -I${MTK_PLAT}/common/drivers/emi_mpu             \
                  -I${MTK_PLAT}/common/drivers/timer/              \
                  -I${MTK_PLAT_SOC}/drivers/                       \
                  -I${MTK_PLAT_SOC}/drivers/devapc/                \
@@ -83,6 +84,7 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    ${MTK_PLAT}/common/mtk_gic_v3_main.c                  \
                    ${MTK_PLAT_SOC}/plat_mt_cirq.c                        \
                    ${MTK_PLAT}/common/drivers/rtc/rtc_common.c           \
+                   ${MTK_PLAT}/common/drivers/emi_mpu/emi_mpu.c          \
                    ${MTK_PLAT_SOC}/drivers/rtc/rtc.c                     \
                    ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c         \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c             \

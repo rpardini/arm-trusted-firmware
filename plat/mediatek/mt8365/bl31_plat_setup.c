@@ -27,6 +27,8 @@
 #include "plat/mediatek/mt8365/include/scu.h"
 #include <mtk_gic_v3_main.h>
 
+#include <emi_mpu.h>
+
 static entry_point_info_t bl32_ep_info;
 static entry_point_info_t bl33_ep_info;
 
@@ -105,6 +107,7 @@ void bl31_platform_setup(void)
 	/* Initialize mcupm at boot time */
 	mcdi_mcupm_boot_init();
 
+	emi_mpu_init();
 }
 
 /*******************************************************************************

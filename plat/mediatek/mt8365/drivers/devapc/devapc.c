@@ -228,4 +228,3 @@ void devapc_init(void)
 	set_default_slave_permission();
 	dump_devapc();
 }
-
