@@ -28,6 +28,7 @@
 #include <mtk_gic_v3_main.h>
 
 #include <emi_mpu.h>
+#include <devapc.h>
 
 static entry_point_info_t bl32_ep_info;
 static entry_point_info_t bl33_ep_info;
@@ -108,6 +109,7 @@ void bl31_platform_setup(void)
 	mcdi_mcupm_boot_init();
 
 	emi_mpu_init();
+	devapc_init();
 }
 
 /*******************************************************************************
