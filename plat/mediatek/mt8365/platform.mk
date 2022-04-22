@@ -21,7 +21,6 @@ PLAT_INCLUDES := -I.                                              \
                  -I${MTK_PLAT}/common/drivers/emi_mpu             \
                  -I${MTK_PLAT}/common/drivers/timer/              \
                  -I${MTK_PLAT_SOC}/drivers/                       \
-                 -I${MTK_PLAT_SOC}/drivers/devapc/                \
                  -I${MTK_PLAT_SOC}/drivers/mcdi/                  \
                  -I${MTK_PLAT_SOC}/drivers/spmc/                  \
                  -I${MTK_PLAT_SOC}/drivers/uart/                  \
