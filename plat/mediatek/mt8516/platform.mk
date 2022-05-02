@@ -65,3 +65,9 @@ $(eval $(call add_define,MTK_SIP_SET_AUTHORIZED_SECURE_REG_ENABLE))
 
 # Do not enable SVE
 ENABLE_SVE_FOR_NS		:=	0
+
+# Use the EFUSE HWID as HUK
+# Warning: Unsafe for secure storage
+ifeq (${HUK_EFUSE_HWID},1)
+TF_CFLAGS += -DHUK_EFUSE_HWID
+endif

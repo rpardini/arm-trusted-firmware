@@ -157,3 +157,9 @@ $(ROTPK_HASH): $(ROT_KEY)
 	$(Q)openssl rsa -in $< -pubout -outform DER 2>/dev/null |\
 	openssl dgst -sha256 -binary > $@ 2>/dev/null
 endif
+
+# Use the EFUSE HWID as HUK
+# Warning: Unsafe for secure storage
+ifeq (${HUK_EFUSE_HWID},1)
+TF_CFLAGS += -DHUK_EFUSE_HWID
+endif

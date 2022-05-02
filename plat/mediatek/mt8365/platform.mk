@@ -173,3 +173,9 @@ PLAT_XLAT_TABLES_DYNAMIC :=    1
 
 # Enable dynamic memory mapping
 $(eval $(call add_define,PLAT_XLAT_TABLES_DYNAMIC))
+
+# Use the EFUSE HWID as HUK
+# Warning: Unsafe for secure storage
+ifeq (${HUK_EFUSE_HWID},1)
+TF_CFLAGS += -DHUK_EFUSE_HWID
+endif

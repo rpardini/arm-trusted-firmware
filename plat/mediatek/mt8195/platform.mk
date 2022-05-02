@@ -144,3 +144,9 @@ MACH_MT8195 := 1
 $(eval $(call add_define,MACH_MT8195))
 
 include lib/coreboot/coreboot.mk
+
+# Use the EFUSE HWID as HUK
+# Warning: Unsafe for secure storage
+ifeq (${HUK_EFUSE_HWID},1)
+TF_CFLAGS += -DHUK_EFUSE_HWID
+endif
