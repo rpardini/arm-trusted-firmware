@@ -408,7 +408,7 @@ void platform_mem_init(void)
 int bl2_plat_handle_pre_image_load(unsigned int image_id)
 {
 	const partition_entry_t *entry;
-	const char *name = "bootloaders";
+	const char *name = get_boot_partition_name();
 
 	if (emmc_fip_spec.length == 0) {
 		partition_init(GPT_IMAGE_ID);

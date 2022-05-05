@@ -76,6 +76,7 @@ uint64_t get_kernel_info_pc(void);
 uint64_t get_kernel_info_r0(void);
 uint64_t get_kernel_info_r1(void);
 uint64_t get_kernel_info_r2(void);
+char *get_boot_partition_name(void);
 
 extern struct atf_arg_t gteearg;
 #endif /* MTK_PLAT_COMMON_H */

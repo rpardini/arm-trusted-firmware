@@ -241,4 +241,6 @@ int mmc_init(const struct mmc_ops *ops_ptr, unsigned int clk,
 	     unsigned int width, unsigned int flags,
 	     struct mmc_device_info *device_info);
 
+unsigned char mmc_current_boot_part(void);
+
 #endif /* MMC_H */

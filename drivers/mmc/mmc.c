@@ -750,7 +750,7 @@ static int mmc_part_switch(unsigned int part_type)
 	return mmc_send_part_switch_cmd(part_config);
 }
 
-static unsigned char mmc_current_boot_part(void)
+unsigned char mmc_current_boot_part(void)
 {
 	return PART_CFG_CURRENT_BOOT_PARTITION(mmc_ext_csd[CMD_EXTCSD_PARTITION_CONFIG]);
 }

@@ -9,6 +9,7 @@
 #include <common/debug.h>
 #include <drivers/arm/cci.h>
 #include <drivers/console.h>
+#include <drivers/mmc.h>
 #include <lib/mmio.h>
 #include <lib/smccc.h>
 #include <lib/xlat_tables/xlat_tables.h>
@@ -165,4 +166,21 @@ int32_t plat_get_soc_version(void)
 int32_t plat_get_soc_revision(void)
 {
 	return 0;
+}
+
+char *get_boot_partition_name(void)
+{
+	unsigned char current_boot_part = mmc_current_boot_part();
+
+	switch (current_boot_part) {
+	case 1U:
+		INFO("Current boot part is 1 so fip.bin is bootloaders\n");
+		return "bootloaders";
+	case 2U:
+		INFO("Current boot part is 2 so fip.bin is bootloaders2\n");
+		return "bootloaders2";
+	default:
+		ERROR("Got unexpected value for active boot partition, %u\n", current_boot_part);
+		return "";
+	}
 }
