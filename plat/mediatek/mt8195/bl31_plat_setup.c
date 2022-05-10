@@ -27,6 +27,7 @@
 #include <mtgpio.h>
 #include <plat_params.h>
 #include <plat_private.h>
+#include <rtc.h>
 
 static entry_point_info_t bl32_ep_info;
 static entry_point_info_t bl33_ep_info;
@@ -108,6 +109,7 @@ void bl31_platform_setup(void)
 	spm_boot_init();
 	mcupm_init();
 	sspm_init();
+	rtc_power_on_sequence();
 }
 
 /*******************************************************************************
