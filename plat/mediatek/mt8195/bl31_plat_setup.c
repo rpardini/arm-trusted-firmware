@@ -30,6 +30,8 @@
 #include <plat_private.h>
 #include <rtc.h>
 
+extern void mtk_soc_disable_l2c_sram(void);
+
 static entry_point_info_t bl32_ep_info;
 static entry_point_info_t bl33_ep_info;
 
@@ -95,6 +97,8 @@ void bl31_platform_setup(void)
 	if (!dcm_set_default()) {
 		ERROR("Failed to set default dcm on!!\n");
 	}
+
+	mtk_soc_disable_l2c_sram();
 
 	/* Initialize EMI MPU */
 	emi_mpu_init();
