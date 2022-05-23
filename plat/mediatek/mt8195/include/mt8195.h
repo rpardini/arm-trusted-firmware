@@ -156,6 +156,15 @@
 
 #define SUB_INFRACFG_AO_BASE  (IO_PHYS + 0x0030E000)
 
+#define DEVAPC_INFRA_AO_BASE    (IO_PHYS + 0x00030000)
+#define DEVAPC_PERI_AO_BASE     (IO_PHYS + 0x00034000)
+#define DEVAPC_PERI2_AO_BASE    (IO_PHYS + 0x00038000)
+#define DEVAPC_PERI_PAR_AO_BASE (IO_PHYS + 0x0003C000)
+#define DEVAPC_FMEM_AO_BASE     (IO_PHYS + 0x00044000)
+#define DEVAPC_INFRA2_AO_BASE   (IO_PHYS + 0x00228000)
+
+#define SCP_CFG_BASE            (IO_PHYS + 0x00700000)
+
 /*=======================================================================*/
 /* AP HW code offset                                                     */
 /*=======================================================================*/

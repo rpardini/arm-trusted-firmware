@@ -44,12 +44,12 @@
 #define EMI_MPU_ALIGN_BITS		(16)
 #define DRAM_OFFSET			(0x40000000 >> EMI_MPU_ALIGN_BITS)
 
-#define NO_PROTECTION			0
+#define NO_PROTECT			0
 #define SEC_RW				1
 #define SEC_RW_NSEC_R			2
 #define SEC_RW_NSEC_W			3
 #define SEC_R_NSEC_R			4
-#define FORBIDDEN			5
+#define FORBIDDEN_RW			5
 #define SEC_R_NSEC_RW			6
 
 #define LOCK				1

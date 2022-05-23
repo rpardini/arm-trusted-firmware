@@ -28,6 +28,7 @@ PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT_SOC}/drivers/dpm/			  \
                  -I${MTK_PLAT_SOC}/drivers/spmc/                  \
                  -I${MTK_PLAT_SOC}/drivers/ptp3/                   \
+                 -I${MTK_PLAT_SOC}/drivers/devapc/                \
                  -I${MTK_PLAT_SOC}/include/
 
 GICV3_SUPPORT_GIC600        :=      1
@@ -118,6 +119,7 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 ${MTK_PLAT_SOC}/drivers/dpm/mt_dpm_4ch.c	      \
                 ${MTK_PLAT_SOC}/drivers/ptp3/mtk_ptp3_main.c          \
                 ${MTK_PLAT_SOC}/drivers/spmc/mtspmc.c                 \
+                ${MTK_PLAT_SOC}/drivers/devapc/devapc.c               \
                 ${MTK_PLAT_SOC}/plat_pm.c                             \
                 ${MTK_PLAT_SOC}/plat_sip_calls.c                      \
                 ${MTK_PLAT_SOC}/plat_topology.c
