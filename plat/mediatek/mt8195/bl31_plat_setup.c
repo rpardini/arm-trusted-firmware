@@ -106,9 +106,11 @@ void bl31_platform_setup(void)
 	mt_systimer_init();
 	generic_delay_timer_init();
 	dpm_init();
-	spm_boot_init();
+	spm_init();
+
 	mcupm_init();
 	sspm_init();
+	spm_boot_init();
 	rtc_power_on_sequence();
 }
 

@@ -86,7 +86,7 @@ struct mt_resource_manager plat_mt8195_rm = {
 	.consts = plat_constraints,
 };
 
-_Alignas(8) static const uint8_t spm_binary[] = {
+_Alignas(16) static const uint8_t spm_binary[] = {
 	0xdd, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x1e, 0x00, 0x00, 0x32, 0x1e, 0x00,
 	0x00, 0x6a, 0x1e, 0x00, 0x00, 0x6e, 0x1e, 0x00, 0x00, 0x68, 0x1e,
@@ -1016,6 +1016,269 @@ _Alignas(8) static const uint8_t spm_binary[] = {
 				 */
 };
 
+static const struct pwr_ctrl spm_init_ctrl = {
+	.pcm_flags = SPM_FLAG_DISABLE_VCORE_DVS | SPM_FLAG_DISABLE_VCORE_DFS |
+		     SPM_FLAG_RUN_COMMON_SCENARIO,
+	/* SPM_AP_STANDBY_CON */
+	/* [0] */
+	.reg_wfi_op = 0,
+	/* [1] */
+	.reg_wfi_type = 0,
+	/* [2] */
+	.reg_mp0_cputop_idle_mask = 0,
+	/* [3] */
+	.reg_mp1_cputop_idle_mask = 0,
+	/* [4] */
+	.reg_mcusys_idle_mask = 0,
+	/* [25] */
+	.reg_md_apsrc_1_sel = 0,
+	/* [26] */
+	.reg_md_apsrc_0_sel = 0,
+	/* [29] */
+	.reg_conn_apsrc_sel = 0,
+	/* SPM_SRC_REQ */
+	/* [0] */
+	.reg_spm_apsrc_req = 0,
+	/* [1] */
+	.reg_spm_f26m_req = 0,
+	/* [3] */
+	.reg_spm_infra_req = 0,
+	/* [4] */
+	.reg_spm_vrf18_req = 0,
+	/* [7] FIXME: default disable HW Auto S1*/
+	.reg_spm_ddr_en_req = 1,
+	/* [8] */
+	.reg_spm_dvfs_req = 0,
+	/* [9] */
+	.reg_spm_sw_mailbox_req = 0,
+	/* [10] */
+	.reg_spm_sspm_mailbox_req = 0,
+	/* [11] */
+	.reg_spm_adsp_mailbox_req = 0,
+	/* [12] */
+	.reg_spm_scp_mailbox_req = 0,
+	/* SPM_SRC_MASK */
+	/* [0] */
+	.reg_sspm_srcclkena_0_mask_b = 1,
+	/* [1] */
+	.reg_sspm_infra_req_0_mask_b = 1,
+	/* [2] */
+	.reg_sspm_apsrc_req_0_mask_b = 1,
+	/* [3] */
+	.reg_sspm_vrf18_req_0_mask_b = 1,
+	/* [4] */
+	.reg_sspm_ddr_en_0_mask_b = 1,
+	/* [5] */
+	.reg_scp_srcclkena_mask_b = 1,
+	/* [6] */
+	.reg_scp_infra_req_mask_b = 1,
+	/* [7] */
+	.reg_scp_apsrc_req_mask_b = 1,
+	/* [8] */
+	.reg_scp_vrf18_req_mask_b = 1,
+	/* [9] */
+	.reg_scp_ddr_en_mask_b = 1,
+	/* [10] */
+	.reg_audio_dsp_srcclkena_mask_b = 1,
+	/* [11] */
+	.reg_audio_dsp_infra_req_mask_b = 1,
+	/* [12] */
+	.reg_audio_dsp_apsrc_req_mask_b = 1,
+	/* [13] */
+	.reg_audio_dsp_vrf18_req_mask_b = 1,
+	/* [14] */
+	.reg_audio_dsp_ddr_en_mask_b = 1,
+	/* [15] */
+	.reg_apu_srcclkena_mask_b = 1,
+	/* [16] */
+	.reg_apu_infra_req_mask_b = 1,
+	/* [17] */
+	.reg_apu_apsrc_req_mask_b = 1,
+	/* [18] */
+	.reg_apu_vrf18_req_mask_b = 1,
+	/* [19] */
+	.reg_apu_ddr_en_mask_b = 1,
+	/* [20] */
+	.reg_cpueb_srcclkena_mask_b = 1,
+	/* [21] */
+	.reg_cpueb_infra_req_mask_b = 1,
+	/* [22] */
+	.reg_cpueb_apsrc_req_mask_b = 1,
+	/* [23] */
+	.reg_cpueb_vrf18_req_mask_b = 1,
+	/* [24] */
+	.reg_cpueb_ddr_en_mask_b = 1,
+	/* [25] */
+	.reg_bak_psri_srcclkena_mask_b = 0,
+	/* [26] */
+	.reg_bak_psri_infra_req_mask_b = 0,
+	/* [27] */
+	.reg_bak_psri_apsrc_req_mask_b = 0,
+	/* [28] */
+	.reg_bak_psri_vrf18_req_mask_b = 0,
+	/* [29] */
+	.reg_bak_psri_ddr_en_mask_b = 0,
+	/* SPM_SRC2_MASK */
+	/* [0] */
+	.reg_msdc0_srcclkena_mask_b = 1,
+	/* [1] */
+	.reg_msdc0_infra_req_mask_b = 1,
+	/* [2] */
+	.reg_msdc0_apsrc_req_mask_b = 1,
+	/* [3] */
+	.reg_msdc0_vrf18_req_mask_b = 1,
+	/* [4] */
+	.reg_msdc0_ddr_en_mask_b = 1,
+	/* [5] */
+	.reg_msdc1_srcclkena_mask_b = 1,
+	/* [6] */
+	.reg_msdc1_infra_req_mask_b = 1,
+	/* [7] */
+	.reg_msdc1_apsrc_req_mask_b = 1,
+	/* [8] */
+	.reg_msdc1_vrf18_req_mask_b = 1,
+	/* [9] */
+	.reg_msdc1_ddr_en_mask_b = 1,
+	/* [10] */
+	.reg_msdc2_srcclkena_mask_b = 1,
+	/* [11] */
+	.reg_msdc2_infra_req_mask_b = 1,
+	/* [12] */
+	.reg_msdc2_apsrc_req_mask_b = 1,
+	/* [13] */
+	.reg_msdc2_vrf18_req_mask_b = 1,
+	/* [14] */
+	.reg_msdc2_ddr_en_mask_b = 1,
+	/* [15] */
+	.reg_ufs_srcclkena_mask_b = 1,
+	/* [16] */
+	.reg_ufs_infra_req_mask_b = 1,
+	/* [17] */
+	.reg_ufs_apsrc_req_mask_b = 1,
+	/* [18] */
+	.reg_ufs_vrf18_req_mask_b = 1,
+	/* [19] */
+	.reg_ufs_ddr_en_mask_b = 1,
+	/* [20] */
+	.reg_usb_srcclkena_mask_b = 1,
+	/* [21] */
+	.reg_usb_infra_req_mask_b = 1,
+	/* [22] */
+	.reg_usb_apsrc_req_mask_b = 1,
+	/* [23] */
+	.reg_usb_vrf18_req_mask_b = 1,
+	/* [24] */
+	.reg_usb_ddr_en_mask_b = 1,
+	/* [25] */
+	.reg_pextp_p0_srcclkena_mask_b = 1,
+	/* [26] */
+	.reg_pextp_p0_infra_req_mask_b = 1,
+	/* [27] */
+	.reg_pextp_p0_apsrc_req_mask_b = 1,
+	/* [28] */
+	.reg_pextp_p0_vrf18_req_mask_b = 1,
+	/* [29] */
+	.reg_pextp_p0_ddr_en_mask_b = 1,
+	/* SPM_SRC3_MASK */
+	/* [0] */
+	.reg_pextp_p1_srcclkena_mask_b = 1,
+	/* [1] */
+	.reg_pextp_p1_infra_req_mask_b = 1,
+	/* [2] */
+	.reg_pextp_p1_apsrc_req_mask_b = 1,
+	/* [3] */
+	.reg_pextp_p1_vrf18_req_mask_b = 1,
+	/* [4] */
+	.reg_pextp_p1_ddr_en_mask_b = 1,
+	/* [5] */
+	.reg_gce0_infra_req_mask_b = 1,
+	/* [6] */
+	.reg_gce0_apsrc_req_mask_b = 1,
+	/* [7] */
+	.reg_gce0_vrf18_req_mask_b = 1,
+	/* [8] */
+	.reg_gce0_ddr_en_mask_b = 1,
+	/* [9] */
+	.reg_gce1_infra_req_mask_b = 1,
+	/* [10] */
+	.reg_gce1_apsrc_req_mask_b = 1,
+	/* [11] */
+	.reg_gce1_vrf18_req_mask_b = 1,
+	/* [12] */
+	.reg_gce1_ddr_en_mask_b = 1,
+	/* [13] */
+	.reg_spm_srcclkena_reserved_mask_b = 1,
+	/* [14] */
+	.reg_spm_infra_req_reserved_mask_b = 1,
+	/* [15] */
+	.reg_spm_apsrc_req_reserved_mask_b = 1,
+	/* [16] */
+	.reg_spm_vrf18_req_reserved_mask_b = 1,
+	/* [17] */
+	.reg_spm_ddr_en_reserved_mask_b = 1,
+	/* [18] */
+	.reg_disp0_apsrc_req_mask_b = 1,
+	/* [19] */
+	.reg_disp0_ddr_en_mask_b = 1,
+	/* [20] */
+	.reg_disp1_apsrc_req_mask_b = 1,
+	/* [21] */
+	.reg_disp1_ddr_en_mask_b = 1,
+	/* [22] */
+	.reg_disp2_apsrc_req_mask_b = 1,
+	/* [23] */
+	.reg_disp2_ddr_en_mask_b = 1,
+	/* [24] */
+	.reg_disp3_apsrc_req_mask_b = 1,
+	/* [25] */
+	.reg_disp3_ddr_en_mask_b = 1,
+	/* [26] */
+	.reg_infrasys_apsrc_req_mask_b = 0,
+	/* [27] */
+	.reg_infrasys_ddr_en_mask_b = 1,
+	/* [28] */
+	.reg_cg_check_srcclkena_mask_b = 1,
+	/* [29] */
+	.reg_cg_check_apsrc_req_mask_b = 1,
+	/* [30] */
+	.reg_cg_check_vrf18_req_mask_b = 1,
+	/* [31] */
+	.reg_cg_check_ddr_en_mask_b = 1,
+	/* SPM_SRC4_MASK */
+	/* [8:0] */
+	.reg_mcusys_merge_apsrc_req_mask_b = 0x17,
+	/* [17:9] */
+	.reg_mcusys_merge_ddr_en_mask_b = 0x17,
+	/* [19:18] */
+	.reg_dramc_md32_infra_req_mask_b = 0,
+	/* [21:20] */
+	.reg_dramc_md32_vrf18_req_mask_b = 0,
+	/* [23:22] */
+	.reg_dramc_md32_ddr_en_mask_b = 0,
+	/* [24] */
+	.reg_dvfsrc_event_trigger_mask_b = 1,
+	/* SPM_WAKEUP_EVENT_MASK2 */
+	/* [3:0] */
+	.reg_sc_sw2spm_wakeup_mask_b = 0,
+	/* [4] */
+	.reg_sc_adsp2spm_wakeup_mask_b = 0,
+	/* [8:5] */
+	.reg_sc_sspm2spm_wakeup_mask_b = 0,
+	/* [9] */
+	.reg_sc_scp2spm_wakeup_mask_b = 0,
+	/* [10] */
+	.reg_csyspwrup_ack_mask = 0,
+	/* [11] */
+	.reg_csyspwrup_req_mask = 1,
+	/* SPM_WAKEUP_EVENT_MASK */
+	/* [31:0] */
+	.reg_wakeup_event_mask = 0xC1382213,
+	/* SPM_WAKEUP_EVENT_EXT_MASK */
+	/* [31:0] */
+	.reg_ext_wakeup_event_mask = 0xFFFFFFFF,
+};
+
+
 static void spm_code_swapping(void)
 {
 	uint32_t con1;
@@ -1052,14 +1315,10 @@ static void set_top_reg_for_spm(void)
 
 static void spm_register_init(void)
 {
-	/* Set clock path for SPM */
-	set_top_reg_for_spm();
-
 	/* enable register control */
 	mmio_write_32(POWERON_CONFIG_EN, SPM_REGWR_CFG_KEY | BCLK_CG_EN_LSB);
 
 	/* init power control register, dram will set this register */
-	/* mmio_write_32(SPM_POWER_ON_VAL0, POWER_ON_VAL0_DEF); */
 	mmio_write_32(SPM_POWER_ON_VAL1, POWER_ON_VAL1_DEF);
 	mmio_write_32(PCM_PWR_IO_EN, 0);
 
@@ -1070,6 +1329,9 @@ static void spm_register_init(void)
 	mmio_write_32(PCM_CON1, SPM_REGWR_CFG_KEY | REG_EVENT_LOCK_EN_LSB |
 		      REG_SPM_SRAM_ISOINT_B_LSB | RG_AHBMIF_APBEN_LSB |
 		      REG_MD32_APB_INTERNAL_EN_LSB);
+
+	/* Initial SPM CLK control register */
+	mmio_setbits_32(SPM_CLK_CON, REG_SYSCLK1_SRC_MD2_SRCCLKENA_LSB);
 
 	/* clean wakeup event raw status */
 	mmio_write_32(SPM_WAKEUP_EVENT_MASK, SPM_WAKEUP_EVENT_MASK_DEF);
@@ -1084,34 +1346,20 @@ static void spm_register_init(void)
 	mmio_write_32(PCM_PWR_IO_EN, PCM_RF_SYNC_R7);
 	mmio_write_32(PCM_PWR_IO_EN, 0);
 
-	/* DDR EN de-bounce length to 5us */
-	mmio_write_32(DDREN_DBC_CON, 0x154 | REG_ALL_DDR_EN_DBC_EN_LSB);
-
 	/* Configure ARMPLL Control Mode for MCDI */
-	mmio_write_32(ARMPLL_CLK_SEL, 0x3FF);
+	mmio_write_32(ARMPLL_CLK_SEL, ARMPLL_CLK_SEL_DEF);
 
 	/* Init for SPM Resource ACK */
-	mmio_write_32(SPM_RESOURCE_ACK_CON0, 0xFFFFFFFF);
-	mmio_write_32(SPM_RESOURCE_ACK_CON1, 0xFFFFFFFF);
-	mmio_write_32(SPM_RESOURCE_ACK_CON2, 0xFFFFFFFF);
-	mmio_write_32(SPM_RESOURCE_ACK_CON3, 0xFFFFFFFF);
+	mmio_write_32(SPM_RESOURCE_ACK_CON0, SPM_RESOURCE_ACK_CON0_DEF);
+	mmio_write_32(SPM_RESOURCE_ACK_CON1, SPM_RESOURCE_ACK_CON1_DEF);
+	mmio_write_32(SPM_RESOURCE_ACK_CON2, SPM_RESOURCE_ACK_CON2_DEF);
+	mmio_write_32(SPM_RESOURCE_ACK_CON3, SPM_RESOURCE_ACK_CON3_DEF);
 
 	/* Init VCORE DVFS Status */
+	mmio_clrbits_32(SPM_DVFS_MISC, SPM_DVFS_FORCE_ENABLE_LSB);
+	mmio_setbits_32(SPM_DVFS_MISC, SPM_DVFSRC_ENABLE_LSB);
 	mmio_write_32(SPM_DVFS_LEVEL, 0x00000001);
 	mmio_write_32(SPM_DVS_DFS_LEVEL, 0x00010001);
-
-	mmio_write_32(SPM_DVFS_MISC, (mmio_read_32(SPM_DVFS_MISC) &
-				      ~(SPM_DVFS_FORCE_ENABLE_LSB)) |
-		      (SPM_DVFSRC_ENABLE_LSB));
-	mmio_write_32(SPM_DVFS_LEVEL, 0x00000001);
-	mmio_write_32(SPM_DVS_DFS_LEVEL, 0x00010001);
-
-	/* HW S1 state monitor */
-	mmio_write_32(SPM_ACK_CHK_SEL_3, SPM_ACK_CHK_3_SEL_HW_S1);
-	mmio_write_32(SPM_ACK_CHK_TIMER_3, SPM_ACK_CHK_3_HW_S1_CNT);
-	spm_hw_s1_state_monitor_pause(NULL);
-
-	__spm_set_power_control(&suspend_ctrl);
 }
 
 static void spm_parse_firmware(struct mtk_mcu *mcu)
@@ -1161,11 +1409,10 @@ static void spm_parse_firmware(struct mtk_mcu *mcu)
 
 static void __spm_reset_and_init_pcm(void)
 {
-	uint32_t con1;
 	unsigned char first_load_fw = true;
 
 	/* check the SPM FW is run or not */
-	if (mmio_read_32(MD32PCM_CFGREG_SW_RSTN) & 0x1)
+	if (mmio_read_32(MD32PCM_CFGREG_SW_RSTN) & MD32PCM_CFGREG_SW_RSTN_RUN)
 		first_load_fw = false;
 
 	if (!first_load_fw) {
@@ -1180,34 +1427,15 @@ static void __spm_reset_and_init_pcm(void)
 	mmio_write_32(PCM_PWR_IO_EN, 0);
 
 	/* disable pcm timer after leaving FW */
-	mmio_write_32(PCM_CON1,
-		      SPM_REGWR_CFG_KEY | (mmio_read_32(PCM_CON1) &
-					   ~RG_PCM_TIMER_EN_LSB));
+	mmio_clrsetbits_32(PCM_CON1, RG_PCM_TIMER_EN_LSB, SPM_REGWR_CFG_KEY);
 
 	/* reset PCM */
 	mmio_write_32(PCM_CON0,
 		      SPM_REGWR_CFG_KEY | PCM_CK_EN_LSB | PCM_SW_RESET_LSB);
 	mmio_write_32(PCM_CON0, SPM_REGWR_CFG_KEY | PCM_CK_EN_LSB);
 
-	/* Clear SPM EVENT count */
-	mmio_write_32(PCM_CON1,
-		      SPM_REGWR_CFG_KEY | mmio_read_32(PCM_CON1) |
-		      SPM_EVENT_COUNTER_CLR_LSB);
-	mmio_write_32(PCM_CON1,
-		      SPM_REGWR_CFG_KEY | (mmio_read_32(PCM_CON1) &
-					   ~SPM_EVENT_COUNTER_CLR_LSB));
-
-	/* Clear SPM timer */
-	mmio_write_32(SYS_TIMER_CON,
-		      mmio_read_32(SYS_TIMER_CON) | SYS_TIMER_START_EN_LSB);
-	mmio_write_32(SYS_TIMER_CON,
-		      mmio_read_32(SYS_TIMER_CON) & ~SYS_TIMER_START_EN_LSB);
-
-	/* init PCM_CON1 (disable PCM timer but keep PCM WDT setting) */
-	con1 = mmio_read_32(PCM_CON1) & (RG_PCM_WDT_WAKE_LSB);
-
-	mmio_write_32(PCM_CON1,
-		      con1 | SPM_REGWR_CFG_KEY | REG_EVENT_LOCK_EN_LSB |
+	mmio_clrsetbits_32(PCM_CON1, ~RG_PCM_WDT_WAKE_LSB,
+		      SPM_REGWR_CFG_KEY | REG_EVENT_LOCK_EN_LSB |
 		      REG_SPM_SRAM_ISOINT_B_LSB | RG_AHBMIF_APBEN_LSB |
 		      REG_MD32_APB_INTERNAL_EN_LSB);
 }
@@ -1215,7 +1443,6 @@ static void __spm_reset_and_init_pcm(void)
 static void __spm_kick_im_to_fetch(const struct dyna_load_pcm *pcm)
 {
 	uintptr_t ptr;
-	uint32_t con0;
 	uint32_t dmem_words;
 	uint32_t pmem_words;
 	uint32_t total_words;
@@ -1232,28 +1459,26 @@ static void __spm_kick_im_to_fetch(const struct dyna_load_pcm *pcm)
 	NOTICE("%s: ptr = 0x%lx, pmem/dmem words = 0x%x/0x%x\n",
 	       __func__, (long)ptr, pmem_words, dmem_words);
 
+	/* DMA needs 16-byte aligned source data. */
+	assert(ptr % 16 == 0);
+
 	if (mmio_read_32(MD32PCM_DMA0_SRC) != ptr
 	    || mmio_read_32(MD32PCM_DMA0_DST) != pmem_start
 	    || mmio_read_32(MD32PCM_DMA0_WPPT) != pmem_words
 	    || mmio_read_32(MD32PCM_DMA0_WPTO) != dmem_start
 	    || mmio_read_32(MD32PCM_DMA0_COUNT) != total_words
-	    || mmio_read_32(MD32PCM_DMA0_CON) != 0x0003820E) {
+	    || mmio_read_32(MD32PCM_DMA0_CON) != MD32PCM_DMA0_CON_VAL) {
 		mmio_write_32(MD32PCM_DMA0_SRC, ptr);
 		mmio_write_32(MD32PCM_DMA0_DST, pmem_start);
 		mmio_write_32(MD32PCM_DMA0_WPPT, pmem_words);
 		mmio_write_32(MD32PCM_DMA0_WPTO, dmem_start);
 		mmio_write_32(MD32PCM_DMA0_COUNT, total_words);
-		mmio_write_32(MD32PCM_DMA0_CON, 0x0003820E);
-		mmio_write_32(MD32PCM_DMA0_START, 0x00008000);
-	} else {
-		mmio_write_32(PCM_CON1,
-			      mmio_read_32(PCM_CON1) | SPM_REGWR_CFG_KEY |
-			      RG_IM_SLAVE_LSB);
+		mmio_write_32(MD32PCM_DMA0_CON, MD32PCM_DMA0_CON_VAL);
+		mmio_write_32(MD32PCM_DMA0_START, MD32PCM_DMA0_START_VAL);
 	}
 
 	/* kick IM to fetch (only toggle IM_KICK) */
-	con0 = mmio_read_32(PCM_CON0);
-	mmio_write_32(PCM_CON0, con0 | SPM_REGWR_CFG_KEY | PCM_CK_EN_LSB);
+	mmio_setbits_32(PCM_CON0, SPM_REGWR_CFG_KEY | PCM_CK_EN_LSB);
 }
 
 static void __spm_init_pcm_register(void)
@@ -1269,29 +1494,65 @@ static void __spm_init_pcm_register(void)
 	mmio_write_32(PCM_PWR_IO_EN, 0);
 }
 
+void __spm_init_set_wakeup_event(const struct pwr_ctrl *pwrctrl)
+{
+	uint32_t val, mask;
+
+	/* toggle event counter clear */
+	mmio_setbits_32(PCM_CON1,
+			SPM_REGWR_CFG_KEY | SPM_EVENT_COUNTER_CLR_LSB);
+
+	/* toggle for reset SYS TIMER start point */
+	mmio_setbits_32(SYS_TIMER_CON, SYS_TIMER_START_EN_LSB);
+
+	if (pwrctrl->timer_val_cust == 0U)
+		val = pwrctrl->timer_val ? pwrctrl->timer_val : PCM_TIMER_MAX;
+	else
+		val = pwrctrl->timer_val_cust;
+
+	mmio_write_32(PCM_TIMER_VAL, val);
+
+	/* Disable pcm timer */
+	mmio_clrsetbits_32(PCM_CON1, RG_PCM_TIMER_EN_LSB, SPM_REGWR_CFG_KEY);
+
+	/* unmask AP wakeup source */
+	if (pwrctrl->wake_src_cust == 0U)
+		mask = pwrctrl->wake_src;
+	else
+		mask = pwrctrl->wake_src_cust;
+
+	mmio_write_32(SPM_WAKEUP_EVENT_MASK, ~mask);
+
+	/* unmask SPM ISR (keep TWAM setting) */
+	mmio_setbits_32(SPM_IRQ_MASK, ISRS_TWAM);
+	mmio_setbits_32(SPM_IRQ_MASK, 0x3FF << 8);
+
+	/* toggle event counter clear */
+	mmio_clrsetbits_32(PCM_CON1, SPM_EVENT_COUNTER_CLR_LSB,
+			   SPM_REGWR_CFG_KEY);
+
+	/* toggle for reset SYS TIMER start point */
+	mmio_clrbits_32(SYS_TIMER_CON, SYS_TIMER_START_EN_LSB);
+}
+
 void __spm_kick_pcm_to_run(struct pwr_ctrl *pwrctrl)
 {
-	uint32_t con0;
-
 	/* Waiting for loading SPMFW done */
 	while (mmio_read_32(MD32PCM_DMA0_RLCT) != 0x0)
 		;
 
 	/* FIXME: init register to match PCM expectation */
-	mmio_write_32(SPM_BUS_PROTECT_MASK_B, 0xffffffff);
-	mmio_write_32(SPM_BUS_PROTECT2_MASK_B, 0xffffffff);
+	mmio_write_32(SPM_BUS_PROTECT_MASK_B, SPM_BUS_PROTECT_MASK_B_DEF);
+	mmio_write_32(SPM_BUS_PROTECT2_MASK_B, SPM_BUS_PROTECT2_MASK_B_DEF);
 	mmio_write_32(PCM_REG_DATA_INI, 0);
 
 	__spm_set_pcm_flags(pwrctrl);
 
-	/* enable r0 and r7 to control power */
-	/* mmio_write_32(PCM_PWR_IO_EN, PCM_PWRIO_EN_R0 | PCM_PWRIO_EN_R7); */
 	/* kick PCM to run (only toggle PCM_KICK) */
-	con0 = mmio_read_32(PCM_CON0);
-	mmio_write_32(PCM_CON0, con0 | SPM_REGWR_CFG_KEY | PCM_CK_EN_LSB);
+	mmio_setbits_32(PCM_CON0, SPM_REGWR_CFG_KEY | PCM_CK_EN_LSB);
+
 	/* reset md32pcm */
-	con0 = mmio_read_32(MD32PCM_CFGREG_SW_RSTN);
-	mmio_write_32(MD32PCM_CFGREG_SW_RSTN, con0 | 0x1);
+	mmio_setbits_32(MD32PCM_CFGREG_SW_RSTN, MD32PCM_CFGREG_SW_RSTN_RUN);
 
 	/* Waiting for SPM init done and entering WFI */
 	udelay(SPM_INIT_DONE_US);
@@ -1305,14 +1566,15 @@ static void reset_spm(struct mtk_mcu *mcu)
 	__spm_reset_and_init_pcm();
 	__spm_kick_im_to_fetch(pcm);
 	__spm_init_pcm_register();
-	__spm_set_wakeup_event(&suspend_ctrl);
-	__spm_kick_pcm_to_run(&suspend_ctrl);
+	__spm_init_set_wakeup_event(&spm_init_ctrl);
+	__spm_kick_pcm_to_run(&spm_init_ctrl);
 }
 
 static struct mtk_mcu spm = {
 	.firmware_name = CONFIG_SPM_FIRMWARE,
 	.reset = reset_spm,
 	.load_buffer = spm_binary,
+	.buffer_size = sizeof(spm_binary),
 	.run_size = 10160,
 };
 
@@ -1328,15 +1590,24 @@ static void spm_set_sysclk_settle(void)
 
 void spm_boot_init(void)
 {
-	struct dyna_load_pcm pcm;
-
 	NOTICE("MT8195 %s\n", __func__);
 	/* switch ck_off/axi_26m control to SPM */
 	mmio_setbits_32(CLK_SCP_CFG_0, SPM_CK_CONTROL_EN);
 
 	plat_spm_lock_init();
 
+	mt_spm_pmic_wrap_set_phase(PMIC_WRAP_PHASE_ALLINONE);
+	mt_lp_rm_register(&plat_mt8195_rm);
+	mt_spm_idle_generic_init();
+	mt_spm_suspend_init();
+}
+
+void spm_init(void)
+{
+	struct dyna_load_pcm pcm;
+
 	spm_register_init();
+	__spm_set_power_control(&spm_init_ctrl);
 	spm_set_sysclk_settle();
 
 	spm.priv = (void *)&pcm;
@@ -1344,8 +1615,5 @@ void spm_boot_init(void)
 		ERROR("SPM: %s: failed in mtk_init_mcu\n", __func__);
 	}
 
-	mt_spm_pmic_wrap_set_phase(PMIC_WRAP_PHASE_ALLINONE);
-	mt_lp_rm_register(&plat_mt8195_rm);
-	mt_spm_idle_generic_init();
-	mt_spm_suspend_init();
+	INFO("SPM: %s done, spm pc = 0x%x\n", __func__, mmio_read_32(0x10006194));
 }

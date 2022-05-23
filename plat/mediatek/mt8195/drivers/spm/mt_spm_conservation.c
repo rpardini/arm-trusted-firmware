@@ -46,12 +46,6 @@ static int go_to_spm_before_wfi(int state_id, unsigned int ext_opand,
 		spm_hw_s1_state_monitor_resume();
 	}
 
-	/* Disable auto resume by PCM in system suspend stage */
-	if (IS_PLAT_SUSPEND_ID(state_id)) {
-		__spm_disable_pcm_timer();
-		__spm_set_pcm_wdt(0);
-	}
-
 	__spm_send_cpu_wakeup_event();
 
 	INFO("cpu%d: wakesrc = 0x%x, settle = 0x%x, sec = %u\n",

@@ -64,5 +64,7 @@ static inline void spm_lock_release(void)
 	plat_spm_unlock();
 }
 
-extern void spm_boot_init(void);
+void spm_boot_init(void);
+void spm_init(void);
+
 #endif /* MT_SPM_H */

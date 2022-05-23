@@ -648,6 +648,7 @@
 #define SCP_DCM_EN_LSB                      (1U << 15)      /* 1b */
 #define REG_SYSCLK0_SRC_MASK_B_LSB          (1U << 16)      /* 8b */
 #define REG_SYSCLK1_SRC_MASK_B_LSB          (1U << 24)      /* 8b */
+#define REG_SYSCLK1_SRC_MD2_SRCCLKENA_LSB   (1U << 28)      /* 1b */
 /* SPM_CLK_SETTLE (0x10006000+0x010) */
 #define SYSCLK_SETTLE_LSB                   (1U << 0)       /* 28b */
 /* SPM_AP_STANDBY_CON (0x10006000+0x014) */

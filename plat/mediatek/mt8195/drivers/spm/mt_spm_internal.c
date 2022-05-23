@@ -24,6 +24,7 @@
 #define ROOT_CORE_ADDR_OFFSET			0x20000000
 #define SPM_WAKEUP_EVENT_MASK_CLEAN_MASK	0xefffffff
 #define	SPM_INIT_DONE_US			20
+#define SPM_WAKEUP_REASON_MISSING		0xdeaddead
 
 static unsigned int mt_spm_bblpm_cnt;
 
@@ -70,20 +71,26 @@ wake_reason_t __spm_output_wake_reason(int state_id,
 				       const struct wake_status *wakesta)
 {
 	uint32_t i, bk_vtcxo_dur, spm_26m_off_pct = 0U;
+	char *spm_26m_sta = NULL;
 	wake_reason_t wr = WR_UNKNOWN;
 
 	if (wakesta == NULL) {
 		return WR_UNKNOWN;
 	}
 
+	spm_26m_sta = ((wakesta->debug_flag & SPM_DBG_DEBUG_IDX_26M_SLEEP) == 0U) ? "on" : "off";
+
 	if (wakesta->abort != 0U) {
-		ERROR("spmfw flow is aborted: 0x%x, timer_out = %u\n",
-		      wakesta->abort, wakesta->timer_out);
+		ERROR("spmfw flow is aborted: 0x%x, timer_out = %u, 26M(%s)\n",
+		      wakesta->abort, wakesta->timer_out, spm_26m_sta);
+	} else if (wakesta->r12 == SPM_WAKEUP_REASON_MISSING) {
+		WARN("cannot find wake up reason, timer_out = %u, 26M(%s)\n",
+		     wakesta->timer_out, spm_26m_sta);
 	} else {
 		for (i = 0U; i < 32U; i++) {
 			if ((wakesta->r12 & (1U << i)) != 0U) {
-				INFO("wake up by %s, timer_out = %u\n",
-				     wakeup_src_str[i], wakesta->timer_out);
+				INFO("wake up by %s, timer_out = %u, 26M(%s)\n",
+				     wakeup_src_str[i], wakesta->timer_out, spm_26m_sta);
 				wr = WR_WAKE_SRC;
 				break;
 			}
