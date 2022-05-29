@@ -18,6 +18,7 @@ ifneq (${OEMS},none)
 endif
 
 PLAT_INCLUDES		:=	-I${MTK_PLAT}/common/				\
+				-I${MTK_PLAT}/include/				\
 				-I${MTK_PLAT}/common/drivers/uart			\
 				-I${MTK_PLAT_SOC}/				\
 				-I${MTK_PLAT_SOC}/drivers/timer/			\

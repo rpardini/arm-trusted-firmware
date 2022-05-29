@@ -16,6 +16,7 @@ PLAT_INCLUDES := -I.                                              \
                  -Iinclude/lib/                                   \
                  -Iinclude/lib/el3_runtime/                       \
                  -Iinclude/plat/common                            \
+                 -I${MTK_PLAT}/include/                           \
                  -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/common/drivers/                    \
                  -I${MTK_PLAT}/common/drivers/emi_mpu             \
