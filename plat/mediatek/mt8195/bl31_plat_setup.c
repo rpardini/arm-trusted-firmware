@@ -16,6 +16,7 @@
 #include <lib/coreboot.h>
 
 /* Platform Includes */
+#include <eint_event.h>
 #include <emi_mpu.h>
 #include <mt_gic_v3.h>
 #include <devapc.h>
@@ -93,6 +94,8 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
  ******************************************************************************/
 void bl31_platform_setup(void)
 {
+	unmask_eint_event_mask();
+
 	/* Set dcm on */
 	if (!dcm_set_default()) {
 		ERROR("Failed to set default dcm on!!\n");
