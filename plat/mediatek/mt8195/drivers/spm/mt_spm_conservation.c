@@ -6,7 +6,7 @@
 
 #include <common/debug.h>
 #include <lib/mmio.h>
-
+#include <mtk_rgu.h>
 #include <mt_spm.h>
 #include <mt_spm_conservation.h>
 #include <mt_spm_internal.h>
@@ -36,6 +36,7 @@ static int go_to_spm_before_wfi(int state_id, unsigned int ext_opand,
 
 	if ((ext_opand & MT_SPM_EX_OP_SET_WDT) != 0U) {
 		__spm_set_pcm_wdt(1);
+		plat_rgu_suspend_notify();
 	}
 
 	if ((ext_opand & MT_SPM_EX_OP_SRCLKEN_RC_BBLPM) != 0U) {
@@ -44,6 +45,12 @@ static int go_to_spm_before_wfi(int state_id, unsigned int ext_opand,
 
 	if ((ext_opand & MT_SPM_EX_OP_HW_S1_DETECT) != 0U) {
 		spm_hw_s1_state_monitor_resume();
+	}
+
+	/* Disable auto resume by PCM in system suspend stage */
+	if (IS_PLAT_SUSPEND_ID(state_id)) {
+		__spm_disable_pcm_timer();
+		__spm_set_pcm_wdt(0);
 	}
 
 	__spm_send_cpu_wakeup_event();
@@ -69,6 +76,7 @@ static void go_to_spm_after_wfi(int state_id, unsigned int ext_opand,
 
 	/* system watchdog will be resumed at kernel stage */
 	if ((ext_opand & MT_SPM_EX_OP_SET_WDT) != 0U) {
+		plat_rgu_resume_notify();
 		__spm_set_pcm_wdt(0);
 	}
 

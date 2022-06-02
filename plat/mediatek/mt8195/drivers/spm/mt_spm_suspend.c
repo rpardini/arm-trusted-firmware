@@ -334,8 +334,6 @@ static struct pwr_ctrl suspend_ctrl = {
 	/* SPM_WAKEUP_EVENT_EXT_MASK */
 	/* [31:0] */
 	.reg_ext_wakeup_event_mask = 0xFFFFFFFF,
-
-	.timer_val = 0x10000,   // PCM_TIMER timeout: 2 secs
 };
 
 struct spm_lp_scen __spm_suspend = {
