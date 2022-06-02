@@ -22,7 +22,7 @@
 #include <mmc/mtk-sd.h>
 #include <ufs/mtk-ufs.h>
 #include <pll/pll.h>
-
+#include <wdt.h>
 #include <rtc.h>
 #include <pmic_initial_setting.h>
 
@@ -357,12 +357,12 @@ void mtk_io_setup(void)
 void bl2_platform_setup(void)
 {
 	generic_delay_timer_init();
-
+	mtk_wdt_init();
 	mt_pll_init();
 
 	mt_gpio_init();
-    pmifclkmgr_init();
-    pmif_spmi_init(0);
+	pmifclkmgr_init();
+	pmif_spmi_init(0);
 
 	pwrap_init_preloader();
 

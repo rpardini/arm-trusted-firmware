@@ -30,6 +30,7 @@ PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT_SOC}/drivers/ptp3/                  \
                  -I${MTK_PLAT_SOC}/drivers/devapc/                \
                  -I${MTK_PLAT_SOC}/drivers/eint/                  \
+                 -I${MTK_PLAT_SOC}/drivers/wdt/                   \
                  -I${MTK_PLAT_SOC}/include/
 
 GICV3_SUPPORT_GIC600        :=      1
@@ -61,7 +62,8 @@ BL2_SOURCES     += common/desc_image_load.c                           \
                    ${MTK_PLAT_SOC}/drivers/pll/pll.c                  \
                    ${MTK_PLAT_SOC}/drivers/pll/spm_mtcmos.c           \
                    ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c      \
-                   ${MTK_PLAT_SOC}/drivers/pmic/pmic_initial_setting.c
+                   ${MTK_PLAT_SOC}/drivers/pmic/pmic_initial_setting.c\
+                   ${MTK_PLAT_SOC}/drivers/wdt/wdt.c                  \
 
 ifeq (${STORAGE_UFS},1)
 BL2_SOURCES     += drivers/ufs/ufs.c                                  \
