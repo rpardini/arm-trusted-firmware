@@ -86,6 +86,7 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    ${MTK_PLAT}/common/drivers/rtc/rtc_common.c           \
                    ${MTK_PLAT}/common/drivers/emi_mpu/emi_mpu.c          \
                    ${MTK_PLAT}/common/drivers/dapc/devapc.c              \
+                   ${MTK_PLAT}/common/mtk_rgu.c                          \
                    ${MTK_PLAT_SOC}/drivers/rtc/rtc.c                     \
                    ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c         \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c             \

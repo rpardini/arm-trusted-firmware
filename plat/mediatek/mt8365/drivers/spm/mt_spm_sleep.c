@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <uart.h>
+#include <mtk_rgu.h>
 
 /* for internal debug */
 static struct wake_status spm_wakesta; /* record last wakesta */
@@ -222,8 +223,10 @@ void go_to_sleep_before_wfi_no_resume(void)
 	__spm_set_wakeup_event(pwrctrl);
 	__spm_sync_vcore_dvfs_power_control(pwrctrl, __spm_vcorefs.pwrctrl);
 	__spm_set_pcm_flags(pwrctrl);
-	if (!pwrctrl->wdt_disable)
+	if (!pwrctrl->wdt_disable) {
 		__spm_set_pcm_wdt(1);
+		plat_rgu_suspend_notify();
+	}
 	__spm_send_cpu_wakeup_event();
 
 	if (is_infra_pdn(pwrctrl->pcm_flags))
@@ -248,8 +251,10 @@ static void go_to_sleep_after_wfi(void)
 	if (is_infra_pdn(pwrctrl->pcm_flags))
 		mtk_uart_restore();
 
-	if (!pwrctrl->wdt_disable)
+	if (!pwrctrl->wdt_disable) {
+		plat_rgu_resume_notify();
 		__spm_set_pcm_wdt(0);
+	}
 
 	__spm_get_wakeup_status(&spm_wakesta);
 	/* __spm_clean_after_wakeup(); */

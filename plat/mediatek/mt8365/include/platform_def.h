@@ -15,6 +15,7 @@
 
 #define IO_PHYS            0x10000000
 
+#define RGU_BASE            (IO_PHYS + 0x7000)
 #define DVFSRC_BASE         (IO_PHYS + 0x12000)
 #define PMIC_WRAP_BASE   (IO_PHYS + 0x0000D000)
 #define SYSTIMER_BASE     (IO_PHYS + 0x00017000)
