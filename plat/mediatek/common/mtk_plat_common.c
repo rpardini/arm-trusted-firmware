@@ -168,6 +168,12 @@ int32_t plat_get_soc_revision(void)
 	return 0;
 }
 
+#if defined(STORAGE_UFS)
+char *get_boot_partition_name(void)
+{
+	return "bootloaders";
+}
+#else
 char *get_boot_partition_name(void)
 {
 	unsigned char current_boot_part = mmc_current_boot_part();
@@ -184,3 +190,4 @@ char *get_boot_partition_name(void)
 		return "";
 	}
 }
+#endif
