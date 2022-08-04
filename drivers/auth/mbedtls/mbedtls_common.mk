@@ -32,6 +32,7 @@ LIBMBEDTLS_SRCS		:= $(addprefix ${MBEDTLS_DIR}/library/,	\
 					oid.c 					\
 					platform.c 				\
 					platform_util.c				\
+					constant_time.c				\
 					bignum.c				\
 					gcm.c 					\
 					md.c					\
