@@ -93,5 +93,25 @@ int emi_mpu_set_protection(struct emi_region_info_t *region_info)
 
 void emi_mpu_init(void)
 {
-	/* TODO: more setting for EMI MPU. */
+	struct emi_region_info_t region_info;
+
+	region_info.start = BL31_BASE;
+	region_info.end = BL31_LIMIT;
+	region_info.region = 1;
+	SET_ACCESS_PERMISSION(region_info.apc, 1,
+				FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW,
+				FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW,
+				FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW,
+				FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW, SEC_RW);
+	emi_mpu_set_protection(&region_info);
+
+	region_info.start = BL32_BASE;
+	region_info.end = (BL32_BASE + BL32_LIMIT);
+	region_info.region = 2;
+	SET_ACCESS_PERMISSION(region_info.apc, 1,
+				FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW,
+				FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW,
+				FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW,
+				FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW, SEC_RW);
+	emi_mpu_set_protection(&region_info);
 }
