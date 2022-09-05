@@ -20,8 +20,8 @@ PLAT_INCLUDES := -I.                                              \
                  -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/common/drivers/                    \
                  -I${MTK_PLAT}/common/drivers/emi_mpu             \
-                 -I${MTK_PLAT}/common/drivers/dapc             \
-                 -I${MTK_PLAT}/common/drivers/timer/              \
+                 -I${MTK_PLAT}/common/drivers/dapc                \
+                 -I${MTK_PLAT}/drivers/timer/                     \
                  -I${MTK_PLAT_SOC}/drivers/                       \
                  -I${MTK_PLAT_SOC}/drivers/mcdi/                  \
                  -I${MTK_PLAT_SOC}/drivers/spmc/                  \
@@ -62,7 +62,7 @@ BL2_SOURCES     += common/desc_image_load.c                              \
                    lib/cpus/aarch64/cortex_a53.S                         \
                    ${MTK_PLAT}/common/mtk_plat_common.c                  \
                    ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c               \
-                   ${MTK_PLAT}/common/drivers/rtc/rtc_common.c           \
+                   ${MTK_PLAT}/drivers/rtc/rtc_common.c           \
                    ${MTK_PLAT_SOC}/aarch64/plat_helpers.S                \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c             \
                    ${MTK_PLAT_SOC}/bl2_plat_setup.c                      \
@@ -81,10 +81,10 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    lib/cpus/aarch64/cortex_a53.S                         \
                    ${MTK_PLAT}/common/mtk_plat_common.c                  \
                    ${MTK_PLAT}/common/params_setup.c                     \
-                   ${MTK_PLAT}/common/drivers/timer/mt_timer.c           \
+                   ${MTK_PLAT}/drivers/timer/mt_timer.c           \
                    ${MTK_PLAT}/common/mtk_gic_v3_main.c                  \
                    ${MTK_PLAT_SOC}/plat_mt_cirq.c                        \
-                   ${MTK_PLAT}/common/drivers/rtc/rtc_common.c           \
+                   ${MTK_PLAT}/drivers/rtc/rtc_common.c           \
                    ${MTK_PLAT}/common/drivers/emi_mpu/emi_mpu.c          \
                    ${MTK_PLAT}/common/drivers/dapc/devapc.c              \
                    ${MTK_PLAT}/common/mtk_rgu.c                          \
