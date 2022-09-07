@@ -7,7 +7,10 @@
 LOCAL_DIR := $(call GET_LOCAL_DIR)
 
 MODULE := lpm
-LOCAL_SRCS-y := $(LOCAL_DIR)/mt_lp_rm.c
+
+LOCAL_SRCS-y := $(LOCAL_DIR)/mt_lp_api.c
+LOCAL_SRCS-y += $(LOCAL_DIR)/mt_lp_rm.c
+LOCAL_SRCS-y += $(LOCAL_DIR)/mt_lp_rq.c
 
 PLAT_INCLUDES += -I${LOCAL_DIR}
 
