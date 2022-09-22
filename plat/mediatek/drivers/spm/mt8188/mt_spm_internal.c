@@ -74,6 +74,64 @@ static void spm_code_swapping(void)
 	mmio_write_32(SPM_WAKEUP_EVENT_MASK, con1);
 }
 
+void __spm_reset_and_init_pcm(void)
+{
+	uint32_t con1;
+	unsigned char first_load_fw = true;
+
+	/* check the SPM FW is run or not */
+	if (mmio_read_32(MD32PCM_CFGREG_SW_RSTN) & 0x1)
+		first_load_fw = false;
+
+	if (!first_load_fw) {
+		/* SPM code swapping */
+		spm_code_swapping();
+
+		/* Backup PCM r0 -> SPM_POWER_ON_VAL0 before `reset PCM` */
+		mmio_write_32(SPM_POWER_ON_VAL0, mmio_read_32(PCM_REG0_DATA));
+	}
+
+	/* disable r0 and r7 to control power */
+	mmio_write_32(PCM_PWR_IO_EN, 0);
+
+	/* disable pcm timer after leaving FW */
+	mmio_write_32(PCM_CON1, SPM_REGWR_CFG_KEY |
+		      (mmio_read_32(PCM_CON1) & ~RG_PCM_TIMER_EN_LSB));
+
+	/* reset PCM */
+	mmio_write_32(PCM_CON0, SPM_REGWR_CFG_KEY | PCM_CK_EN_LSB | PCM_SW_RESET_LSB);
+	mmio_write_32(PCM_CON0, SPM_REGWR_CFG_KEY | PCM_CK_EN_LSB);
+
+	/* Clear SPM EVENT count */
+	mmio_write_32(PCM_CON1, SPM_REGWR_CFG_KEY |
+		mmio_read_32(PCM_CON1) | SPM_EVENT_COUNTER_CLR_LSB);
+	mmio_write_32(PCM_CON1, SPM_REGWR_CFG_KEY |
+		(mmio_read_32(PCM_CON1) & ~SPM_EVENT_COUNTER_CLR_LSB));
+
+	/* Clear SPM timer */
+	mmio_write_32(SYS_TIMER_CON, mmio_read_32(SYS_TIMER_CON) | SYS_TIMER_START_EN_LSB);
+	mmio_write_32(SYS_TIMER_CON, mmio_read_32(SYS_TIMER_CON) & ~SYS_TIMER_START_EN_LSB);
+
+	/* init PCM_CON1 (disable PCM timer but keep PCM WDT setting) */
+	con1 = mmio_read_32(PCM_CON1) & (RG_PCM_WDT_WAKE_LSB);
+	mmio_write_32(PCM_CON1, con1 | SPM_REGWR_CFG_KEY | REG_EVENT_LOCK_EN_LSB |
+			REG_SPM_SRAM_ISOINT_B_LSB | RG_AHBMIF_APBEN_LSB |
+			REG_MD32_APB_INTERNAL_EN_LSB);
+}
+
+void __spm_init_pcm_register(void)
+{
+	/* init r0 with POWER_ON_VAL0 */
+	mmio_write_32(PCM_REG_DATA_INI, mmio_read_32(SPM_POWER_ON_VAL0));
+	mmio_write_32(PCM_PWR_IO_EN, PCM_RF_SYNC_R0);
+	mmio_write_32(PCM_PWR_IO_EN, 0);
+
+	/* init r7 with POWER_ON_VAL1 */
+	mmio_write_32(PCM_REG_DATA_INI, mmio_read_32(SPM_POWER_ON_VAL1));
+	mmio_write_32(PCM_PWR_IO_EN, PCM_RF_SYNC_R7);
+	mmio_write_32(PCM_PWR_IO_EN, 0);
+}
+
 void __spm_src_req_update(const struct pwr_ctrl *pwrctrl, unsigned int resource_usage)
 {
 
@@ -304,6 +362,34 @@ void __spm_set_pcm_flags(struct pwr_ctrl *pwrctrl)
 	mmio_write_32(SPM_SW_RSV_7, pwrctrl->pcm_flags);
 
 	mmio_write_32(SPM_SW_RSV_8, pwrctrl->pcm_flags1);
+}
+
+void __spm_kick_pcm_to_run(struct pwr_ctrl *pwrctrl)
+{
+	uint32_t con0;
+
+	/* Waiting for loading SPMFW done*/
+	while (mmio_read_32(MD32PCM_DMA0_RLCT) != 0x0)
+		;
+
+	/* FIXME: init register to match PCM expectation */
+	mmio_write_32(SPM_BUS_PROTECT_MASK_B, 0xffffffff);
+	mmio_write_32(SPM_BUS_PROTECT2_MASK_B, 0xffffffff);
+	mmio_write_32(PCM_REG_DATA_INI, 0);
+
+	__spm_set_pcm_flags(pwrctrl);
+
+	/* enable r0 and r7 to control power */
+	/* mmio_write_32(PCM_PWR_IO_EN, PCM_PWRIO_EN_R0 | PCM_PWRIO_EN_R7); */
+	/* kick PCM to run (only toggle PCM_KICK) */
+	con0 = mmio_read_32(PCM_CON0);
+	mmio_write_32(PCM_CON0, con0 | SPM_REGWR_CFG_KEY | PCM_CK_EN_LSB);
+	/* reset md32pcm */
+	con0 = mmio_read_32(MD32PCM_CFGREG_SW_RSTN);
+	mmio_write_32(MD32PCM_CFGREG_SW_RSTN, con0 | 0x1);
+
+	/* Waiting for SPM init done and entering WFI*/
+	udelay(SPM_INIT_DONE_US);
 }
 
 void __spm_get_wakeup_status(struct wake_status *wakesta, unsigned int ext_status)

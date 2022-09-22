@@ -9,6 +9,16 @@
 
 #include "mt_spm.h"
 
+/**************************************
+ * Config and Parameter
+ **************************************/
+#define POWER_ON_VAL0_DEF	0x0000F100
+/* SPM_POWER_ON_VAL1 */
+#define POWER_ON_VAL1_DEF	0x80015860
+/* SPM_WAKEUP_EVENT_MASK */
+#define SPM_WAKEUP_EVENT_MASK_DEF	0xFFFFFFFF
+
+
 /* PCM_WDT_VAL */
 #define PCM_WDT_TIMEOUT		(30 * 32768)	/* 30s */
 /* PCM_TIMER_VAL */
@@ -115,9 +125,6 @@
 #define MCUPM_MBOX_WAKEUP_CPU		(0x0c55FD10)
 
 struct pcm_desc {
-	const char *version;	/* PCM code version */
-	uint32_t *base;		/* binary array base */
-	uintptr_t base_dma;	/* dma addr of base */
 	uint32_t pmem_words;
 	uint32_t total_words;
 	uint32_t pmem_start;
@@ -599,6 +606,9 @@ enum pwr_ctrl_enum {
  * HW_TRIG_SIGNAL_SEL_3		: 5'b1100 (trig_reserve[24]=sc_hw_s1_req)
  */
 
+#define SPM_ACK_CHK_3_SEL_HW_S1		(0x00350098)
+#define SPM_ACK_CHK_3_HW_S1_CNT		(1)
+
 #define SPM_ACK_CHK_3_CON_HW_MODE_TRIG	(0x800)
 /* BIT[0]: SW_EN, BIT[4]: STA_EN, BIT[8]: HW_EN */
 #define SPM_ACK_CHK_3_CON_EN		(0x110)
@@ -652,6 +662,8 @@ struct spm_lp_scen {
 };
 
 void __spm_set_cpu_status(uint32_t cpu);
+void __spm_reset_and_init_pcm(void);
+void __spm_init_pcm_register(void);	/* init r0 and r7 */
 void __spm_src_req_update(const struct pwr_ctrl *pwrctrl, unsigned int resource_usage);
 void __spm_set_power_control(const struct pwr_ctrl *pwrctrl);
 void __spm_set_wakeup_event(const struct pwr_ctrl *pwrctrl);

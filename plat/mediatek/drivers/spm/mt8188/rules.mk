@@ -19,6 +19,11 @@ MT_SPM_SSPM_NOTIFIER_SUPPORT := y
 MT_SPM_UART_SUSPEND_SUPPORT := n
 MT_SPM_RGU_SUPPORT := n
 
+PLAT_INCLUDES += -I$(LOCAL_DIR)/ \
+		 -I$(LOCAL_DIR)/constraints \
+		 -I$(LOCAL_DIR)/notifier \
+		 -I$(LOCAL_DIR)/tracer
+
 LOCAL_SRCS-y := ${LOCAL_DIR}/mt_spm.c
 LOCAL_SRCS-y += ${LOCAL_DIR}/mt_spm_conservation.c
 LOCAL_SRCS-y += ${LOCAL_DIR}/mt_spm_internal.c

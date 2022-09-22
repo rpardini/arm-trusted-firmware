@@ -17,6 +17,7 @@ include lib/xlat_tables_v2/xlat_tables.mk
 PLAT_INCLUDES := -I${MTK_PLAT}/common \
 		 -I${MTK_PLAT}/include \
 		 -I${MTK_PLAT}/common/drivers \
+		 -I${MTK_PLAT}/include/drivers/spm \
 		 -I${MTK_PLAT}/include/${ARCH_VERSION} \
 		 -I${MTK_PLAT} \
 		 -I${MTK_PLAT_SOC}/include \
@@ -53,6 +54,7 @@ MODULES-y += $(MTK_PLAT_SOC)/drivers/apusys
 MODULES-y += ${MTK_PLAT_SOC}/drivers/input_gating
 MODULES-y += $(MTK_PLAT_SOC)/drivers/rng
 MODULES-y += $(MTK_PLAT_SOC)/drivers/devapc
+MODULES-y += $(MTK_PLAT_SOC)/drivers/spm
 MODULES-y += $(MTK_PLAT_SOC)/drivers/mcupm
 MODULES-y += $(MTK_PLAT_SOC)/drivers/dpm
 MODULES-y += $(MTK_PLAT_SOC)/drivers/sspm
