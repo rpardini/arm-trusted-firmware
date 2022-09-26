@@ -50,6 +50,7 @@ MODULES-y += $(MTK_PLAT)/drivers/apusys
 MODULES-y += $(MTK_PLAT_SOC)/drivers/apusys
 MODULES-y += ${MTK_PLAT_SOC}/drivers/input_gating
 MODULES-y += $(MTK_PLAT_SOC)/drivers/rng
+MODULES-y += $(MTK_PLAT_SOC)/drivers/mcupm
 endif
 
 PLAT_BL_COMMON_SOURCES := common/desc_image_load.c \
