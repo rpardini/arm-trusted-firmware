@@ -103,9 +103,6 @@ void bl31_platform_setup(void)
 
 	mtk_soc_disable_l2c_sram();
 
-	/* Initialize EMI MPU */
-	emi_mpu_init();
-
 	/* Initialize the GIC driver, CPU and distributor interfaces */
 	mt_gic_driver_init();
 	mt_gic_init();
@@ -123,6 +120,10 @@ void bl31_platform_setup(void)
 	mcupm_init();
 	sspm_init();
 	spm_boot_init();
+
+	/* Initialize EMI MPU */
+	emi_mpu_init();
+
 	rtc_power_on_sequence();
 }
 
