@@ -68,6 +68,15 @@
 #define WPE_VPP0_BASE        (IO_PHYS + 0x4e02000)
 #define CCU_MAIN_BASE        (IO_PHYS + 0x7200000)
 #define MFGCFG_BASE          (IO_PHYS + 0x3fbf000)
+#define APMIXEDSYS           (IO_PHYS + 0x0000C000)
+#define SSPM_MBOX_BASE       (IO_PHYS + 0x00480000)
+#define VPPSYS0_BASE         (IO_PHYS + 0x04000000)
+#define VPPSYS1_BASE         (IO_PHYS + 0x04f00000)
+#define VDOSYS0_BASE         (IO_PHYS + 0x0C01A000)
+#define VDOSYS1_BASE         (IO_PHYS + 0x0C100000)
+#define DVFSRC_BASE          (IO_PHYS + 0x00012000)
+#define APU_IOMMU_0_BASE     (IO_PHYS + 0x09010000)
+#define APU_IOMMU_1_BASE     (IO_PHYS + 0x09015000)
 
 /*******************************************************************************
  * APUSYS related constants
