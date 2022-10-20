@@ -14,6 +14,7 @@ PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/drivers/dp/                        \
                  -I${MTK_PLAT}/drivers/gic600/                    \
                  -I${MTK_PLAT}/drivers/gpio/                      \
+                 -I${MTK_PLAT}/drivers/iommu/                     \
                  -I${MTK_PLAT}/drivers/pmic/                      \
                  -I${MTK_PLAT}/drivers/pmic_wrap/                 \
                  -I${MTK_PLAT}/drivers/rtc/                       \
@@ -26,6 +27,7 @@ PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT_SOC}/drivers/dfd                    \
                  -I${MTK_PLAT_SOC}/drivers/emi_mpu/               \
                  -I${MTK_PLAT_SOC}/drivers/gpio/                  \
+                 -I${MTK_PLAT_SOC}/drivers/iommu/                 \
                  -I${MTK_PLAT_SOC}/drivers/mcdi/                  \
                  -I${MTK_PLAT_SOC}/drivers/pmic/                  \
                  -I${MTK_PLAT_SOC}/drivers/mcupm/                 \
@@ -102,6 +104,7 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 ${MTK_PLAT}/drivers/dp/mt_dp.c                        \
                 ${MTK_PLAT}/drivers/gic600/mt_gic_v3.c                \
                 ${MTK_PLAT}/drivers/gpio/mtgpio_common.c              \
+                ${MTK_PLAT}/drivers/iommu/mtk_iommu_ptbl.c            \
                 ${MTK_PLAT}/drivers/pmic/pmic.c                       \
                 ${MTK_PLAT}/drivers/pmic_wrap/pmic_wrap_init_v2.c     \
                 ${MTK_PLAT}/drivers/rtc/rtc_common.c                  \
@@ -116,6 +119,7 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 ${MTK_PLAT_SOC}/drivers/dfd/plat_dfd.c                \
                 ${MTK_PLAT_SOC}/drivers/emi_mpu/emi_mpu.c             \
                 ${MTK_PLAT_SOC}/drivers/gpio/mtgpio.c                 \
+                ${MTK_PLAT_SOC}/drivers/iommu/mtk_iommu_plat.c        \
                 ${MTK_PLAT_SOC}/drivers/mcdi/mt_cpu_pm.c              \
                 ${MTK_PLAT_SOC}/drivers/mcdi/mt_cpu_pm_cpc.c          \
                 ${MTK_PLAT_SOC}/drivers/mcdi/mt_mcdi.c                \
