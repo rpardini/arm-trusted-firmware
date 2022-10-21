@@ -70,6 +70,56 @@
 #define MFGCFG_BASE          (IO_PHYS + 0x3fbf000)
 
 /*******************************************************************************
+ * APUSYS related constants
+ ******************************************************************************/
+#define DEBUGSYS_APB			(0x0d000000)
+#define APU_MD32_DEBUG_APB		(DEBUGSYS_APB + 0x00298000)
+#define APU_MD32_SYSCTRL		(IO_PHYS + 0x09001000)
+#define APU_MD32_WDT			(IO_PHYS + 0x09002000)
+#define APU_RCX_CONFIG			(IO_PHYS + 0x09020000)
+#define APU_LOGTOP			(IO_PHYS + 0x09024000)
+#define APU_NOC_MNI_RCX			(IO_PHYS + 0x0903e000)
+#define APU_MGALS			(IO_PHYS + 0x0903f000)
+#define APUSYS_CTRL_DAPC_RCX_BASE	(IO_PHYS + 0x09034000)
+#define APUSYS_NOC_DAPC_RCX_BASE	(IO_PHYS + 0x09038000)
+#define APU_SCTRL_REVISER		(IO_PHYS + 0x0903c000)
+#define APU_ACS_RCX			(IO_PHYS + 0x09044000)
+#define APU_CACHE_DUMP			(IO_PHYS + 0x09050000)
+#define APU_MBOX0			(IO_PHYS + 0x090e1000)
+#define APU_MBOX1			(IO_PHYS + 0x090e2000)
+#define APU_RPCTOP			(IO_PHYS + 0x090F0000)
+#define APU_PCUTOP			(IO_PHYS + 0x090F1000)
+#define APU_AO_CTRL			(IO_PHYS + 0x090f2000)
+#define APU_PLL				(IO_PHYS + 0x090F3000)
+#define APU_ACC				(IO_PHYS + 0x090F4000)
+#define APU_SEC_CON			(IO_PHYS + 0x090F5000)
+#define APU_ARETOP_ARE0			(IO_PHYS + 0x090F6000)
+#define APU_ARETOP_ARE1			(IO_PHYS + 0x090F7000)
+#define APU_ARETOP_ARE2			(IO_PHYS + 0x090F8000)
+#define APUSYS_CTRL_DAPC_AO_BASE	(IO_PHYS + 0x090FC000)
+#define APU_RCX_VCORE_CONFIG		(IO_PHYS + 0x090E0000)
+#define APU_ACX0			(IO_PHYS + 0x09100000)
+#define APU_ACX0_RPC_LITE		(IO_PHYS + 0x09140000)
+#define APU_ACX0_CONFIG			(IO_PHYS + 0x0913C000)
+#define APU_ACS_ACX0			(IO_PHYS + 0x09112000)
+#define APU_MD32_TCM			(IO_PHYS + 0x0d000000)
+
+#define APU_ACS_RCX_SZ			0x1000
+#define APU_RPCTOP_LITE_ACX0_SZ		0x1000
+#define APU_ACX0_CONFIG_SZ		0x1000
+#define APU_ACS_ACX0_SZ			0x1000
+#define APU_SEC_CON_SZ			0x1000
+#define APU_RPCTOP_SZ			0x1000
+#define APU_PCUTOP_SZ			0x1000
+#define APU_ARETOP_ARE0_SZ		0x1000
+#define APU_ARETOP_ARE1_SZ		0x1000
+#define APU_ARETOP_ARE2_SZ		0x1000
+#define APU_PLL_COMMON_SZ		0x1000
+#define APU_LOGTOP_SZ			0x1000
+#define APU_NOC_MNI_RCX_SZ		0x1000
+#define APU_MGALS_SZ			0x1000
+
+/*******************************************************************************
  * GPIO related constants
  ******************************************************************************/
 #define GPIO_BASE		(IO_PHYS + 0x00005000)
