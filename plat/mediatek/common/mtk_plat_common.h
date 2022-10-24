@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2016-2022, ARM Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -38,14 +38,6 @@ struct atf_arg_t {
 	unsigned int atf_aee_debug_buf_size;
 };
 
-struct kernel_info {
-	uint64_t pc;
-	uint64_t r0;
-	uint64_t r1;
-	uint64_t r2;
-	uint64_t k32_64;
-};
-
 struct mtk_bl_param_t {
 	uint64_t bootarg_loc;
 	uint64_t bootarg_size;
@@ -54,12 +46,12 @@ struct mtk_bl_param_t {
 };
 
 struct mtk_bl31_params {
-       param_header_t h;
-       image_info_t *bl31_image_info;
-       entry_point_info_t *bl32_ep_info;
-       image_info_t *bl32_image_info;
-       entry_point_info_t *bl33_ep_info;
-       image_info_t *bl33_image_info;
+	param_header_t h;
+	image_info_t *bl31_image_info;
+	entry_point_info_t *bl32_ep_info;
+	image_info_t *bl32_image_info;
+	entry_point_info_t *bl33_ep_info;
+	image_info_t *bl33_image_info;
 };
 
 /* Declarations for mtk_plat_common.c */
