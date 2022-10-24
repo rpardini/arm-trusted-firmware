@@ -491,7 +491,7 @@ endif
 
 # MODULE_OBJS can be assigned by vendors with different compiled
 # object file path, and prebuilt object file path.
-$(eval OBJS += $(MODULE_OBJS))
+$(eval OBJS += $(MODULE_OBJS_$(1)))
 
 $(ELF): $(OBJS) $(LINKERFILE) | $(1)_dirs libraries $(BL_LIBS)
 	$$(ECHO) "  LD      $$@"

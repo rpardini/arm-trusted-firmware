@@ -5,7 +5,9 @@
 #
 
 # Expand include modules
-$(eval $(call INCLUDE_MODULES,$(MODULES-y)))
+
+$(eval $(call INCLUDE_MODULES,$(MODULES-BL2-y),bl2))
+$(eval $(call INCLUDE_MODULES,$(MODULES-y),bl31))
 
 # Make next section align to page size
 ifneq ($(MTK_EXTRA_LINKERFILE),)

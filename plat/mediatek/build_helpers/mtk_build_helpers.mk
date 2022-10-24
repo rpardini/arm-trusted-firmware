@@ -47,9 +47,11 @@ endef
 # INCLUDE_MODULES macro expand included modules rules.mk
 # Arguments:
 #   $(1) = MODULES variables
+#   $(2) = BL stage (1, 2, 2u, 31, 32)
 define INCLUDE_MODULES
 $(eval MODULES_TEMP := $(1))
 $(eval MODULES_MAKEFILE := $(patsubst %,%/rules.mk,$(MODULES_TEMP)))
+$(eval MTK_BL := $(2))
 $(foreach S,$(MODULES_MAKEFILE),$(eval $(EXPAND_RULES_MAKEFILE)))
 endef
 
@@ -97,7 +99,7 @@ define MAKE_MODULE
         $(eval BUILD_DIR  := ${BUILD_PLAT}/${3})
         $(eval SOURCES    := $(2))
         $(eval OBJS_TEMP  := $(addprefix $(BUILD_DIR)/$(MODULE)/,$(call SOURCES_TO_OBJS,$(SOURCES))))
-        $(eval MODULE_OBJS += $(OBJS_TEMP))
+        $(eval MODULE_OBJS_$(3) += $(OBJS_TEMP))
         # We use sort only to get a list of unique object directory names.
         # ordering is not relevant but sort removes duplicates.
         $(eval TEMP_OBJ_DIRS := $(sort $(dir ${OBJS_TEMP} ${LINKERFILE})))
@@ -130,6 +132,7 @@ MTK_BL := bl32
 else
 MTK_BL := bl31
 endif
+
 # Include common, platform, board level config
 include $(MTK_COMMON_CFG)
 include $(MTK_PLAT_CFG)
