@@ -1,6 +1,7 @@
 ///* SPDX-License-Identifier: GPL-2.0-only */
 
 #include <mt_dpm.h>
+#include <mt_spm_internal.h>
 
 static struct dpm_regs *const mtk_dpm2 = (void *)DPM_CFG_BASE2;
 extern const uint8_t dpm_data_binary[];

@@ -3,8 +3,6 @@
 #ifndef __MCU__H__
 #define __MCU__H__
 
-#include <mt_spm_internal.h>
-
 struct mtk_mcu {
 	const char *firmware_name;	/* The firmware file name in CBFS */
 
