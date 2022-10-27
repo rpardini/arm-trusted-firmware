@@ -7,6 +7,8 @@
 MTK_PLAT := plat/mediatek
 MTK_PLAT_SOC := ${MTK_PLAT}/${PLAT}
 MTK_SOC := ${PLAT}
+MTK_IOT_YOCTO = 1
+PLAT_PARTITION_BLOCK_SIZE := 512
 
 include plat/mediatek/build_helpers/mtk_build_helpers.mk
 include drivers/arm/gic/v3/gicv3.mk
@@ -14,6 +16,7 @@ include lib/xlat_tables_v2/xlat_tables.mk
 
 PLAT_INCLUDES := -I${MTK_PLAT}/common \
 		 -I${MTK_PLAT}/include \
+		 -I${MTK_PLAT}/common/drivers \
 		 -I${MTK_PLAT}/include/${ARCH_VERSION} \
 		 -I${MTK_PLAT} \
 		 -I${MTK_PLAT_SOC}/include \
@@ -38,11 +41,11 @@ MODULES-y += $(MTK_PLAT)/drivers/pmic
 MODULES-y += $(MTK_PLAT)/drivers/pmic_wrap
 MODULES-y += $(MTK_PLAT)/drivers/rtc
 MODULES-y += $(MTK_PLAT)/drivers/timer
+MODULES-y += $(MTK_PLAT)/drivers/uart
 MODULES-y += $(MTK_PLAT)/helpers
 MODULES-y += $(MTK_PLAT)/topology
 
 PLAT_BL_COMMON_SOURCES := common/desc_image_load.c \
-			  drivers/ti/uart/aarch64/16550_console.S \
 			  lib/bl_aux_params/bl_aux_params.c
 
 BL31_SOURCES += drivers/delay_timer/delay_timer.c \
@@ -58,6 +61,12 @@ BL31_SOURCES += drivers/delay_timer/delay_timer.c \
 		${MTK_PLAT}/common/params_setup.c \
 		$(MTK_PLAT)/$(MTK_SOC)/plat_mmap.c
 
+ifeq (${MTK_IOT_YOCTO},1)
+BL31_LIBS += ${LIBBASE}
+include ${MTK_PLAT_SOC}/platform_bl2.mk
+endif
 include plat/mediatek/build_helpers/mtk_build_helpers_epilogue.mk
 
+ifneq (${MTK_IOT_YOCTO},1)
 include lib/coreboot/coreboot.mk
+endif

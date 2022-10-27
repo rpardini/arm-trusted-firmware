@@ -22,6 +22,53 @@
 #define MTK_DEV_RNG1_BASE	(IO_PHYS)
 #define MTK_DEV_RNG1_SIZE	(0x10000000)
 
+/*=======================================================================*/
+/* Register Bases                                                        */
+/*=======================================================================*/
+#define MCUCFG_BASE          (0x0C530000)
+#define TOPCKGEN_BASE        (IO_PHYS)
+#define INFRACFG_AO_BASE     (IO_PHYS + 0x00001000)
+#define APMIXED_BASE         (IO_PHYS + 0x0000C000)
+#define INFRA_AO_BCRM_BASE   (IO_PHYS + 0x00022000)
+#define TRNG_BASE            (IO_PHYS + 0x0020f000)
+#define AUDIO_BASE           (IO_PHYS + 0xb10000)
+#define AUDIO_SRC_BASE       (IO_PHYS + 0xb00000)
+#define CAMSYS_MAIN_BASE     (IO_PHYS + 0x6000000)
+#define CAMSYS_RAWA_BASE     (IO_PHYS + 0x604f000)
+#define CAMSYS_RAWB_BASE     (IO_PHYS + 0x608f000)
+#define CAMSYS_YUVA_BASE     (IO_PHYS + 0x606f000)
+#define CAMSYS_YUVB_BASE     (IO_PHYS + 0x60af000)
+#define IMGSYS1_DIP_NR_BASE  (IO_PHYS + 0x5130000)
+#define IMGSYS1_DIP_TOP_BASE (IO_PHYS + 0x5110000)
+#define IMGSYS_MAIN_BASE     (IO_PHYS + 0x5000000)
+#define IMGSYS_WPE1_BASE     (IO_PHYS + 0x5220000)
+#define IMGSYS_WPE2_BASE     (IO_PHYS + 0x5520000)
+#define IMGSYS_WPE3_BASE     (IO_PHYS + 0x5620000)
+#define IMP_IIC_WRAP_C_BASE  (IO_PHYS + 0x1283000)
+#define IMP_IIC_WRAP_EN_BASE (IO_PHYS + 0x1ec2000)
+#define IMP_IIC_WRAP_W_BASE  (IO_PHYS + 0x1e02000)
+#define IPESYS_BASE          (IO_PHYS + 0x5330000)
+#define MD32DR_CH0_BASE      (IO_PHYS + 0x900000)
+#define MD32DR_CH1_BASE      (IO_PHYS + 0xa00000)
+#define MSDC0_TOP_BASE       (IO_PHYS + 0x1f50000)
+#define MSDC2_TOP_BASE       (IO_PHYS + 0x1e60000)
+#define PMIF_SPI_BASE        (IO_PHYS + 0x00024000)
+#define PERICFG_BASE         (IO_PHYS + 0x3000)
+#define SUB_EMI_BASE         (IO_PHYS + 0x21d000)
+#define SYSTIMER_BASE        (IO_PHYS + 0x00017000)
+#define VDEC_GCON_BASE       (IO_PHYS + 0x802f000)
+#define VDEC_SOC_GCON_BASE   (IO_PHYS + 0x800f000)
+#define VDO0_DISP_DSC_WRAP_BASE  (IO_PHYS + 0xc009000)
+#define VDOSYS0_CONFIG_BASE  (IO_PHYS + 0xc01d000)
+#define VDOSYS1_CONFIG_BASE  (IO_PHYS + 0xc100000)
+#define VENC_GCON_BASE       (IO_PHYS + 0xa000000)
+#define VPP0_REG_BASE        (IO_PHYS + 0x4000000)
+#define VPPSYS1_CONFIG_BASE  (IO_PHYS + 0x4f00000)
+#define WPESYS_TOP_REG_BASE  (IO_PHYS + 0x4e00000)
+#define WPE_VPP0_BASE        (IO_PHYS + 0x4e02000)
+#define CCU_MAIN_BASE        (IO_PHYS + 0x7200000)
+#define MFGCFG_BASE          (IO_PHYS + 0x3fbf000)
+
 /*******************************************************************************
  * GPIO related constants
  ******************************************************************************/
@@ -36,8 +83,16 @@
 /*******************************************************************************
  * UART related constants
  ******************************************************************************/
-#define UART0_BASE	(IO_PHYS + 0x01002000)
-#define UART_BAUDRATE	(115200)
+#define UART0_BASE	(IO_PHYS + 0x01001100)
+#define UART1_BASE	(IO_PHYS + 0x01001200)
+
+/*******************************************************************************
+ * PMIC related constants
+ ******************************************************************************/
+#define PMIC_WRAP_BASE		(IO_PHYS + 0x00024000)
+
+#define SPM_BASE		(IO_PHYS + 0x00006000)
+#define MCUSYS_CFGREG_BASE	(0x0C530000)
 
 /*******************************************************************************
  * Infra IOMMU related constants
@@ -129,7 +184,27 @@
  * Platform memory map related constants
  ******************************************************************************/
 #define TZRAM_BASE			(0x54600000)
-#define TZRAM_SIZE			(0x00030000)
+#define TZRAM_SIZE			(0x00200000)
+
+/*******************************************************************************
+ * BL2 specific defines.
+******************************************************************************/
+#define BL2_BASE		(0x201000)
+#define BL2_LIMIT		(0x400000)
+
+#define MAX_IO_DEVICES			U(3)
+#define MAX_IO_HANDLES			U(4)
+#define MAX_IO_BLOCK_DEVICES			1
+
+#define BL31_BASE		(TZRAM_BASE + 0x1000)
+#define BL31_LIMIT		(TZRAM_BASE + TZRAM_SIZE)
+#define TZRAM2_LIMIT		(TZRAM2_BASE + TZRAM2_SIZE)
+
+#define BL32_BASE		(0x43200000)
+#define BL32_LIMIT		(0x00a00000)
+#define BL32_HEADER_SIZE	(0x1c)
+
+#define BL33_BASE		(0x4c000000)
 
 /*******************************************************************************
  * BL31 specific defines.
