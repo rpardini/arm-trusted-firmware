@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <lib/mtk_init/mtk_init.h>
 #include <common/debug.h>
 #include <drivers/delay_timer.h>
 #include <rtc.h>
@@ -1167,3 +1168,11 @@ void rtc_power_on_sequence(void)
 	rtc_boot_check();
 	rtc_bbpu_power_on();
 }
+
+int rtc_power_on()
+{
+	rtc_power_on_sequence();
+	return 0;
+}
+
+MTK_PLAT_SETUP_0_INIT(rtc_power_on);
