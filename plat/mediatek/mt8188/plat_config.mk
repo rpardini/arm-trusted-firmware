@@ -35,6 +35,11 @@ ERRATA_A78_2242635 := 1
 ERRATA_A78_2376745 := 1
 ERRATA_A78_2395406 := 1
 
+ifeq (${MTK_IOT_YOCTO},1)
+# True Random Number firmware Interface
+TRNG_SUPPORT := 1
+endif
+
 CONFIG_ARCH_ARM_V8_2 := y
 CONFIG_MTK_MCUSYS := y
 MCUSYS_VERSION := v1

@@ -44,6 +44,9 @@ MODULES-y += $(MTK_PLAT)/drivers/timer
 MODULES-y += $(MTK_PLAT)/drivers/uart
 MODULES-y += $(MTK_PLAT)/helpers
 MODULES-y += $(MTK_PLAT)/topology
+ifeq (${MTK_IOT_YOCTO},1)
+MODULES-y += $(MTK_PLAT_SOC)/drivers/rng
+endif
 
 PLAT_BL_COMMON_SOURCES := common/desc_image_load.c \
 			  lib/bl_aux_params/bl_aux_params.c
