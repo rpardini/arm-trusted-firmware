@@ -8,7 +8,7 @@
 #define SOC_MEDIATEK_MT8195_WDT_H
 
 #include <stdint.h>
-#include <mt8195.h>
+#include <platform_def.h>
 
 #define MTK_WDT_CLR_STATUS 0x230001FF
 

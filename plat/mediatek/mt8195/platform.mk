@@ -19,6 +19,7 @@ PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/drivers/rtc/                       \
                  -I${MTK_PLAT}/drivers/timer/                     \
                  -I${MTK_PLAT}/drivers/uart/                      \
+                 -I${MTK_PLAT}/drivers/wdt/                       \
                  -I${MTK_PLAT}/include/                           \
                  -I${MTK_PLAT_SOC}/drivers/                       \
                  -I${MTK_PLAT_SOC}/drivers/dcm                    \
@@ -34,7 +35,6 @@ PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT_SOC}/drivers/ptp3/                  \
                  -I${MTK_PLAT_SOC}/drivers/devapc/                \
                  -I${MTK_PLAT_SOC}/drivers/eint/                  \
-                 -I${MTK_PLAT_SOC}/drivers/wdt/                   \
                  -I${MTK_PLAT_SOC}/include/
 
 GICV3_SUPPORT_GIC600        :=      1
@@ -60,6 +60,8 @@ BL2_SOURCES     += common/desc_image_load.c                           \
                    lib/libc/memset.c                                  \
                    ${MTK_PLAT}/common/mtk_plat_common.c               \
                    ${MTK_PLAT}/drivers/rtc/rtc_common.c               \
+                   ${MTK_PLAT}/drivers/wdt/wdt.c                      \
+                   ${MTK_PLAT}/drivers/wdt/mt8195/wdt_platform.c      \
                    ${MTK_PLAT_SOC}/aarch64/plat_helpers.S             \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c          \
                    ${MTK_PLAT_SOC}/bl2_plat_setup.c                   \
@@ -67,7 +69,6 @@ BL2_SOURCES     += common/desc_image_load.c                           \
                    ${MTK_PLAT_SOC}/drivers/pll/spm_mtcmos.c           \
                    ${MTK_PLAT_SOC}/drivers/pmic/pmic_wrap_init.c      \
                    ${MTK_PLAT_SOC}/drivers/pmic/pmic_initial_setting.c\
-                   ${MTK_PLAT_SOC}/drivers/wdt/wdt.c                  \
 
 ifeq (${STORAGE_UFS},1)
 BL2_SOURCES     += drivers/ufs/ufs.c                                  \

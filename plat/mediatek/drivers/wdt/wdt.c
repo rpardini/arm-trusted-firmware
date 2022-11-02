@@ -23,11 +23,6 @@ void mtk_wdt_set_req(void)
 	mmio_clrsetbits_32(&mtk_wdt->wdt_req_irq_en, MTK_WDT_REQ_IRQ_KEY, MTK_WDT_REQ_IRQ_KEY_VAL << 24);
 }
 
-void mtk_wdt_clr_status(void)
-{
-	mmio_write_32(&mtk_wdt->wdt_mode, MTK_WDT_CLR_STATUS);
-}
-
 static inline void mtk_wdt_swreset(void)
 {
 	NOTICE("%s() called!\n", __func__);
