@@ -45,6 +45,7 @@ MODULES-y += $(MTK_PLAT)/drivers/uart
 MODULES-y += $(MTK_PLAT)/helpers
 MODULES-y += $(MTK_PLAT)/topology
 ifeq (${MTK_IOT_YOCTO},1)
+MODULES-y += $(MTK_PLAT)/drivers/l2c
 MODULES-y += $(MTK_PLAT)/drivers/apusys
 MODULES-y += $(MTK_PLAT_SOC)/drivers/apusys
 MODULES-y += $(MTK_PLAT_SOC)/drivers/rng
