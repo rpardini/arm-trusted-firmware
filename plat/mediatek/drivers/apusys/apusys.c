@@ -9,6 +9,7 @@
 #include <common/debug.h>
 #include <smccc_helpers.h>
 #include <lib/mtk_init/mtk_init.h>
+#include "apusys_secure_boot.h"
 
 /* Vendor header */
 #include <mtk_sip_svc.h>
@@ -378,6 +379,11 @@ static u_register_t apusys_kernel_handler(u_register_t x1,
 		break;
 	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_APU_IMG_MEM:
 		ret = apusys_kernel_apusys_rv_setup_apu_img_mem(x2, x3);
+		if (ret == 0) {
+			//call verified ( x2, x4) - x2 : base address, x4, image
+			char *ptr =(char *)(x2 + x4 - 256);
+			ret = apusys_image_verify((uint64_t*)x2, (uint32_t)x4, ptr);
+		}
 		break;
 	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_SECURE_MEM:
 		ret = apusys_kernel_apusys_rv_setup_secure_mem(x2, x3);

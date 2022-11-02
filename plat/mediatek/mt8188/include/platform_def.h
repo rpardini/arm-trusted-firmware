@@ -251,7 +251,7 @@
 /*******************************************************************************
  * Generic platform constants
  ******************************************************************************/
-#define PLATFORM_STACK_SIZE		(0x800)
+#define PLATFORM_STACK_SIZE		(0x1000)
 #define FIRMWARE_WELCOME_STR		"Booting Trusted Firmware\n"
 #define SOC_CHIP_ID			U(0x8188)
 

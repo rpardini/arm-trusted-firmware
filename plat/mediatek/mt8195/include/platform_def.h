@@ -109,7 +109,7 @@
 /*******************************************************************************
  * Generic platform constants
  ******************************************************************************/
-#define PLATFORM_STACK_SIZE		0x800
+#define PLATFORM_STACK_SIZE		0x1000
 
 #define FIRMWARE_WELCOME_STR		"Booting Trusted Firmware\n"
 
