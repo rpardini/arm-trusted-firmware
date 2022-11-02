@@ -316,6 +316,7 @@ void mtk_io_setup(void)
 void bl2_platform_setup(void)
 {
 	generic_delay_timer_init();
+	mtk_wdt_init();
 	mt_pll_init();
 
 	mt_gpio_init();
