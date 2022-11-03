@@ -17,6 +17,7 @@ PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/drivers/iommu/                     \
                  -I${MTK_PLAT}/drivers/pmic/                      \
                  -I${MTK_PLAT}/drivers/pmic_wrap/                 \
+                 -I${MTK_PLAT}/drivers/ptp3/                      \
                  -I${MTK_PLAT}/drivers/rtc/                       \
                  -I${MTK_PLAT}/drivers/timer/                     \
                  -I${MTK_PLAT}/drivers/uart/                      \
@@ -107,6 +108,7 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 ${MTK_PLAT}/drivers/iommu/mtk_iommu_ptbl.c            \
                 ${MTK_PLAT}/drivers/pmic/pmic.c                       \
                 ${MTK_PLAT}/drivers/pmic_wrap/pmic_wrap_init_v2.c     \
+                ${MTK_PLAT}/drivers/ptp3/ptp3_common.c                \
                 ${MTK_PLAT}/drivers/rtc/rtc_common.c                  \
                 ${MTK_PLAT}/drivers/rtc/rtc_mt6359p.c                 \
                 ${MTK_PLAT}/drivers/timer/mt_timer.c                  \
@@ -129,7 +131,6 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 ${MTK_PLAT_SOC}/drivers/sspm/mt_sspm.c		      \
                 ${MTK_PLAT_SOC}/drivers/dpm/mt_dpm.c		      \
                 ${MTK_PLAT_SOC}/drivers/dpm/mt_dpm_4ch.c	      \
-                ${MTK_PLAT_SOC}/drivers/ptp3/mtk_ptp3_main.c          \
                 ${MTK_PLAT_SOC}/drivers/spmc/mtspmc.c                 \
                 ${MTK_PLAT_SOC}/drivers/devapc/devapc.c               \
                 ${MTK_PLAT_SOC}/drivers/l2c/l2c.c                     \
