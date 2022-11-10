@@ -48,6 +48,7 @@ ifeq (${MTK_IOT_YOCTO},1)
 MODULES-y += $(MTK_PLAT)/drivers/l2c
 MODULES-y += $(MTK_PLAT)/drivers/apusys
 MODULES-y += $(MTK_PLAT_SOC)/drivers/apusys
+MODULES-y += ${MTK_PLAT_SOC}/drivers/input_gating
 MODULES-y += $(MTK_PLAT_SOC)/drivers/rng
 endif
 
