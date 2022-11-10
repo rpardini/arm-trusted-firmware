@@ -78,7 +78,10 @@
 #define DVFSRC_BASE          (IO_PHYS + 0x00012000)
 #define APU_IOMMU_0_BASE     (IO_PHYS + 0x09010000)
 #define APU_IOMMU_1_BASE     (IO_PHYS + 0x09015000)
-
+#define DEVAPC_INFRA_AO_BASE (IO_PHYS + 0x00030000)
+#define DEVAPC_PERI_AO_BASE  (IO_PHYS + 0x00034000)
+#define DEVAPC_PERI2_AO_BASE (IO_PHYS + 0x00038000)
+#define DEVAPC_PERI_PAR_AO_BASE	(IO_PHYS + 0x0003C000)
 /*******************************************************************************
  * APUSYS related constants
  ******************************************************************************/

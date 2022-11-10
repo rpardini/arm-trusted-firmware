@@ -51,6 +51,7 @@ MODULES-y += $(MTK_PLAT_SOC)/drivers/eint
 MODULES-y += $(MTK_PLAT_SOC)/drivers/apusys
 MODULES-y += ${MTK_PLAT_SOC}/drivers/input_gating
 MODULES-y += $(MTK_PLAT_SOC)/drivers/rng
+MODULES-y += $(MTK_PLAT_SOC)/drivers/devapc
 MODULES-y += $(MTK_PLAT_SOC)/drivers/mcupm
 MODULES-y += $(MTK_PLAT_SOC)/drivers/dpm
 MODULES-y += $(MTK_PLAT_SOC)/drivers/sspm
