@@ -373,6 +373,7 @@ static int cpupm_init(void)
 
 	if (!(cpu_pm_status & CPU_PM_DEPD_INIT)) {
 		status = mtk_lp_depd_condition(CPUPM_MBOX_WAIT_DEV_INIT);
+		mdelay(10);
 		if (status == 0) {
 			plat_cpu_pm_lock();
 			cpu_pm_status |= CPU_PM_DEPD_INIT;
