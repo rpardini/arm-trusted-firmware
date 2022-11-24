@@ -28,6 +28,7 @@
 #define MCUCFG_BASE          (0x0C530000)
 #define TOPCKGEN_BASE        (IO_PHYS)
 #define INFRACFG_AO_BASE     (IO_PHYS + 0x00001000)
+#define EINT_BASE            (IO_PHYS + 0x0000B000)
 #define APMIXED_BASE         (IO_PHYS + 0x0000C000)
 #define INFRA_AO_BCRM_BASE   (IO_PHYS + 0x00022000)
 #define TRNG_BASE            (IO_PHYS + 0x0020f000)
