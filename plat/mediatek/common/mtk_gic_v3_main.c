@@ -72,6 +72,10 @@ __asm__ (
 uint64_t cpu_logical_map[PLATFORM_CORE_COUNT];
 struct gic_chip_data gic_data[MAX_GIC_NR] __aligned(PLATFORM_CACHE_LINE_SIZE);
 
+static const interrupt_prop_t g0_interrupt_props[] = {
+	INTR_PROP_DESC(FIQ_SMP_CALL_SGI, GIC_HIGHEST_SEC_PRIORITY,
+		       INTR_GROUP0, GIC_INTR_CFG_LEVEL),
+};
 
 #if  CFG_MICROTRUST_TEE_SUPPORT
 void gicc_write_ctlr_el1(uint64_t val)
@@ -733,10 +737,9 @@ void mt_irq_set_sens(unsigned int base, unsigned int irq, unsigned int sens)
 	}
 }
 
-static void enable_sgi_fiq(uint32_t fiq_num)
+static void enable_sgi_fiq(void)
 {
 	unsigned int rdist_sgi_base = 0;
-	interrupt_prop_t prop;
 	int ret = 0;
 
 	ret = gic_populate_rdist((unsigned int *)&rdist_sgi_base);
@@ -745,9 +748,8 @@ static void enable_sgi_fiq(uint32_t fiq_num)
 	/* set all SGI/PPI as NS-group1 by default */
 	gicr_write_igroupr0(rdist_sgi_base, ~0x0);
 #endif
-	prop.intr_num = fiq_num;
-	prop.intr_grp = INTR_GROUP0;
-	gicv3_secure_ppi_sgi_config_props(rdist_sgi_base, &prop, 1);
+	/* enable FIQ_SMP_CALL_SGI */
+	gicv3_secure_ppi_sgi_config_props(rdist_sgi_base, &g0_interrupt_props[0], 1);
 }
 
 int gic_cpuif_init(void)
@@ -820,7 +822,7 @@ int gic_cpuif_init(void)
 #endif
 
 	/* everytime we setup the cpu IF, add a SGI as FIQ for smp call debug */
-	enable_sgi_fiq(FIQ_SMP_CALL_SGI);
+	enable_sgi_fiq();
 
 	/* init mpidr table for this cpu for later sgi usage */
 	mpidr = read_mpidr();
