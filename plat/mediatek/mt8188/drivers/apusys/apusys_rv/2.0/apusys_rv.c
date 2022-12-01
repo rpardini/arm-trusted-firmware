@@ -39,43 +39,6 @@
 
 #pragma weak apusys_regdump
 
-#if 0
-static const mmap_region_t apusys_rv_mmap[] MTK_MMAP_SECTION = {
-	MAP_REGION_FLAT(APU_MD32_SYSCTRL, APU_MD32_SYSCTRL_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_MD32_WDT, APU_MD32_WDT_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_SCTRL_REVISER, APU_SCTRL_REVISER_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_AO_CTRL, APU_AO_CTRL_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_MD32_TCM, APU_MD32_TCM_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_CACHE_DUMP, APU_CACHE_DUMP_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_MD32_DEBUG_APB, MD32_DEBUG_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_MBOX0, APU_MBOX0_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_MBOX1, APU_MBOX1_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_RPCTOP, APU_RPCTOP_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_RCX_CONFIG, APU_RCX_CONFIG_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_RCX_VCORE_CONFIG, APU_RCX_VCORE_CONFIG_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-#ifdef CONFIG_MTK_APUSYS_RV_MNOC_OST_DBG
-	MAP_REGION_FLAT(APU_NOC_MNI_RCX, APU_NOC_MNI_RCX_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_MGALS, APU_MGALS_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-#endif
-	{0}
-};
-DECLARE_MTK_MMAP_REGIONS(apusys_rv_mmap);
-#endif
-
 /* static variable declaration */
 static spinlock_t apusys_rv_lock;
 static bool apusys_rv_setup_reviser_called;
@@ -290,16 +253,12 @@ int apusys_kernel_apusys_rv_stop_mp(void)
 
 static int is_valid_pa_dram_range(uint64_t addr, uint64_t size)
 {
-#if 0 //ERIC_DEBUG
-	uint64_t res_mem_start = mblock_get_memory_start();
-	uint64_t res_mem_size = mblock_get_memory_size();
+	uint64_t res_mem_start = APUSYS_RESERVED_MEM_START;
+	uint64_t res_mem_size  = APUSYS_RESERVED_MEM_SZ;
 
 	return (addr >= res_mem_start &&
 		addr < (res_mem_start + res_mem_size) &&
 		(addr + size) < (res_mem_start + res_mem_size));
-#else
-	return true;
-#endif
 }
 
 int apusys_rv_mbox_mpu_init(void)
@@ -345,67 +304,6 @@ int apusys_rv_init(void)
 
 	apusys_secure_info = NULL;
 	apusys_aee_coredump_info = NULL;
-
-	return 0;
-}
-
-/*
- * apusys_rv secure memory (from bootloader)
- *
- * record secure memory pa & size
- *
- */
-int apusys_rv_setup_secure_mem(uint64_t addr, uint64_t size)
-{
-	if (!is_valid_pa_dram_range(addr, size)) {
-		ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
-			__func__, addr, size);
-		return -EINVAL;
-	}
-
-	apusys_rv_sec_buf_pa = addr;
-	apusys_rv_sec_buf_sz = size;
-
-	return 0;
-}
-
-/*
- * apusys_rv aee_coredump memory mapping (from bootloader)
- *
- * dynamic map aee_coredump memory
- *
- */
-int apusys_rv_setup_aee_coredump_mem(uint64_t addr, uint64_t size)
-{
-	int ret;
-
-	if (!is_valid_pa_dram_range(addr, size)) {
-		ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
-			__func__, addr, size);
-		return -EINVAL;
-	}
-
-	apusys_rv_aee_coredump_buf_pa = addr;
-	apusys_rv_aee_coredump_buf_sz = size;
-
-	/* create mapping */
-	ret = mmap_add_dynamic_region((unsigned long long)addr, /* PA */
-				(uintptr_t)addr, /* VA */
-				(size_t)round_up(size, PAGE_SIZE), /* size */
-				(unsigned int)MT_MEMORY | MT_RW | MT_NS); /* attrs */
-	if (ret) {
-		ERROR("%s: mmap_add_dynamic_region() fail, ret=0x%x\n",
-			__func__, ret);
-		return ret;
-	}
-
-	apusys_aee_coredump_info = (struct apusys_aee_coredump_info_t *) addr;
-	if (apusys_aee_coredump_info->up_xfile_sz == 0) {
-		ERROR("%s: apusys_aee_coredump_info->up_xfile_sz == 0\n",
-			__func__);
-		mmap_remove_dynamic_region((uintptr_t)addr, (size_t)size);
-		return -EINVAL;
-	}
 
 	return 0;
 }
@@ -1133,6 +1031,12 @@ int apusys_rv_ns_mem_emi_protect_en(uint64_t pa, uint32_t size)
      */
     struct emi_region_info_t region_info;
 
+    if (!is_valid_pa_dram_range(pa, size)) {
+	    ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
+		    __func__, pa, size);
+	    return -EINVAL;
+    }
+
     region_info.start = (unsigned long long) pa;
     region_info.end = (unsigned long long) (pa + size) - 1;
     region_info.region = APUSYS_NS_FW_EMI_REGION;
@@ -1158,6 +1062,12 @@ int apusys_rv_ns_mem_emi_protect_en(uint64_t pa, uint32_t size)
 int apusys_kernel_apusys_rv_setup_apu_img_mem(uint64_t addr, uint64_t size)
 {
 	int ret;
+
+	if (!is_valid_pa_dram_range(addr, size)) {
+		ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
+			__func__, addr, size);
+		return -EINVAL;
+	}
 
 	apu_img_base_pa = addr;
 	apu_img_base_sz = size;
@@ -1190,6 +1100,12 @@ static int apusys_rv_sec_mem_emi_protect_en(uint64_t pa, uint32_t size)
      */
     struct emi_region_info_t region_info;
 
+    if (!is_valid_pa_dram_range(pa, size)) {
+	    ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
+		    __func__, pa, size);
+	    return -EINVAL;
+    }
+
     region_info.start = (unsigned long long) pa;
     region_info.end = (unsigned long long) (pa + size) - 1;
     region_info.region = APUSYS_SEC_FW_EMI_REGION;
@@ -1216,6 +1132,12 @@ static int apusys_rv_sec_mem_emi_protect_en(uint64_t pa, uint32_t size)
 int apusys_kernel_apusys_rv_setup_secure_mem(uint64_t addr, uint64_t size)
 {
 	int ret;
+
+	if (!is_valid_pa_dram_range(addr, size)) {
+		ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
+			__func__, addr, size);
+		return -EINVAL;
+	}
 
 	apusys_rv_sec_buf_pa = addr;
 	apusys_rv_sec_buf_sz = size;
@@ -1269,6 +1191,12 @@ int apusys_kernel_apusys_rv_setup_secure_mem(uint64_t addr, uint64_t size)
 int apusys_kernel_apusys_rv_setup_aee_coredump_mem(uint64_t addr, uint64_t size)
 {
 	int ret;
+
+	if (!is_valid_pa_dram_range(addr, size)) {
+		ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
+			__func__, addr, size);
+		return -EINVAL;
+	}
 
 	apusys_rv_aee_coredump_buf_pa = addr;
 	apusys_rv_aee_coredump_buf_sz = size;

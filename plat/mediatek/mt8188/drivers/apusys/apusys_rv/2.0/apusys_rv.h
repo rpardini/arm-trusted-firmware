@@ -139,6 +139,8 @@
 #define PWR_STATUS(x)		bits_get(x, 1, 0)
 #define ROUNDUP(a, b)		(((a) + ((b)-1)) & ~((b)-1))
 
+#define APUSYS_RESERVED_MEM_START	(0x55000000)
+#define APUSYS_RESERVED_MEM_SZ		(0x1400000)
 #define APUSYS_COREDUMP_SHADOW_MEM_SIZE	0x200000	/* 2M */
 #define APUSYS_MEM_ALIGN		0x10000		/* 64K (minimal size for EMI MPU) */
 #define APUSYS_MEM_LIMIT 		0x90000000	/* max address can APUSYS remap */

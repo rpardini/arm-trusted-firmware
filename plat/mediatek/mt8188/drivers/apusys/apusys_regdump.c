@@ -11,6 +11,7 @@
 #include <lib/utils_def.h>
 #include <mtk_mmap_pool.h>
 #include <platform_def.h>
+#include <apusys_rv.h>
 //#include <mblock.h>
 
 #define VCORE               (SPM_BASE + 0x414)
@@ -30,35 +31,6 @@
  */
 #define NAME_MAX_LEN        30
 #define REGION_MAX_NUM      50
-
-#if 0
-static const mmap_region_t apusys_regdump_mmap[] MTK_MMAP_SECTION = {
-	MAP_REGION_FLAT(APU_ACS_RCX, APU_ACS_RCX_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_ACX0_RPC_LITE, APU_RPCTOP_LITE_ACX0_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_ACX0_CONFIG, APU_ACX0_CONFIG_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_ACS_ACX0, APU_ACS_ACX0_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_SEC_CON, APU_SEC_CON_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_ARETOP_ARE0, APU_ARETOP_ARE0_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_ARETOP_ARE1, APU_ARETOP_ARE1_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_ARETOP_ARE2, APU_ARETOP_ARE2_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_PCUTOP, APU_PCUTOP_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_PLL, APU_PLL_COMMON_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(APU_LOGTOP, APU_LOGTOP_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	{0}
-};
-DECLARE_MTK_MMAP_REGIONS(apusys_regdump_mmap);
-#endif
 
 enum apusys_region_name {
 	APU_MD32_SYSCTRL_RGN,
@@ -315,9 +287,8 @@ static uint32_t region_regdump(uint64_t dst_pa, uint32_t region_idx)
 
 static int is_valid_pa_dram_range(uint64_t addr, unsigned int size)
 {
-#if 0
-	uint64_t res_mem_start = mblock_get_memory_start();
-	uint64_t res_mem_size = mblock_get_memory_size();
+	uint64_t res_mem_start = APUSYS_RESERVED_MEM_START;
+	uint64_t res_mem_size  = APUSYS_RESERVED_MEM_SZ;
 
 	INFO("%s: 0x%llx, 0x%llx, 0x%llx, 0x%x\n",
 		__func__, res_mem_start, res_mem_size, addr, size);
@@ -325,9 +296,6 @@ static int is_valid_pa_dram_range(uint64_t addr, unsigned int size)
 	return (addr >= res_mem_start &&
 		addr < (res_mem_start + res_mem_size) &&
 		(addr + size) < (res_mem_start + res_mem_size));
-#else
-	return true;
-#endif
 }
 
 int apusys_regdump(uint64_t dst_pa, unsigned int buffer_size)
