@@ -46,6 +46,7 @@ MODULES-y += $(MTK_PLAT)/drivers/rtc
 MODULES-y += $(MTK_PLAT)/drivers/spm
 MODULES-y += $(MTK_PLAT)/drivers/timer
 MODULES-y += $(MTK_PLAT)/drivers/uart
+MODULES-y += $(MTK_PLAT)/drivers/usb
 MODULES-y += $(MTK_PLAT)/helpers
 MODULES-y += $(MTK_PLAT)/topology
 ifeq (${MTK_IOT_YOCTO},1)
