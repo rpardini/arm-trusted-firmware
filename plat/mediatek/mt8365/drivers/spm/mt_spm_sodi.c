@@ -15,7 +15,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <mtk_cirq.h>
+#include <mt_cirq.h>
 
 static struct wake_status spm_wakesta; /* record last wakesta */
 static unsigned int resource_usage;
