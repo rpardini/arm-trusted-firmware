@@ -23,6 +23,12 @@
 #include <plat_params.h>
 #endif
 
+#if MTK_IOT_YOCTO
+#include <common/desc_image_load.h>
+#include <uart.h>
+#include <plat_params.h>
+#endif
+
 /* MTK headers */
 #if MTK_SIP_KERNEL_BOOT_ENABLE
 #include <cold_boot.h>
@@ -33,7 +39,7 @@
 IMPORT_SYM(uintptr_t, __RW_START__, RW_START);
 IMPORT_SYM(uintptr_t, __DATA_START__, DATA_START);
 
-#if COREBOOT
+#if defined(COREBOOT) || defined(MTK_IOT_YOCTO)
 static entry_point_info_t bl32_ep_info;
 static entry_point_info_t bl33_ep_info;
 
@@ -112,7 +118,14 @@ void bl31_early_platform_setup2(u_register_t from_bl2,
 				       &console);
 	}
 	bl31_params_parse_helper(from_bl2, &bl32_ep_info, &bl33_ep_info);
+#elif MTK_IOT_YOCTO
+	static console_t console;
+
+	params_early_setup(soc_fw_config);
+	console_8250_register(UART0_BASE, UART_CLOCK, UART_BAUDRATE, &console);
+	bl31_params_parse_helper(from_bl2, &bl32_ep_info, &bl33_ep_info);
 #else
+
 	struct mtk_bl_param_t *p_mtk_bl_param = (struct mtk_bl_param_t *)from_bl2;
 
 	if (p_mtk_bl_param == NULL) {
