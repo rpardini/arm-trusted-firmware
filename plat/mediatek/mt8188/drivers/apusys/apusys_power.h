@@ -9,9 +9,6 @@
 
 #include <platform_def.h>
 
-#define ERIC_DEBUG	(0)
-
-
 enum smc_rcx_pwr_op {
 	SMC_RCX_PWR_AFC_EN = 0,
 	SMC_RCX_PWR_WAKEUP_RPC,
@@ -38,24 +35,6 @@ enum apu_clksrc_id {
 	PLL_DLA,
 	PLL_NUM,
 };
-
-#if 0
-reg = <0 0x10006000 0 0x1000>,		// sys_spm
-      <0 0x10276000 0 0x1000>,		// bcrm_fmem_pdn
-      <0 0x19020000 0 0x1000>,		// apu_rcx
-      <0 0x190e0000 0 0x1000>,		// apu_vcore
-      <0 0x190e1000 0 0x1000>,		// apu_md32_mbox
-      <0 0x190f0000 0 0x1000>,		// apu_rpc
-      <0 0x190f1000 0 0x1000>,		// apu_pcu
-      <0 0x190f2000 0 0x1000>,		// apu_ao_ctl
-      <0 0x190f3000 0 0x1000>,		// apu_pll
-      <0 0x190f4000 0 0x1000>,		// apu_acc
-      <0 0x190f6000 0 0x1000>,		// apu_are0
-      <0 0x190f7000 0 0x1000>,		// apu_are1
-      <0 0x190f8000 0 0x1000>,		// apu_are2
-      <0 0x19100000 0 0x40000>, 	// apu_acx0
-      <0 0x19140000 0 0x1000>;		// apu_acx0_rpc_lite
-#endif
 
 enum apupw_reg {
 	sys_spm,
@@ -275,6 +254,7 @@ static inline void apu_clearl(const unsigned int val, uintptr_t regs)
 }
 
 int apusys_power_init(void);
+int apusys_kernel_apusys_pwr_rcx(uint32_t op);
 
 #endif
 

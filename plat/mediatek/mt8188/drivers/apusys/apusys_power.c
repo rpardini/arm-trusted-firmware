@@ -17,26 +17,6 @@
 #define LOCAL_DEBUG	(1)
 #define MODULE_TAG	"[APUSYS]"
 
-#define ERIC_DEBUG	(0)
-
-#if 0
-reg = <0 0x10006000 0 0x1000>,		// sys_spm
-      <0 0x10276000 0 0x1000>,		// bcrm_fmem_pdn
-      <0 0x19020000 0 0x1000>,		// apu_rcx
-      <0 0x190e0000 0 0x1000>,		// apu_vcore
-      <0 0x190e1000 0 0x1000>,		// apu_md32_mbox
-      <0 0x190f0000 0 0x1000>,		// apu_rpc
-      <0 0x190f1000 0 0x1000>,		// apu_pcu
-      <0 0x190f2000 0 0x1000>,		// apu_ao_ctl
-      <0 0x190f3000 0 0x1000>,		// apu_pll
-      <0 0x190f4000 0 0x1000>,		// apu_acc
-      <0 0x190f6000 0 0x1000>,		// apu_are0
-      <0 0x190f7000 0 0x1000>,		// apu_are1
-      <0 0x190f8000 0 0x1000>,		// apu_are2
-      <0 0x19100000 0 0x40000>, 	// apu_acx0
-      <0 0x19140000 0 0x1000>;		// apu_acx0_rpc_lite
-#endif
-
 static const unsigned int reg_addr[APUPW_MAX_REGS] = {
 	SPM_BASE, BCRM_FMEM_PDN, APU_RCX_BASE, APU_VCORE_BASE, APU_MBOX0_BASE,
 	APU_RPC_BASE, APU_PCU_BASE, APU_AO_CTL_BASE, APU_PLL_BASE, APU_ACC_BASE,
@@ -46,28 +26,7 @@ static const unsigned int reg_addr[APUPW_MAX_REGS] = {
 
 static struct apu_power apupw;
 
-#if 1
-struct mtk_mmap_descriptor {
-	const char *mmap_name;
-	const mmap_region_t *mmap_ptr;
-	const uint32_t mmap_size;
-};
-#define MTK_MMAP_SECTION \
-	__attribute__((used)) \
-	__aligned(sizeof(void *)) \
-	__section(".mtk_mmap_lists")
-
-#define DECLARE_MTK_MMAP_REGIONS(_mmap_array) \
-	static const struct mtk_mmap_descriptor _mtk_mmap_descriptor_##_mmap_array \
-	__attribute__((used)) \
-	__aligned(sizeof(void *)) \
-	__section(".mtk_mmap_pool") \
-	= { \
-		.mmap_name = #_mmap_array, \
-		.mmap_ptr = _mmap_array, \
-		.mmap_size = ARRAY_SIZE(_mmap_array) \
-	};
-
+#if 0
 static const mmap_region_t apusys_power_mmap[] MTK_MMAP_SECTION = {
 //	MAP_REGION_FLAT(APU_RPC_BASE, APU_RPCTOP_SZ,
 //		MT_DEVICE | MT_RW | MT_SECURE),
@@ -80,13 +39,30 @@ static const mmap_region_t apusys_power_mmap[] MTK_MMAP_SECTION = {
 	{0}
 };
 DECLARE_MTK_MMAP_REGIONS(apusys_power_mmap);
-#else
-static const mmap_region_t apusys_power_mmap[] = {
-	MAP_REGION_FLAT(APU_RPC_BASE, APU_RPCTOP_SZ,
-		MT_DEVICE | MT_RW | MT_SECURE),
-	{0}
-};
 #endif
+
+int apusys_kernel_apusys_pwr_rcx(uint32_t op)
+{
+	switch (op) {
+	case SMC_RCX_PWR_AFC_EN:
+		mmio_write_32(APU_RPC_BASE + APU_RPC_TOP_SEL_1,
+				(mmio_read_32(APU_RPC_BASE + APU_RPC_TOP_SEL_1)
+								| (0x1 << 16)));
+		break;
+	case SMC_RCX_PWR_WAKEUP_RPC:
+		mmio_write_32(APU_RPC_BASE + APU_RPC_TOP_CON, 0x00000100);
+		break;
+	case SMC_RCX_PWR_CG_EN:
+		mmio_write_32(APU_VCORE_BASE + APUSYS_VCORE_CG_CLR, 0xFFFFFFFF);
+		mmio_write_32(APU_RCX_BASE + APU_RCX_CG_CLR, 0xFFFFFFFF);
+
+		break;
+	default:
+		ERROR("%s invalid op:%d\n", __func__, op);
+	}
+
+	return 0;
+}
 
 static void get_pll_pcw(uint32_t clk_rate, uint32_t *r1, uint32_t *r2)
 {
@@ -327,11 +303,6 @@ static void __apu_pcu_init(void)
 	apu_writel(APU_PCU_BUCK_ON_SETTLE_TIME,
 			apupw.regs[apu_pcu] + APU_PCU_BUCK_ON_SLE1);
 
-NOTICE("[Eric][%s][%d] APU_PCU_BUCK_ON_SLE0(*0x%08x) = 0x%08x\n",
-	__func__, __LINE__,
-	apupw.regs[apu_pcu] + APU_PCU_BUCK_ON_SLE0,
-	apu_readl(apupw.regs[apu_pcu] + APU_PCU_BUCK_ON_SLE0));
-
 #if LOCAL_DEBUG
 	NOTICE("PCU init %s %d --\n", __func__, __LINE__);
 #endif
@@ -525,11 +496,6 @@ static void __apu_aoc_init(void)
 	/* SRAM_AOC_ISO */
 	apu_writel(0x00000080, apupw.regs[apu_rpc] + APU_RPC_HW_CON);
 	udelay(10);
-
-NOTICE("[Eric][%s][%d] APU_RPC_HW_CON (*0x%08x) = 0x%08x\n",
-	__func__, __LINE__,
-	apupw.regs[apu_rpc] + APU_RPC_HW_CON,
-	apu_readl(apupw.regs[apu_rpc] + APU_RPC_HW_CON));
 
 #if LOCAL_DEBUG
 	NOTICE(MODULE_TAG "[%s][%d] -\n", __func__, __LINE__);
