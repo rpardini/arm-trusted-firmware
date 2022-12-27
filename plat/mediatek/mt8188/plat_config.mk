@@ -37,6 +37,8 @@ ERRATA_A78_2395406 := 1
 
 ifeq (${MTK_IOT_YOCTO},1)
 # True Random Number firmware Interface
+CONFIG_MTK_APUSYS := y
+CONFIG_MTK_APUSYS_RV_SECURE_BOOT = y
 TRNG_SUPPORT := 1
 endif
 
