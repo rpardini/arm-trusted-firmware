@@ -11,15 +11,13 @@
 #include <lib/mtk_init/mtk_init.h>
 
 /* Vendor header */
-//#include <mtk_sip_inc.h>
+#include <mtk_sip_svc.h>
 #include "apusys.h"
+#include "apusys_power.h"
 
 #define LOCAL_DEBUG	(1)
 #define MODULE_TAG	"[APUSYS]"
 
-#define ERIC_DEBUG	(0)
-
-#if ERIC_DEBUG
 /* Weak definitions can be overridden in specific platform */
 #pragma weak start_apusys_devapc_ao
 #pragma weak start_apusys_devapc_rcx
@@ -35,9 +33,7 @@
 
 #pragma weak apusys_rv_setup_secure_mem
 #pragma weak apusys_rv_setup_aee_coredump_mem
-#endif
 #pragma weak apusys_power_init
-#if ERIC_DEBUG
 #pragma weak apusys_kernel_apusys_rv_disable_wdt_isr
 #pragma weak apusys_kernel_apusys_rv_clear_wdt_isr
 #pragma weak apusys_kernel_apusys_rv_cg_gating
@@ -53,6 +49,11 @@
 #pragma weak apusys_kernel_apusys_regdump
 #pragma weak apusys_kernel_apusys_pwr_rcx
 #pragma weak apusys_kernel_apusys_setup_secure_mem
+#pragma weak apusys_kernel_apusys_rv_setup_apu_img_mem
+#pragma weak apusys_kernel_apusys_rv_setup_secure_mem
+#pragma weak apusys_kernel_apusys_rv_setup_aee_coredump_mem
+#pragma weak apusys_kernel_apusys_rv_load_apu_img
+#pragma weak apusys_kernel_apusys_rv_initialize_aee_coredump_buf
 
 int32_t start_apusys_devapc_ao(void)
 {
@@ -130,7 +131,6 @@ int apusys_rv_setup_aee_coredump_mem(uint64_t addr, uint64_t size)
 
 	return -EOPNOTSUPP;
 }
-#endif
 
 int apusys_power_init(void)
 {
@@ -139,7 +139,6 @@ int apusys_power_init(void)
 	return -EOPNOTSUPP;
 }
 
-#if ERIC_DEBUG
 int apusys_kernel_apusys_rv_disable_wdt_isr(void)
 {
 	WARN(MODULE_TAG "%s not support\n", __func__);
@@ -252,49 +251,36 @@ int apusys_kernel_apusys_setup_secure_mem(void)
 	return -EOPNOTSUPP;
 }
 
-static u_register_t apusys_bootloader_handler(u_register_t x1,
-	u_register_t x2,
-	u_register_t x3,
-	u_register_t x4,
-	void *handle,
-	struct smccc_res *smccc_ret)
+int32_t apusys_kernel_apusys_rv_setup_apu_img_mem(uint64_t addr, uint64_t size)
 {
-	uint32_t request_ops;
-	int32_t ret = -EIO;
+	WARN(MODULE_TAG "%s not support\n", __func__);
+	return -EOPNOTSUPP;
+}
 
-	INFO("%s %s\n", MODULE_TAG, __func__);
-	request_ops = (uint32_t)x1;
+int32_t apusys_kernel_apusys_rv_setup_secure_mem(uint64_t addr, uint64_t size)
+{
+	WARN(MODULE_TAG "%s not support\n", __func__);
+	return -EOPNOTSUPP;
+}
 
-	switch (request_ops) {
-	case MTK_APUSYS_SMC_OP_DEVAPC_INIT:
-		ret = start_apusys_devapc_ao();
-		break;
-	case MTK_APUSYS_SMC_OP_APUSYS_RV_INIT:
-		ret = apusys_rv_init();
-		break;
-	case MTK_APUSYS_SMC_OP_APUSYS_RV_SETUP_SECURE_MEM:
-		ret = apusys_rv_setup_secure_mem(x2, x3);
-		break;
-	case MTK_APUSYS_SMC_OP_APUSYS_RV_SETUP_AEE_COREDUMP_MEM:
-		ret = apusys_rv_setup_aee_coredump_mem(x2, x3);
-		break;
-	case MTK_APUSYS_SMC_OP_APUSYS_PWR_INIT:
-		ret = apusys_power_init(x2);
-		break;
-	case MTK_APUSYS_SMC_OP_APUSYS_RV_SETUP_MBOX_MPU:
-		ret = apusys_rv_mbox_mpu_init();
-		break;
-	case MTK_APUSYS_SMC_OP_SECURITY_CTRL_INIT:
-		ret = apusys_security_ctrl_init();
-		break;
-	default:
-		ERROR("%s unknown request_ops = %x\n", MODULE_TAG, request_ops);
-		break;
-	}
-#if LOCAL_DEBUG
-	INFO("%s request_ops = %x, ret = %d\n", MODULE_TAG, request_ops, ret);
-#endif
-	return ret;
+int32_t apusys_kernel_apusys_rv_setup_aee_coredump_mem(uint64_t addr,
+							uint64_t size)
+{
+	WARN(MODULE_TAG "%s not support\n", __func__);
+	return -EOPNOTSUPP;
+}
+
+int32_t apusys_kernel_apusys_rv_load_apu_img(uint64_t apu_secure_info_pa)
+{
+	WARN(MODULE_TAG "%s not support\n", __func__);
+	return -EOPNOTSUPP;
+}
+
+int32_t apusys_kernel_apusys_rv_initialize_aee_coredump_buf(
+							uint64_t regdump_buf_sz)
+{
+	WARN(MODULE_TAG "%s not support\n", __func__);
+	return -EOPNOTSUPP;
 }
 
 static u_register_t apusys_kernel_handler(u_register_t x1,
@@ -390,6 +376,21 @@ static u_register_t apusys_kernel_handler(u_register_t x1,
 	case MTK_APUSYS_KERNEL_OP_APUSYS_SETUP_SECURE_MEM:
 		ret = apusys_kernel_apusys_setup_secure_mem();
 		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_APU_IMG_MEM:
+		ret = apusys_kernel_apusys_rv_setup_apu_img_mem(x2, x3);
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_SECURE_MEM:
+		ret = apusys_kernel_apusys_rv_setup_secure_mem(x2, x3);
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_AEE_COREDUMP_MEM:
+		ret = apusys_kernel_apusys_rv_setup_aee_coredump_mem(x2, x3);
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_LOAD_APU_IMG:
+		ret = apusys_kernel_apusys_rv_load_apu_img(x2);
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_INITIALIZE_AEE_COREDUMP_BUFFER:
+		ret = apusys_kernel_apusys_rv_initialize_aee_coredump_buf(x2);
+		break;
 	default:
 		ERROR("%s unknown request_ops = %x\n", MODULE_TAG, request_ops);
 		break;
@@ -399,9 +400,7 @@ static u_register_t apusys_kernel_handler(u_register_t x1,
 }
 
 /* Register SiP SMC service */
-DECLARE_SMC_HANDLER(MTK_SIP_BL_APUSYS_CONTROL, apusys_bootloader_handler);
 DECLARE_SMC_HANDLER(MTK_SIP_APUSYS_CONTROL, apusys_kernel_handler);
-#endif
 
 /*
  * apusys_init() - Do apu init flow.
@@ -420,11 +419,11 @@ int apusys_init(void)
 	NOTICE("%s %s + \n", MODULE_TAG, __func__);
 #endif
 
-//	apusys_rv_init();
+	apusys_rv_init();
 	apusys_power_init();
-//	start_apusys_devapc_ao();
-//	apusys_security_ctrl_init();
-//	apusys_rv_mbox_mpu_init();
+	start_apusys_devapc_ao();
+	apusys_security_ctrl_init();
+	apusys_rv_mbox_mpu_init();
 
 #if LOCAL_DEBUG
 	NOTICE("%s %s - \n", MODULE_TAG, __func__);
