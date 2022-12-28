@@ -81,6 +81,7 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 	}
 #else
 	console_16550_register(UART0_BASE, UART_CLOCK, UART_BAUDRATE, &console);
+	mt_serial_setbrg(UART0_BASE, UART_CLOCK, UART_BAUDRATE);
 #endif
 
 	NOTICE("MT8195 bl31_setup\n");

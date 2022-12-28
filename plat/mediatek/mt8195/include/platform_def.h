@@ -69,7 +69,7 @@
 #define UART1_BASE			(IO_PHYS + 0x01001200)
 
 #define UART_CLOCK    26000000
-#define UART_BAUDRATE			115200
+#define UART_BAUDRATE			921600
 
 /*******************************************************************************
  * PMIC related constants

@@ -417,10 +417,8 @@ void bl2_el3_early_platform_setup(u_register_t arg0, u_register_t arg1,
 {
 	static console_t console;
 
-	/* Reset UART HIGHSPEED to 0 */
-	mmio_write_16(0x11001124, 0);
-
 	console_16550_register(UART0_BASE, UART_CLOCK, UART_BAUDRATE, &console);
+	mt_serial_setbrg(UART0_BASE, UART_CLOCK, UART_BAUDRATE);
 }
 
 void bl2_el3_plat_arch_setup(void)

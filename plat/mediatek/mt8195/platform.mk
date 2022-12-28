@@ -63,6 +63,7 @@ BL2_SOURCES     += common/desc_image_load.c                           \
                    lib/libc/memset.c                                  \
                    ${MTK_PLAT}/common/mtk_plat_common.c               \
                    ${MTK_PLAT}/drivers/rtc/rtc_common.c               \
+                   ${MTK_PLAT}/drivers/uart/uart.c                    \
                    ${MTK_PLAT}/drivers/wdt/wdt.c                      \
                    ${MTK_PLAT}/drivers/wdt/mt8195/wdt_platform.c      \
                    ${MTK_PLAT_SOC}/aarch64/plat_helpers.S             \
