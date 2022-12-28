@@ -110,3 +110,28 @@ uint32_t mt_console_uart_cg_status(void)
 {
 	return mmio_read_32(UART_CLOCK_GATE_STA) & UART0_CLOCK_GATE_BIT;
 }
+
+#define UART_LCR(uart)              (uart+0xc)
+#define UART_DLL(uart)              (uart+0x0)
+#define UART_DLH(uart)              (uart+0x4)
+#define UART_HIGHSPEED(uart)        (uart+0x24)
+
+void mt_serial_setbrg(volatile unsigned int uart_base, uint32_t uartclk, uint32_t baudrate)
+{
+	unsigned int divisor;
+
+	if (baudrate <= 115200) {
+		mmio_write_16(UART_HIGHSPEED(uart_base), 0);
+		return;
+	}
+
+	divisor = uartclk / (4 * baudrate);
+	if ((uartclk % (4 * baudrate)) >= 2 * baudrate)
+		divisor += 1;
+
+	mmio_write_16(UART_HIGHSPEED(uart_base), 2);
+	mmio_write_32(UART_LCR(uart_base), (mmio_read_32(UART_LCR(uart_base)) | UART_LCR_DLAB));
+	mmio_write_32(UART_DLL(uart_base), (divisor & 0x00ff));
+	mmio_write_32(UART_DLH(uart_base), ((divisor >> 8) & 0x00ff));
+	mmio_write_32(UART_LCR(uart_base), 0x0003);
+}

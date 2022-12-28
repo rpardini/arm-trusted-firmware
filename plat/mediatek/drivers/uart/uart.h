@@ -96,5 +96,6 @@ void mt_uart_save(void);
 void mt_uart_restore(void);
 void mt_console_uart_cg(int on);
 uint32_t mt_console_uart_cg_status(void);
+void mt_serial_setbrg(volatile unsigned int uart_base, uint32_t uartclk, uint32_t baudrate);
 
 #endif /* __UART_H__ */
