@@ -23,10 +23,10 @@ PLAT_INCLUDES := -I.                                              \
                  -I${MTK_PLAT}/common/drivers/dapc                \
                  -I${MTK_PLAT}/drivers/cirq/                      \
                  -I${MTK_PLAT}/drivers/timer/                     \
+                 -I${MTK_PLAT}/drivers/uart/                      \
                  -I${MTK_PLAT_SOC}/drivers/                       \
                  -I${MTK_PLAT_SOC}/drivers/mcdi/                  \
                  -I${MTK_PLAT_SOC}/drivers/spmc/                  \
-                 -I${MTK_PLAT_SOC}/drivers/uart/                  \
                  -I${MTK_PLAT_SOC}/drivers/rtc/                  \
                  -I${MTK_PLAT_SOC}/drivers/pmic/                  \
                  -I${MTK_PLAT_SOC}/drivers/spm/                   \
@@ -64,6 +64,7 @@ BL2_SOURCES     += common/desc_image_load.c                              \
                    ${MTK_PLAT}/common/mtk_plat_common.c                  \
                    ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c               \
                    ${MTK_PLAT}/drivers/rtc/rtc_common.c           \
+                   ${MTK_PLAT}/drivers/uart/uart.c                       \
                    ${MTK_PLAT_SOC}/aarch64/plat_helpers.S                \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c             \
                    ${MTK_PLAT_SOC}/bl2_plat_setup.c                      \
@@ -86,6 +87,7 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    ${MTK_PLAT}/common/mtk_gic_v3_main.c                  \
                    ${MTK_PLAT_SOC}/plat_mt_cirq.c                        \
                    ${MTK_PLAT}/drivers/rtc/rtc_common.c           \
+                   ${MTK_PLAT}/drivers/uart/uart.c                       \
                    ${MTK_PLAT}/common/drivers/emi_mpu/emi_mpu.c          \
                    ${MTK_PLAT}/common/drivers/dapc/devapc.c              \
                    ${MTK_PLAT}/common/mtk_rgu.c                          \
@@ -105,7 +107,6 @@ BL31_SOURCES    += common/desc_image_load.c                              \
                    ${MTK_PLAT_SOC}/drivers/spm/mt_spm_pmic_wrap.c        \
                    ${MTK_PLAT_SOC}/drivers/spm/mt_spm_mc_dsr.c           \
                    ${MTK_PLAT_SOC}/drivers/spmc/mtspmc.c                 \
-                   ${MTK_PLAT_SOC}/drivers/uart/uart.c                   \
                    ${MTK_PLAT_SOC}/plat_mt_gic.c                         \
                    ${MTK_PLAT_SOC}/bl31_plat_setup.c                     \
                    ${MTK_PLAT_SOC}/drivers/pmic/pmic.c                   \

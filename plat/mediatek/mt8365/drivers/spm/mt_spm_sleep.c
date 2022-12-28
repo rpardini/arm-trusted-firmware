@@ -230,7 +230,7 @@ void go_to_sleep_before_wfi_no_resume(void)
 	__spm_send_cpu_wakeup_event();
 
 	if (is_infra_pdn(pwrctrl->pcm_flags))
-		mtk_uart_save();
+		mt_uart_save();
 
 	INFO("cpu%d: \"%s\", wakesrc = 0x%x, pcm_con1 = 0x%x\n",
 	     cpu, spm_get_firmware_version(), pwrctrl->wake_src,
@@ -251,7 +251,7 @@ static void go_to_sleep_after_wfi(void)
 	mt_pmic_resume();
 
 	if (is_infra_pdn(pwrctrl->pcm_flags))
-		mtk_uart_restore();
+		mt_uart_restore();
 
 	if (!pwrctrl->wdt_disable) {
 		plat_rgu_resume_notify();
