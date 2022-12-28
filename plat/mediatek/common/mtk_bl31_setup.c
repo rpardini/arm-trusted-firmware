@@ -26,6 +26,7 @@
 #if MTK_IOT_YOCTO
 #include <common/desc_image_load.h>
 #include <uart.h>
+#include <drivers/ti/uart/uart_16550.h>
 #include <plat_params.h>
 #endif
 
@@ -122,7 +123,8 @@ void bl31_early_platform_setup2(u_register_t from_bl2,
 	static console_t console;
 
 	params_early_setup(soc_fw_config);
-	console_8250_register(UART0_BASE, UART_CLOCK, UART_BAUDRATE, &console);
+	console_16550_register(UART0_BASE, UART_CLOCK, UART_BAUDRATE, &console);
+	mt_serial_setbrg(UART0_BASE, UART_CLOCK, UART_BAUDRATE);
 	bl31_params_parse_helper(from_bl2, &bl32_ep_info, &bl33_ep_info);
 #else
 

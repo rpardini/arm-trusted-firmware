@@ -64,6 +64,7 @@ MODULES-y += $(MTK_PLAT_SOC)/drivers/spm
 endif
 
 PLAT_BL_COMMON_SOURCES := common/desc_image_load.c \
+			  drivers/ti/uart/aarch64/16550_console.S \
 			  lib/bl_aux_params/bl_aux_params.c
 
 BL31_SOURCES += drivers/delay_timer/delay_timer.c \

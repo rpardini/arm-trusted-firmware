@@ -26,6 +26,7 @@
 #include <platform_def.h>
 #include <uart.h>
 #include <mmc/mtk-sd.h>
+#include <drivers/ti/uart/uart_16550.h>
 
 
 void pwrap_init(void);
@@ -376,7 +377,8 @@ void bl2_el3_early_platform_setup(u_register_t arg0, u_register_t arg1,
 {
 	static console_t console;
 
-	console_8250_register(UART0_BASE, UART_CLOCK, UART_BAUDRATE, &console);
+	console_16550_register(UART0_BASE, UART_CLOCK, UART_BAUDRATE, &console);
+	mt_serial_setbrg(UART0_BASE, UART_CLOCK, UART_BAUDRATE);
 }
 
 void bl2_el3_plat_arch_setup(void)
