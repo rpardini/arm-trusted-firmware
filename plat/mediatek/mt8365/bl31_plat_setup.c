@@ -73,6 +73,7 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 	params_early_setup(arg1);
 
 	console_16550_register(UART0_BASE, UART_CLOCK, UART_BAUDRATE, &console);
+	mt_serial_setbrg(UART0_BASE, UART_CLOCK, UART_BAUDRATE);
 
 	bl31_params_parse_helper(arg0, &bl32_ep_info, &bl33_ep_info);
 }

@@ -80,7 +80,7 @@
 #define UART2_BASE    (IO_PHYS + 0x01004000)
 
 #define UART_CLOCK    26000000
-#define UART_BAUDRATE 115200
+#define UART_BAUDRATE 921600
 
 /*******************************************************************************
  * System counter frequency related constants
