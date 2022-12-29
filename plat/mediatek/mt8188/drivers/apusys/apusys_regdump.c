@@ -15,9 +15,6 @@
 //#include <mblock.h>
 
 #define VCORE               (SPM_BASE + 0x414)
-#define PWR_RDY             (APU_RPCTOP + 0x44)
-#define VCORE_CLK_CRTL      (APU_RCX_VCORE_CONFIG)
-#define RCX_CLK_CRTL        (APU_RCX_CONFIG)
 #define ACX0_PWR_RDY        (APU_ACX0_RPC_LITE + 0x44)
 #define ACX0_CLK_CRTL       (APU_ACX0_CONFIG)
 

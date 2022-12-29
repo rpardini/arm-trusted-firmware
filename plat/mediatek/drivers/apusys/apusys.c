@@ -50,11 +50,7 @@
 #pragma weak apusys_kernel_apusys_regdump
 #pragma weak apusys_kernel_apusys_pwr_rcx
 #pragma weak apusys_kernel_apusys_setup_secure_mem
-#pragma weak apusys_kernel_apusys_rv_setup_apu_img_mem
-#pragma weak apusys_kernel_apusys_rv_setup_secure_mem
-#pragma weak apusys_kernel_apusys_rv_setup_aee_coredump_mem
-#pragma weak apusys_kernel_apusys_rv_load_apu_img
-#pragma weak apusys_kernel_apusys_rv_initialize_aee_coredump_buf
+#pragma weak apusys_kernel_apusys_rv_load_image
 
 int32_t start_apusys_devapc_ao(void)
 {
@@ -252,33 +248,8 @@ int apusys_kernel_apusys_setup_secure_mem(void)
 	return -EOPNOTSUPP;
 }
 
-int32_t apusys_kernel_apusys_rv_setup_apu_img_mem(uint64_t addr, uint64_t size)
-{
-	WARN(MODULE_TAG "%s not support\n", __func__);
-	return -EOPNOTSUPP;
-}
-
-int32_t apusys_kernel_apusys_rv_setup_secure_mem(uint64_t addr, uint64_t size)
-{
-	WARN(MODULE_TAG "%s not support\n", __func__);
-	return -EOPNOTSUPP;
-}
-
-int32_t apusys_kernel_apusys_rv_setup_aee_coredump_mem(uint64_t addr,
-							uint64_t size)
-{
-	WARN(MODULE_TAG "%s not support\n", __func__);
-	return -EOPNOTSUPP;
-}
-
-int32_t apusys_kernel_apusys_rv_load_apu_img(uint64_t apu_secure_info_pa)
-{
-	WARN(MODULE_TAG "%s not support\n", __func__);
-	return -EOPNOTSUPP;
-}
-
-int32_t apusys_kernel_apusys_rv_initialize_aee_coredump_buf(
-							uint64_t regdump_buf_sz)
+int32_t apusys_kernel_apusys_rv_load_image(uint64_t res_mem_start,
+			uint64_t res_mem_size, uint64_t apusys_part_size)
 {
 	WARN(MODULE_TAG "%s not support\n", __func__);
 	return -EOPNOTSUPP;
@@ -377,25 +348,9 @@ static u_register_t apusys_kernel_handler(u_register_t x1,
 	case MTK_APUSYS_KERNEL_OP_APUSYS_SETUP_SECURE_MEM:
 		ret = apusys_kernel_apusys_setup_secure_mem();
 		break;
-	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_APU_IMG_MEM:
-		ret = apusys_kernel_apusys_rv_setup_apu_img_mem(x2, x3);
-		if (ret == 0) {
-			//call verified ( x2, x4) - x2 : base address, x4, image
-			char *ptr =(char *)(x2 + x4 - 256);
-			ret = apusys_image_verify((uint64_t*)x2, (uint32_t)x4, ptr);
-		}
-		break;
-	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_SECURE_MEM:
-		ret = apusys_kernel_apusys_rv_setup_secure_mem(x2, x3);
-		break;
-	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_AEE_COREDUMP_MEM:
-		ret = apusys_kernel_apusys_rv_setup_aee_coredump_mem(x2, x3);
-		break;
-	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_LOAD_APU_IMG:
-		ret = apusys_kernel_apusys_rv_load_apu_img(x2);
-		break;
-	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_INITIALIZE_AEE_COREDUMP_BUFFER:
-		ret = apusys_kernel_apusys_rv_initialize_aee_coredump_buf(x2);
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_LOAD_IMAGE:
+		ret = apusys_kernel_apusys_rv_load_image((uint64_t)x2,
+						(uint64_t)x3, (uint64_t)x4);
 		break;
 	default:
 		ERROR("%s unknown request_ops = %x\n", MODULE_TAG, request_ops);

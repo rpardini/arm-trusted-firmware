@@ -139,16 +139,27 @@
 #define PWR_STATUS(x)		bits_get(x, 1, 0)
 #define ROUNDUP(a, b)		(((a) + ((b)-1)) & ~((b)-1))
 
-#define APUSYS_RESERVED_MEM_START	(0x55000000)
-#define APUSYS_RESERVED_MEM_SZ		(0x1400000)
-#define APUSYS_COREDUMP_SHADOW_MEM_SIZE	0x200000	/* 2M */
-#define APUSYS_MEM_ALIGN		0x10000		/* 64K (minimal size for EMI MPU) */
-#define APUSYS_MEM_LIMIT 		0x90000000	/* max address can APUSYS remap */
-#define APUSYS_FW_ALIGN 		16 		/* for mdla dma alignment limitation */
-#define APUSYS_IOVA_PAGE 		0x4000		/* secure iova page table size*/
+/* platform dependent address */
+#define APUSYS_COREDUMP_SHADOW_MEM_SIZE	(0x200000)	/* 2M */
+#define APUSYS_MEM_ALIGN		(0x10000)		/* 64K (minimal size for EMI MPU) */
+#define APUSYS_MEM_IOVA_ALIGN		(0x100000)	/* 1M (for secure iova mapping) */
+#define APUSYS_MEM_LIMIT 		(0x90000000)	/* max address can APUSYS remap */
+#define APUSYS_FW_ALIGN 		(16) 		/* for mdla dma alignment limitation */
+#define APUSYS_IOVA_PAGE 		(0x4000)		/* secure iova page table size*/
 
 /* image name definition */
 #define IMG_NAME_APUSYS_A	"tinysys-apusys-RV33_A"
+
+/* below setting aligned dts */
+#define APUSYS_RESERVED_MEM_START	(0x55000000)
+#define APUSYS_RESERVED_MEM_SZ		(0x1400000)
+
+#define UP_CODE_BUF_SZ			(0x100000)
+#define UP_COREDUMP_BUF_SZ		(0x180000)
+#define MDLA_COREDUMP_BUF_SZ		(0x0)
+#define MVPU_COREDUMP_BUF_SZ		(0x0)
+#define MVPU_SEC_COREDUMP_BUF_SZ	(0x0)
+#define REGDUMP_BUF_SZ			(0x10000)
 
 /******************************************************************************
  * 1. New entries must be appended to the end of the structure.

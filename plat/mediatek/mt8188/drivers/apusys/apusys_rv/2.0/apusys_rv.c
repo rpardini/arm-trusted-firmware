@@ -17,7 +17,7 @@
 #include "apusys_rv_coredump.h"
 #include "apusys_rv_mbox_mpu.h"
 #include "apusys_rv_reg_map.h"
-
+#include "apusys_secure_boot.h"
 #if ENABLE_APUSYS_EMI_PROTECTION
 #include <emi_mpu.h>
 #endif
@@ -46,6 +46,7 @@ static bool apusys_rv_reset_mp_called;
 static bool apusys_rv_setup_boot_called;
 static bool apusys_rv_start_mp_called;
 static bool apusys_rv_stop_mp_called;
+static bool apusys_rv_load_image_called;
 static uint64_t apusys_rv_sec_buf_pa;
 static uint64_t apusys_rv_sec_buf_iova;
 static uint64_t apusys_rv_sec_buf_sz;
@@ -72,240 +73,6 @@ static bool is_rcx_mtcmos_on(void)
 		__func__, pwr_ready, vcore_clk_ctrl, rcx_clk_ctrl);
 
 	return false;
-}
-
-int apusys_kernel_apusys_rv_setup_reviser(void)
-{
-	uint32_t boundary = 0;
-	uint32_t iommu_en = 1;
-	uint32_t code_da = apusys_rv_sec_buf_iova;
-
-	INFO("%s: enter\n", __func__);
-
-	if (apusys_rv_setup_reviser_called) {
-		ERROR("%s: only permitted called once\n", __func__);
-		return -EPERM;
-	}
-
-	if (apusys_rv_sec_buf_iova == 0) {
-		ERROR("%s: apusys_rv_sec_buf_iova = 0\n", __func__);
-		return -ENOMEM;
-	}
-
-	apusys_rv_setup_reviser_called = true;
-
-	spin_lock(&apusys_rv_lock);
-
-	/* setup boundary */
-	mmio_write_32(USERFW_CTXT, CFG_4GB_SEL_EN | boundary);
-	mmio_write_32(SECUREFW_CTXT, CFG_4GB_SEL_EN | boundary);
-
-	/* setup iommu ctrl(mmu_ctrl | mmu_en) */
-	mmio_write_32(UP_IOMMU_CTRL, MMU_CTRL_LOCK | MMU_CTRL |
-		(iommu_en << MMU_EN_SHIFT));
-
-	/* setup ns/domain */
-	mmio_write_32(UP_NORMAL_DOMAIN_NS, (UP_NORMAL_DOMAIN << UP_DOMAIN_SHIFT) |
-		(UP_NORMAL_NS << UP_NS_SHIFT));
-	mmio_write_32(UP_PRI_DOMAIN_NS, (UP_PRI_DOMAIN << UP_DOMAIN_SHIFT) |
-		(UP_PRI_NS << UP_NS_SHIFT));
-
-	/* setup VDRAM for privilege mode */
-	/* vld=1, partial_enable=1, thread_num=1 */
-	mmio_write_32(UP_CORE0_VABASE0, VLD | PARTIAL_ENABLE |
-		(1 << THREAD_NUM_SHIFT));
-	/* for 34 bit mva */
-	mmio_write_32(UP_CORE0_MVABASE0, VASIZE_1MB | (code_da >> 2));
-
-	/* setup VDRAM for normal mode */
-	/* vld=1, partial_enable=1 */
-	mmio_write_32(UP_CORE0_VABASE1, VLD | PARTIAL_ENABLE |
-		(0 << THREAD_NUM_SHIFT));
-	/* for 34 bit mva */
-	mmio_write_32(UP_CORE0_MVABASE1, VASIZE_1MB | (code_da >> 2));
-
-#ifdef CONFIG_MTK_APUSYS_RV_MNOC_OST_DBG
-	mmio_write_32(APU_NOC_MNI_RCX + 0x16c, 0x8080);
-	mmio_write_32(APU_NOC_MNI_RCX + 0x1ac, 0xffffffff);
-#endif
-
-	spin_unlock(&apusys_rv_lock);
-
-	return 0;
-}
-
-int apusys_kernel_apusys_rv_reset_mp(void)
-{
-	INFO("%s: enter\n", __func__);
-
-	if (apusys_rv_reset_mp_called) {
-		ERROR("%s: only permitted called once\n", __func__);
-		return -EPERM;
-	}
-
-	apusys_rv_reset_mp_called = true;
-
-	spin_lock(&apusys_rv_lock);
-
-	/* reset uP */
-	mmio_write_32(MD32_SYS_CTRL, 0x0);
-
-	udelay(10);
-
-	/* enable IOMMU only(iommu_tr_en = 1/acp_en = 0) */
-	mmio_write_32(MD32_SYS_CTRL, MD32_G2B_CG_EN | MD32_DBG_EN |
-		MD32_DM_AWUSER_IOMMU_EN | MD32_DM_ARUSER_IOMMU_EN |
-		MD32_PM_AWUSER_IOMMU_EN | MD32_PM_ARUSER_IOMMU_EN |
-		MD32_SOFT_RSTN);
-
-	/* md32 clk enable */
-	mmio_write_32(MD32_CLK_EN, 0x1);
-	/* set up_wake_host_mask0 for wdt irq */
-	mmio_write_32(UP_WAKE_HOST_MASK0, WDT_IRQ_EN);
-	/* set up_wake_host_mask1 for mbox irq */
-	mmio_write_32(UP_WAKE_HOST_MASK1, MBOX0_IRQ_EN | MBOX1_IRQ_EN |
-		MBOX2_IRQ_EN);
-
-	spin_unlock(&apusys_rv_lock);
-
-	return 0;
-}
-
-int apusys_kernel_apusys_rv_setup_boot(void)
-{
-	uint32_t code_da = apusys_rv_sec_buf_iova;
-
-	INFO("%s: enter\n", __func__);
-
-	if (apusys_rv_setup_boot_called) {
-		ERROR("%s: only permitted called once\n", __func__);
-		return -EPERM;
-	}
-
-	if (apusys_rv_sec_buf_iova == 0) {
-		ERROR("%s: apusys_rv_sec_buf_iova = 0\n", __func__);
-		return -ENOMEM;
-	}
-
-	apusys_rv_setup_boot_called = true;
-
-	spin_lock(&apusys_rv_lock);
-
-	mmio_write_32(MD32_BOOT_CTRL, code_da);
-
-	/* set predefined MPU region for cache access */
-	mmio_write_32(MD32_PRE_DEFINE, (PREDEFINE_CACHE_TCM << PREDEF_1G_OFS) |
-		(PREDEFINE_CACHE << PREDEF_2G_OFS) |
-		(PREDEFINE_CACHE << PREDEF_3G_OFS) |
-		(PREDEFINE_CACHE << PREDEF_4G_OFS));
-
-	spin_unlock(&apusys_rv_lock);
-
-	return 0;
-}
-
-int apusys_kernel_apusys_rv_start_mp(void)
-{
-	INFO("%s: enter\n", __func__);
-
-	if (apusys_rv_start_mp_called) {
-		ERROR("%s: only permitted called once\n", __func__);
-		return -EPERM;
-	}
-
-	apusys_rv_start_mp_called = true;
-
-	spin_lock(&apusys_rv_lock);
-
-	/* release runstall */
-	mmio_write_32(MD32_RUNSTALL, 0x0);
-
-	spin_unlock(&apusys_rv_lock);
-
-	return 0;
-}
-
-int apusys_kernel_apusys_rv_stop_mp(void)
-{
-	INFO("%s: enter\n", __func__);
-
-	if (apusys_rv_stop_mp_called) {
-		ERROR("%s: only permitted called once\n", __func__);
-		return -EPERM;
-	}
-
-	if (mmio_read_32(WDT_INT) != 1) {
-		ERROR("%s: WDT not timeout\n", __func__);
-		return -EPERM;
-	}
-
-	apusys_rv_stop_mp_called = true;
-
-	spin_lock(&apusys_rv_lock);
-
-	/* hold runstall */
-	mmio_write_32(MD32_RUNSTALL, 0x1);
-
-	spin_unlock(&apusys_rv_lock);
-
-	return 0;
-}
-
-static int is_valid_pa_dram_range(uint64_t addr, uint64_t size)
-{
-	uint64_t res_mem_start = APUSYS_RESERVED_MEM_START;
-	uint64_t res_mem_size  = APUSYS_RESERVED_MEM_SZ;
-
-	return (addr >= res_mem_start &&
-		addr < (res_mem_start + res_mem_size) &&
-		(addr + size) < (res_mem_start + res_mem_size));
-}
-
-int apusys_rv_mbox_mpu_init(void)
-{
-	int i;
-
-	for (i = 0; i < APU_MBOX_NUM; i++) {
-		mmio_write_32(APU_MBOX_FUNC_CFG(i),
-			MBOX_CTRL_LOCK |
-			(mbox_mpu_setting_tab[i].no_mpu << MBOX_NO_MPU_SHIFT));
-		mmio_write_32(APU_MBOX_DOMAIN_CFG(i),
-		MBOX_CTRL_LOCK |
-		(mbox_mpu_setting_tab[i].rx_ns << MBOX_RX_NS_SHIFT) |
-		(mbox_mpu_setting_tab[i].rx_domain << MBOX_RX_DOMAIN_SHIFT) |
-		(mbox_mpu_setting_tab[i].tx_ns << MBOX_TX_NS_SHIFT) |
-		(mbox_mpu_setting_tab[i].tx_domain << MBOX_TX_DOMAIN_SHIFT));
-	}
-
-	return 0;
-}
-
-/*
- * apusys_rv driver initialization (from bootloader)
- *
- * initialize static variables
- *
- */
-int apusys_rv_init(void)
-{
-	INFO("%s: enter\n", __func__);
-
-	apusys_rv_setup_reviser_called = 0;
-	apusys_rv_reset_mp_called = 0;
-	apusys_rv_setup_boot_called = 0;
-	apusys_rv_start_mp_called = 0;
-	apusys_rv_stop_mp_called = 0;
-
-	apusys_rv_sec_buf_pa = 0;
-	apusys_rv_sec_buf_iova = 0;
-	apusys_rv_sec_buf_sz = 0;
-	apusys_rv_aee_coredump_buf_pa = 0;
-	apusys_rv_aee_coredump_buf_sz = 0;
-
-	apusys_secure_info = NULL;
-	apusys_aee_coredump_info = NULL;
-
-	return 0;
 }
 
 int apusys_kernel_apusys_rv_disable_wdt_isr(void)
@@ -846,13 +613,249 @@ exit:
 	return 0;
 }
 
+static bool is_valid_pa_dram_range(uint64_t res_mem_start,
+			uint64_t res_mem_size, uint64_t addr, uint64_t size)
+{
+	if ((res_mem_start != APUSYS_RESERVED_MEM_START) ||
+		(res_mem_size != APUSYS_RESERVED_MEM_SZ)) {
+		return false;
+	}
+
+	INFO("%s: 0x%llx, 0x%llx, 0x%llx, 0x%llx\n",
+		__func__, res_mem_start, res_mem_size, addr, size);
+
+	return (addr >= res_mem_start &&
+		addr < (res_mem_start + res_mem_size) &&
+		(addr + size) < (res_mem_start + res_mem_size));
+}
+
+static int apusys_rv_ns_mem_emi_protect_en(uint64_t pa, uint32_t size)
+{
+#if ENABLE_APUSYS_EMI_PROTECTION
+    /*
+     * setup EMI MPU
+     * domain 0: APMCU
+     * domain 5: APUSYS
+     */
+    struct emi_region_info_t region_info;
+
+    region_info.start = (unsigned long long) pa;
+    region_info.end = (unsigned long long) (pa + size) - 1;
+    region_info.region = APUSYS_NS_FW_EMI_REGION;
+
+    SET_ACCESS_PERMISSION(region_info.apc, UNLOCK,
+                          FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                          FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                          FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                          FORBIDDEN, FORBIDDEN, FORBIDDEN, SEC_RW_NSEC_R);
+
+    return emi_mpu_set_protection(&region_info);
+#else
+    return 0;
+#endif
+}
+
+static int apusys_rv_sec_mem_emi_protect_en(uint64_t pa, uint32_t size)
+{
+#if ENABLE_APUSYS_EMI_PROTECTION
+    /*
+     * setup EMI MPU
+     * domain 0: APMCU
+     * domain 5: APUSYS
+     */
+    struct emi_region_info_t region_info;
+
+    region_info.start = (unsigned long long) pa;
+    region_info.end = (unsigned long long) (pa + size) - 1;
+    region_info.region = APUSYS_SEC_FW_EMI_REGION;
+
+    SET_ACCESS_PERMISSION(region_info.apc, UNLOCK,
+                          FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                          FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                          FORBIDDEN, FORBIDDEN, SEC_RW,    FORBIDDEN,
+                          FORBIDDEN, FORBIDDEN, FORBIDDEN, SEC_RW);
+
+    return emi_mpu_set_protection(&region_info);
+#else
+    return 0;
+#endif
+}
+
 /*
- * apusys_rv load apusys image (from kernel)
- *
- * 1. load apusys image
- *
+ * apusys_rv_setup_apu_img_mem() - setup apu img region
  */
-int apusys_kernel_apusys_rv_load_apu_img(uint64_t apu_secure_info_pa)
+static int apusys_rv_setup_apu_img_mem(uint64_t addr, uint64_t size)
+{
+	int ret;
+
+	apu_img_base_pa = addr;
+	apu_img_base_sz = size;
+
+	INFO("%s: addr = 0x%llx, size = 0x%llx\n", __func__, addr, size);
+
+	/* create apusys img mapping */
+	ret = mmap_add_dynamic_region((unsigned long long)addr,
+				(uintptr_t)addr,
+				(size_t)round_up(size, PAGE_SIZE),
+				(unsigned int)MT_MEMORY | MT_RW | MT_SECURE);
+	if (ret) {
+		ERROR("%s: mmap_add_dynamic_region() fail, ret=0x%x\n",
+			__func__, ret);
+		return ret;
+	}
+
+#if ENABLE_APUSYS_EMI_PROTECTION
+	apusys_rv_ns_mem_emi_protect_en(addr, size);
+#endif
+
+	return 0;
+}
+
+/*
+ * apusys_rv_setup_apu_img_mem() - setup apu sec mem region
+ *
+ * 1. dynamic map secure memory
+ * 2. get iova of secure memory from iommu mapping
+ */
+static int apusys_rv_setup_secure_mem(uint64_t addr, uint64_t size)
+{
+	int ret;
+
+	apusys_rv_sec_buf_pa = addr;
+	apusys_rv_sec_buf_sz = size;
+
+	INFO("%s: addr = 0x%llx, size = 0x%llx, realsize = 0x%lx\n",
+		__func__, addr, size,
+		(size_t)round_up(size + APUSYS_IOVA_PAGE, PAGE_SIZE));
+
+	/* create mapping */
+	ret = mmap_add_dynamic_region((unsigned long long)addr,
+				(uintptr_t)addr,
+				(size_t)round_up(size + APUSYS_IOVA_PAGE,
+							PAGE_SIZE),
+				(unsigned int)MT_MEMORY | MT_RW | MT_SECURE);
+	if (ret) {
+		ERROR("%s: mmap_add_dynamic_region() fail, ret=0x%x\n",
+			__func__, ret);
+		return ret;
+	}
+
+	apusys_secure_info = \
+		(struct apusys_secure_info_t *)(addr + CODE_BUF_SIZE);
+
+#ifdef CONFIG_MTK_APUSYS_RV_SECURE_BOOT
+	/* get iova */
+
+	INFO("%s: GET SECURE IOVA\n", __func__);
+	apusys_rv_sec_buf_iova = mtk_iommu_linear_secure_map(addr,
+		size, SECURE_MEM, MOD_APU_FW);
+
+	if (apusys_rv_sec_buf_iova == 0) {
+		ERROR("%s: Fail to map iova, addr(0x%llx), size(0x%llx)\n",
+			__func__, addr, size);
+		mmap_remove_dynamic_region((uintptr_t)addr, (size_t)size);
+		return -ENOMEM;
+	}
+#else
+	apusys_rv_sec_buf_iova = 0x200000;
+#endif
+
+#if ENABLE_APUSYS_EMI_PROTECTION
+	apusys_rv_sec_mem_emi_protect_en(addr, size);
+#endif
+
+	return 0;
+}
+
+/*
+ * apusys_rv_setup_aee_coredump_mem() - setup apu aee coredump mem region
+ */
+static int apusys_rv_setup_aee_coredump_mem(uint64_t addr, uint64_t size)
+{
+	int ret;
+
+	apusys_rv_aee_coredump_buf_pa = addr;
+	apusys_rv_aee_coredump_buf_sz = size;
+
+	INFO("%s: addr = 0x%llx, size = 0x%llx\n",
+		__func__, addr, size);
+
+	/* create mapping */
+	ret = mmap_add_dynamic_region((unsigned long long)addr,
+				(uintptr_t)addr,
+				(size_t)round_up(size, PAGE_SIZE),
+				(unsigned int)MT_MEMORY | MT_RW | MT_NS);
+	if (ret) {
+		ERROR("%s: mmap_add_dynamic_region() fail, ret=0x%x\n",
+			__func__, ret);
+		return ret;
+	}
+
+	apusys_aee_coredump_info = (struct apusys_aee_coredump_info_t *)addr;
+
+	return 0;
+}
+
+/*
+ * apusys_rv_fill_sec_info() - fill sec_info struct
+ */
+static void apusys_rv_fill_sec_info(uint64_t apusys_part_size,
+					struct apusys_secure_info_t *sec_info)
+{
+	size_t tmp_ofs = 0;
+	uint64_t coredump_buf_sz = 0, sec_mem_sz = 0;
+
+	/* fill in sec_info structure */
+	sec_info->up_code_buf_ofs = 0;
+	sec_info->up_code_buf_sz = UP_CODE_BUF_SZ;
+	tmp_ofs = sec_info->up_code_buf_ofs + sec_info->up_code_buf_sz;
+	INFO("%s: up_code_buf_sz is 0x%x\n",
+		__func__, sec_info->up_code_buf_sz);
+
+	sec_info->up_coredump_ofs = apusys_part_size - (0x200) + tmp_ofs;
+	sec_info->up_coredump_sz = UP_COREDUMP_BUF_SZ;
+	tmp_ofs = sec_info->up_coredump_ofs + sec_info->up_coredump_sz;
+	INFO("%s: up_coredump_ofs is 0x%x, up_coredump_sz is 0x%x\n",
+		__func__,
+		sec_info->up_coredump_ofs, sec_info->up_coredump_sz);
+
+	sec_info->mdla_coredump_ofs = tmp_ofs;
+	sec_info->mdla_coredump_sz = MDLA_COREDUMP_BUF_SZ;
+	tmp_ofs = sec_info->mdla_coredump_ofs + sec_info->mdla_coredump_sz;
+	INFO("%s: mdla_coredump_ofs is 0x%x, mdla_coredump_sz is 0x%x\n",
+		__func__,
+		sec_info->mdla_coredump_ofs, sec_info->mdla_coredump_sz);
+
+	sec_info->mvpu_coredump_ofs = tmp_ofs;
+	sec_info->mvpu_coredump_sz = MVPU_COREDUMP_BUF_SZ;
+	tmp_ofs = sec_info->mvpu_coredump_ofs + sec_info->mvpu_coredump_sz;
+	INFO("%s: mvpu_coredump_ofs is 0x%x, mvpu_coredump_sz is 0x%x\n",
+		__func__,
+		sec_info->mvpu_coredump_ofs, sec_info->mvpu_coredump_sz);
+
+	sec_info->mvpu_sec_coredump_ofs = tmp_ofs;
+	sec_info->mvpu_sec_coredump_sz = MVPU_SEC_COREDUMP_BUF_SZ;
+	INFO("%s: mvpu_sec_coredump_ofs is 0x%x, mvpu_sec_coredump_sz is 0x%x\n",
+		__func__,
+		sec_info->mvpu_sec_coredump_ofs,
+		sec_info->mvpu_sec_coredump_sz);
+
+	coredump_buf_sz = sec_info->up_coredump_sz +
+				sec_info->mdla_coredump_sz +
+				sec_info->mvpu_coredump_sz +
+				sec_info->mvpu_sec_coredump_sz;
+
+	sec_mem_sz = ROUNDUP(apusys_part_size - (0x200) +
+				sec_info->up_code_buf_sz + coredump_buf_sz,
+				APUSYS_MEM_IOVA_ALIGN);
+
+	sec_info->total_sz = sec_mem_sz;
+}
+
+/*
+ * apusys_rv_load_apu_img() - load apusys image
+ */
+static int apusys_rv_load_apu_img(uint64_t apu_secure_info_pa)
 {
 	unsigned int apusys_pmsize, apusys_xsize;
 	void *apusys_pmimg, *apusys_ximg;
@@ -884,7 +887,7 @@ int apusys_kernel_apusys_rv_load_apu_img(uint64_t apu_secure_info_pa)
 	hdr = (void *)apu_img_base_pa + (0x200);
 	INFO("%s: hdr->magic is 0x%x\n", __func__, hdr->magic);
 	img_size = (void *)apu_img_base_pa + (0x4);
-	INFO("%s: apu_partition_sz is 0x%x\n", __func__, *img_size );
+	INFO("%s: apu_partition_sz is 0x%x\n", __func__, *img_size);
 	memcpy(tmp_addr, ((void *)apu_img_base_pa + (0x200)), (*img_size));
 
 	hdr = tmp_addr;
@@ -1009,301 +1012,90 @@ int apusys_kernel_apusys_rv_load_apu_img(uint64_t apu_secure_info_pa)
 	INFO("copy uP firmware to code buffer\n");
 
 	/* initialize apusys sec_info */
-	memcpy((void *)(sec_info->up_code_buf_ofs +
-			sec_info->up_code_buf_sz + apusys_rv_sec_buf_pa),
-		(void *)apu_secure_info_pa, sizeof(*sec_info));
+	memcpy((void *)(apusys_rv_sec_buf_pa + sec_info->up_code_buf_ofs +
+			sec_info->up_code_buf_sz),
+			(void *)sec_info, sizeof(*sec_info));
 	INFO("initialize apusys sec_info\n");
 	INFO("apusys_kernel_apusys_rv_load_apu_img end\n");
 
-	flush_dcache_range(apu_secure_info_pa, sizeof(*sec_info));
-	flush_dcache_range(apusys_rv_sec_buf_pa, apusys_rv_sec_buf_sz);
-
-	return 0;
-}
-
-int apusys_rv_ns_mem_emi_protect_en(uint64_t pa, uint32_t size)
-{
-#if ENABLE_APUSYS_EMI_PROTECTION
-    /*
-     * setup EMI MPU
-     * domain 0: APMCU
-     * domain 5: APUSYS
-     */
-    struct emi_region_info_t region_info;
-
-    if (!is_valid_pa_dram_range(pa, size)) {
-	    ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
-		    __func__, pa, size);
-	    return -EINVAL;
-    }
-
-    region_info.start = (unsigned long long) pa;
-    region_info.end = (unsigned long long) (pa + size) - 1;
-    region_info.region = APUSYS_NS_FW_EMI_REGION;
-
-    SET_ACCESS_PERMISSION(region_info.apc, UNLOCK,
-                          FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
-                          FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
-                          FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
-                          FORBIDDEN, FORBIDDEN, FORBIDDEN, SEC_RW_NSEC_R);
-
-    return emi_mpu_set_protection(&region_info);
-#else
-    return 0;
-#endif
-}
-
-/*
- * apusys_rv get apusys.sig.img for kernel
- *
- *  dynamic map secure apusys.sig.img memory
- *
- */
-int apusys_kernel_apusys_rv_setup_apu_img_mem(uint64_t addr, uint64_t size)
-{
-	int ret;
-
-	if (!is_valid_pa_dram_range(addr, size)) {
-		ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
-			__func__, addr, size);
-		return -EINVAL;
-	}
-
-	apu_img_base_pa = addr;
-	apu_img_base_sz = size;
-
-	INFO("%s: addr = 0x%llx, size = 0x%llx\n", __func__, addr, size);
-
-	/* create apusys img mapping */
-	ret = mmap_add_dynamic_region((unsigned long long)addr,
-				(uintptr_t)addr,
-				(size_t)round_up(size, PAGE_SIZE),
-				(unsigned int)MT_MEMORY | MT_RW | MT_SECURE);
-	if (ret) {
-		ERROR("%s: mmap_add_dynamic_region() fail, ret=0x%x\n",
-			__func__, ret);
-		return ret;
-	}
-
-	apusys_rv_ns_mem_emi_protect_en(addr, size);
-
-	return 0;
-}
-
-static int apusys_rv_sec_mem_emi_protect_en(uint64_t pa, uint32_t size)
-{
-#if ENABLE_APUSYS_EMI_PROTECTION
-    /*
-     * setup EMI MPU
-     * domain 0: APMCU
-     * domain 5: APUSYS
-     */
-    struct emi_region_info_t region_info;
-
-    if (!is_valid_pa_dram_range(pa, size)) {
-	    ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
-		    __func__, pa, size);
-	    return -EINVAL;
-    }
-
-    region_info.start = (unsigned long long) pa;
-    region_info.end = (unsigned long long) (pa + size) - 1;
-    region_info.region = APUSYS_SEC_FW_EMI_REGION;
-
-    SET_ACCESS_PERMISSION(region_info.apc, UNLOCK,
-                          FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
-                          FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
-                          FORBIDDEN, FORBIDDEN, SEC_RW,    FORBIDDEN,
-                          FORBIDDEN, FORBIDDEN, FORBIDDEN, SEC_RW);
-
-    return emi_mpu_set_protection(&region_info);
-#else
-    return 0;
-#endif
-}
-
-/*
- * apusys_rv secure memory mapping (from kernel)
- *
- * 1. dynamic map secure memory
- * 2. get iova of secure memory from iommu mapping
- *
- */
-int apusys_kernel_apusys_rv_setup_secure_mem(uint64_t addr, uint64_t size)
-{
-	int ret;
-
-	if (!is_valid_pa_dram_range(addr, size)) {
-		ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
-			__func__, addr, size);
-		return -EINVAL;
-	}
-
-	apusys_rv_sec_buf_pa = addr;
-	apusys_rv_sec_buf_sz = size;
-
-	INFO("%s: addr = 0x%llx, size = 0x%llx, realsize = 0x%lx\n",
-		__func__, addr, size,
-		(size_t)round_up(size + APUSYS_IOVA_PAGE, PAGE_SIZE));
-
-	/* create mapping */
-	ret = mmap_add_dynamic_region((unsigned long long)addr,
-			(uintptr_t)addr,
-			(size_t)round_up(size + APUSYS_IOVA_PAGE, PAGE_SIZE),
-			(unsigned int)MT_MEMORY | MT_RW | MT_SECURE);
-	if (ret) {
-		ERROR("%s: mmap_add_dynamic_region() fail, ret=0x%x\n",
-			__func__, ret);
-		return ret;
-	}
-
-	apusys_secure_info = (struct apusys_secure_info_t *)
-						(addr + CODE_BUF_SIZE);
-
-#ifdef CONFIG_MTK_APUSYS_RV_SECURE_BOOT
-	/* get iova */
-
-	INFO("%s: GET SECURE IOVA\n", __func__);
-	apusys_rv_sec_buf_iova = mtk_iommu_linear_secure_map(addr,
-		size, SECURE_MEM, MOD_APU_FW);
-
-	if (apusys_rv_sec_buf_iova == 0) {
-		ERROR("%s: Fail to map iova, addr(0x%llx), size(0x%llx)\n",
-			__func__, addr, size);
-		mmap_remove_dynamic_region((uintptr_t)addr, (size_t)size);
-		return -ENOMEM;
-	}
-#else
-	apusys_rv_sec_buf_iova = 0x200000;
-#endif
-
-	apusys_rv_sec_mem_emi_protect_en(addr, size);
+	flush_dcache_range((uintptr_t)apu_secure_info_pa, sizeof(*sec_info));
+	flush_dcache_range((uintptr_t)apusys_rv_sec_buf_pa, apusys_rv_sec_buf_sz);
 
 	return 0;
 }
 
 /*
- * apusys_rv aee_coredump memory mapping (from kernel)
- *
- * dynamic map aee_coredump memory
- *
+ * apusys_rv_initialize_aee_coredump_buf() -  initialize_aee_coredump memory
  */
-int apusys_kernel_apusys_rv_setup_aee_coredump_mem(uint64_t addr, uint64_t size)
-{
-	int ret;
-
-	if (!is_valid_pa_dram_range(addr, size)) {
-		ERROR("%s: invalid addr(0x%llx), size(0x%llx)\n",
-			__func__, addr, size);
-		return -EINVAL;
-	}
-
-	apusys_rv_aee_coredump_buf_pa = addr;
-	apusys_rv_aee_coredump_buf_sz = size;
-
-	INFO("%s: addr = 0x%llx, size = 0x%llx\n",
-		__func__, addr, size);
-
-	/* create mapping */
-	ret = mmap_add_dynamic_region((unsigned long long)addr, /* PA */
-				(uintptr_t)addr, /* VA */
-				(size_t)round_up(size, PAGE_SIZE), /* size */
-				(unsigned int)MT_MEMORY | MT_RW | MT_NS); /* attrs */
-	if (ret) {
-		ERROR("%s: mmap_add_dynamic_region() fail, ret=0x%x\n",
-			__func__, ret);
-		return ret;
-	}
-
-	apusys_aee_coredump_info = (struct apusys_aee_coredump_info_t *) addr;
-
-	return 0;
-}
-
-/*
- * apusys_rv initialize_aee_coredump (from kernel)
- *
- * initialize_aee_coredump memory
- *
- */
-int apusys_kernel_apusys_rv_initialize_aee_coredump_buf(uint64_t regdump_buf_sz)
+static int apusys_rv_initialize_aee_coredump_buf(
+					struct apusys_secure_info_t *sec_info)
 {
 	struct apusys_aee_coredump_info_t * aee_coredump_info =
-		(struct apusys_aee_coredump_info_t *) \
-			apusys_rv_aee_coredump_buf_pa;
+					((struct apusys_aee_coredump_info_t *)
+						apusys_rv_aee_coredump_buf_pa);
 
 	aee_coredump_info->up_coredump_ofs = sizeof(*aee_coredump_info);
-	aee_coredump_info->up_coredump_sz = apusys_secure_info->up_coredump_sz;
-	INFO("up_coredump_sz is 0x%x\n", apusys_secure_info->up_coredump_sz);
-	aee_coredump_info->regdump_ofs =
-				aee_coredump_info->up_coredump_ofs +
-				aee_coredump_info->up_coredump_sz;
-	aee_coredump_info->regdump_sz = regdump_buf_sz;
-	aee_coredump_info->mdla_coredump_ofs =
-				aee_coredump_info->regdump_ofs +
-				aee_coredump_info->regdump_sz;
-	aee_coredump_info->mdla_coredump_sz =
-				apusys_secure_info->mdla_coredump_sz;
+	aee_coredump_info->up_coredump_sz = sec_info->up_coredump_sz;
+	aee_coredump_info->regdump_ofs = aee_coredump_info->up_coredump_ofs +
+					aee_coredump_info->up_coredump_sz;
+	aee_coredump_info->regdump_sz = REGDUMP_BUF_SZ;
+	aee_coredump_info->mdla_coredump_ofs = aee_coredump_info->regdump_ofs +
+						aee_coredump_info->regdump_sz;
+	aee_coredump_info->mdla_coredump_sz = sec_info->mdla_coredump_sz;
 	aee_coredump_info->mvpu_coredump_ofs =
-				aee_coredump_info->mdla_coredump_ofs +
-				aee_coredump_info->mdla_coredump_sz;
-	aee_coredump_info->mvpu_coredump_sz =
-				apusys_secure_info->mvpu_coredump_sz;
+		aee_coredump_info->mdla_coredump_ofs +
+		aee_coredump_info->mdla_coredump_sz;
+	aee_coredump_info->mvpu_coredump_sz = sec_info->mvpu_coredump_sz;
 	aee_coredump_info->mvpu_sec_coredump_ofs =
-				aee_coredump_info->mvpu_coredump_ofs +
-				aee_coredump_info->mvpu_coredump_sz;
+		aee_coredump_info->mvpu_coredump_ofs +
+		aee_coredump_info->mvpu_coredump_sz;
 	aee_coredump_info->mvpu_sec_coredump_sz =
-				apusys_secure_info->mvpu_sec_coredump_sz;
+		sec_info->mvpu_sec_coredump_sz;
 
 	aee_coredump_info->up_xfile_ofs =
-				aee_coredump_info->mvpu_sec_coredump_ofs +
-				aee_coredump_info->mvpu_sec_coredump_sz;
-	aee_coredump_info->up_xfile_sz = apusys_secure_info->up_xfile_sz;
+		aee_coredump_info->mvpu_sec_coredump_ofs +
+		aee_coredump_info->mvpu_sec_coredump_sz;
+	aee_coredump_info->up_xfile_sz = sec_info->up_xfile_sz;
 	aee_coredump_info->mdla_xfile_ofs =
-				aee_coredump_info->up_xfile_ofs +
-				aee_coredump_info->up_xfile_sz;
-	aee_coredump_info->mdla_xfile_sz = apusys_secure_info->mdla_xfile_sz;
+		aee_coredump_info->up_xfile_ofs +
+		aee_coredump_info->up_xfile_sz;
+	aee_coredump_info->mdla_xfile_sz = sec_info->mdla_xfile_sz;
 	aee_coredump_info->mvpu_xfile_ofs =
-				aee_coredump_info->mdla_xfile_ofs +
-				aee_coredump_info->mdla_xfile_sz;
-	aee_coredump_info->mvpu_xfile_sz = apusys_secure_info->mvpu_xfile_sz;
+		aee_coredump_info->mdla_xfile_ofs +
+		aee_coredump_info->mdla_xfile_sz;
+	aee_coredump_info->mvpu_xfile_sz = sec_info->mvpu_xfile_sz;
 	aee_coredump_info->mvpu_sec_xfile_ofs =
-				aee_coredump_info->mvpu_xfile_ofs +
-				aee_coredump_info->mvpu_xfile_sz;
-	aee_coredump_info->mvpu_sec_xfile_sz =
-				apusys_secure_info->mvpu_sec_xfile_sz;
+		aee_coredump_info->mvpu_xfile_ofs +
+		aee_coredump_info->mvpu_xfile_sz;
+	aee_coredump_info->mvpu_sec_xfile_sz = sec_info->mvpu_sec_xfile_sz;
 
-	INFO("copy uP xfile to aee_coredump buffer\n");
 	/* copy uP xfile to aee_coredump buffer */
+	INFO("copy uP xfile to aee_coredump buffer\n");
 	memcpy((void *)(apusys_rv_aee_coredump_buf_pa +
 				aee_coredump_info->up_xfile_ofs),
-	       (void *)(apusys_rv_sec_buf_pa +
-				apusys_secure_info->up_xfile_ofs),
-	       apusys_secure_info->up_xfile_sz);
+		(void *)(apusys_rv_sec_buf_pa + sec_info->up_xfile_ofs),
+		sec_info->up_xfile_sz);
 
 	/* copy mdla xfile to aee_coredump buffer */
 	INFO("copy mdla xfile to aee_coredump buffer\n");
 	memcpy((void *)(apusys_rv_aee_coredump_buf_pa +
-			aee_coredump_info->mdla_xfile_ofs),
-	       (void *)(apusys_rv_sec_buf_pa +
-			apusys_secure_info->mdla_xfile_ofs),
-	       apusys_secure_info->mdla_xfile_sz);
+				aee_coredump_info->mdla_xfile_ofs),
+		(void *)(apusys_rv_sec_buf_pa + sec_info->mdla_xfile_ofs),
+		sec_info->mdla_xfile_sz);
 
 	/* copy mvpu xfile to aee_coredump buffer */
 	INFO("copy mvpu xfile to aee_coredump buffer\n");
 	memcpy((void *)(apusys_rv_aee_coredump_buf_pa +
-			aee_coredump_info->mvpu_xfile_ofs),
-	       (void *)(apusys_rv_sec_buf_pa +
-			apusys_secure_info->mvpu_xfile_ofs),
-		apusys_secure_info->mvpu_xfile_sz);
+				aee_coredump_info->mvpu_xfile_ofs),
+		(void *)(apusys_rv_sec_buf_pa + sec_info->mvpu_xfile_ofs),
+		sec_info->mvpu_xfile_sz);
 
 	/* copy mvpu_sec xfile to aee_coredump buffer */
 	INFO("copy mvpu_sec xfile to aee_coredump buffer\n");
 	memcpy((void *)(apusys_rv_aee_coredump_buf_pa +
 			aee_coredump_info->mvpu_sec_xfile_ofs),
-	       (void *)(apusys_rv_sec_buf_pa +
-			apusys_secure_info->mvpu_sec_xfile_ofs),
-	       apusys_secure_info->mvpu_sec_xfile_sz);
+		(void *)(apusys_rv_sec_buf_pa + sec_info->mvpu_sec_xfile_ofs),
+		sec_info->mvpu_sec_xfile_sz);
 
 	if (apusys_aee_coredump_info->up_xfile_sz == 0) {
 		ERROR("%s: apusys_aee_coredump_info->up_xfile_sz == 0\n",
@@ -1311,7 +1103,6 @@ int apusys_kernel_apusys_rv_initialize_aee_coredump_buf(uint64_t regdump_buf_sz)
 		mmap_remove_dynamic_region(
 			(uintptr_t)apusys_rv_aee_coredump_buf_pa,
 			(size_t)apusys_rv_aee_coredump_buf_sz);
-
 		return -EINVAL;
 	}
 	INFO("%s: apusys_aee_coredump_info = 0x%p, up_coredump_ofs = 0x%x\n",
@@ -1324,3 +1115,384 @@ int apusys_kernel_apusys_rv_initialize_aee_coredump_buf(uint64_t regdump_buf_sz)
 	return 0;
 }
 
+int apusys_kernel_apusys_rv_setup_reviser(void)
+{
+	uint32_t boundary = 0;
+	uint32_t iommu_en = 1;
+	uint32_t code_da = apusys_rv_sec_buf_iova;
+
+	INFO("%s: enter\n", __func__);
+
+	if (apusys_rv_setup_reviser_called) {
+		ERROR("%s: only permitted called once\n", __func__);
+		return -EPERM;
+	}
+
+	if (apusys_rv_sec_buf_iova == 0) {
+		ERROR("%s: apusys_rv_sec_buf_iova = 0\n", __func__);
+		return -ENOMEM;
+	}
+
+	apusys_rv_setup_reviser_called = true;
+
+	spin_lock(&apusys_rv_lock);
+
+	/* setup boundary */
+	mmio_write_32(USERFW_CTXT, CFG_4GB_SEL_EN | boundary);
+	mmio_write_32(SECUREFW_CTXT, CFG_4GB_SEL_EN | boundary);
+
+	/* setup iommu ctrl(mmu_ctrl | mmu_en) */
+	mmio_write_32(UP_IOMMU_CTRL, MMU_CTRL_LOCK | MMU_CTRL |
+		(iommu_en << MMU_EN_SHIFT));
+
+	/* setup ns/domain */
+	mmio_write_32(UP_NORMAL_DOMAIN_NS, (UP_NORMAL_DOMAIN << UP_DOMAIN_SHIFT) |
+		(1 << UP_NS_SHIFT));
+	mmio_write_32(UP_PRI_DOMAIN_NS, (UP_PRI_DOMAIN << UP_DOMAIN_SHIFT) |
+		(0 << UP_NS_SHIFT));
+
+	/* setup VDRAM for privilege mode */
+	/* vld=1, partial_enable=1, thread_num=1 */
+	mmio_write_32(UP_CORE0_VABASE0, VLD | PARTIAL_ENABLE |
+		(1 << THREAD_NUM_SHIFT));
+	/* for 34 bit mva */
+	mmio_write_32(UP_CORE0_MVABASE0, VASIZE_1MB | (code_da >> 2));
+
+	/* setup VDRAM for normal mode */
+	/* vld=1, partial_enable=1 */
+	mmio_write_32(UP_CORE0_VABASE1, VLD | PARTIAL_ENABLE |
+		(0 << THREAD_NUM_SHIFT));
+	/* for 34 bit mva */
+	mmio_write_32(UP_CORE0_MVABASE1, VASIZE_1MB | (code_da >> 2));
+
+#ifdef CONFIG_MTK_APUSYS_RV_MNOC_OST_DBG
+	mmio_write_32(APU_NOC_MNI_RCX + 0x16c, 0x8080);
+	mmio_write_32(APU_NOC_MNI_RCX + 0x1ac, 0xffffffff);
+#endif
+
+	spin_unlock(&apusys_rv_lock);
+
+	return 0;
+}
+
+int apusys_kernel_apusys_rv_reset_mp(void)
+{
+	INFO("%s: enter\n", __func__);
+
+	if (apusys_rv_reset_mp_called) {
+		ERROR("%s: only permitted called once\n", __func__);
+		return -EPERM;
+	}
+
+	apusys_rv_reset_mp_called = true;
+
+	spin_lock(&apusys_rv_lock);
+
+	/* reset uP */
+	mmio_write_32(MD32_SYS_CTRL, 0x0);
+
+	udelay(10);
+
+	/* enable IOMMU only(iommu_tr_en = 1/acp_en = 0) */
+	mmio_write_32(MD32_SYS_CTRL, MD32_G2B_CG_EN | MD32_DBG_EN |
+		MD32_DM_AWUSER_IOMMU_EN | MD32_DM_ARUSER_IOMMU_EN |
+		MD32_PM_AWUSER_IOMMU_EN | MD32_PM_ARUSER_IOMMU_EN |
+		MD32_SOFT_RSTN);
+
+	/* md32 clk enable */
+	mmio_write_32(MD32_CLK_EN, 0x1);
+	/* set up_wake_host_mask0 for wdt irq */
+	mmio_write_32(UP_WAKE_HOST_MASK0, WDT_IRQ_EN);
+	/* set up_wake_host_mask1 for mbox irq */
+	mmio_write_32(UP_WAKE_HOST_MASK1, MBOX0_IRQ_EN | MBOX1_IRQ_EN |
+		MBOX2_IRQ_EN);
+
+	spin_unlock(&apusys_rv_lock);
+
+	return 0;
+}
+
+int apusys_kernel_apusys_rv_setup_boot(void)
+{
+	uint32_t code_da = apusys_rv_sec_buf_iova;
+
+	INFO("%s: enter\n", __func__);
+
+	if (apusys_rv_setup_boot_called) {
+		ERROR("%s: only permitted called once\n", __func__);
+		return -EPERM;
+	}
+
+	if (apusys_rv_sec_buf_iova == 0) {
+		ERROR("%s: apusys_rv_sec_buf_iova = 0\n", __func__);
+		return -ENOMEM;
+	}
+
+	apusys_rv_setup_boot_called = true;
+
+	spin_lock(&apusys_rv_lock);
+
+	mmio_write_32(MD32_BOOT_CTRL, code_da);
+
+	/* set predefined MPU region for cache access */
+	mmio_write_32(MD32_PRE_DEFINE, (PREDEFINE_CACHE_TCM << PREDEF_1G_OFS) |
+		(PREDEFINE_CACHE << PREDEF_2G_OFS) |
+		(PREDEFINE_CACHE << PREDEF_3G_OFS) |
+		(PREDEFINE_CACHE << PREDEF_4G_OFS));
+
+	spin_unlock(&apusys_rv_lock);
+
+	return 0;
+}
+
+int apusys_kernel_apusys_rv_start_mp(void)
+{
+	INFO("%s: enter\n", __func__);
+
+	if (apusys_rv_start_mp_called) {
+		ERROR("%s: only permitted called once\n", __func__);
+		return -EPERM;
+	}
+
+	apusys_rv_start_mp_called = true;
+
+	spin_lock(&apusys_rv_lock);
+
+	/* release runstall */
+	mmio_write_32(MD32_RUNSTALL, 0x0);
+
+	spin_unlock(&apusys_rv_lock);
+
+	return 0;
+}
+
+int apusys_kernel_apusys_rv_stop_mp(void)
+{
+	INFO("%s: enter\n", __func__);
+
+	if (apusys_rv_stop_mp_called) {
+		ERROR("%s: only permitted called once\n", __func__);
+		return -EPERM;
+	}
+
+	if (mmio_read_32(WDT_INT) != 1) {
+		ERROR("%s: WDT not timeout\n", __func__);
+		return -EPERM;
+	}
+
+	apusys_rv_stop_mp_called = true;
+
+	spin_lock(&apusys_rv_lock);
+
+	/* hold runstall */
+	mmio_write_32(MD32_RUNSTALL, 0x1);
+
+	spin_unlock(&apusys_rv_lock);
+
+	return 0;
+}
+
+int apusys_rv_mbox_mpu_init(void)
+{
+	int i;
+
+	for (i = 0; i < APU_MBOX_NUM; i++) {
+		mmio_write_32(APU_MBOX_FUNC_CFG(i),
+			MBOX_CTRL_LOCK |
+			(mbox_mpu_setting_tab[i].no_mpu << MBOX_NO_MPU_SHIFT));
+		mmio_write_32(APU_MBOX_DOMAIN_CFG(i),
+			MBOX_CTRL_LOCK |
+			(mbox_mpu_setting_tab[i].rx_ns << MBOX_RX_NS_SHIFT) |
+			(mbox_mpu_setting_tab[i].rx_domain << MBOX_RX_DOMAIN_SHIFT) |
+			(mbox_mpu_setting_tab[i].tx_ns << MBOX_TX_NS_SHIFT) |
+			(mbox_mpu_setting_tab[i].tx_domain << MBOX_TX_DOMAIN_SHIFT));
+
+		INFO("%s: 0x%x = 0x%x, 0x%x = 0x%x\n", __func__,
+			APU_MBOX_FUNC_CFG(i), mmio_read_32(APU_MBOX_FUNC_CFG(i)),
+			APU_MBOX_DOMAIN_CFG(i), mmio_read_32(APU_MBOX_DOMAIN_CFG(i)));
+	}
+
+	return 0;
+}
+
+/*
+ * apusys_rv driver initialization (from atf)
+ *
+ * initialize static variables
+ *
+ */
+int apusys_rv_init(void)
+{
+	INFO("%s: enter\n", __func__);
+
+	apusys_rv_setup_reviser_called = 0;
+	apusys_rv_reset_mp_called = 0;
+	apusys_rv_setup_boot_called = 0;
+	apusys_rv_start_mp_called = 0;
+	apusys_rv_stop_mp_called = 0;
+	apusys_rv_load_image_called = 0;
+
+	apu_img_base_pa = 0;
+	apu_img_base_sz = 0;
+
+	apusys_rv_sec_buf_pa = 0;
+	apusys_rv_sec_buf_iova = 0;
+	apusys_rv_sec_buf_sz = 0;
+	apusys_rv_aee_coredump_buf_pa = 0;
+	apusys_rv_aee_coredump_buf_sz = 0;
+
+	apusys_secure_info = NULL;
+	apusys_aee_coredump_info = NULL;
+
+	return 0;
+}
+
+
+/*
+ * apusys_kernel_apusys_rv_load_image() - public api for apusys secure boot flow
+ * @apusys_part_size: apu fw size
+ *
+ * APU map three mem region in ATF for diff usage. The memory layout is
+ * described as below:
+ *
+ *             PA                            offset (ALIGN)
+ *
+ *  1|apu_img_base_pa            || -- || 0 (APUSYS_MEM_ALIGN)
+ *  1|                           || -- ||
+ *  1|sec_info_pa                || -- || apusys_part_size (APUSYS_MEM_ALIGN)
+ *  1|                           || -- ||
+ *  2|sec_mem_addr_pa            || -- || sec_mem_addr_ofs
+ *  2|                           || -- || (APUSYS_MEM_IOVA_ALIGN)
+ *  2|                           || -- ||
+ *  3|aee_coredump_mem_addr_pa   || -- || sec_mem_addr_ofs + sec_mem_size +
+ *  3|                           || -- ||       APUSYS_IOVA_PAGE
+ *  3|                           || -- || (APUSYS_MEM_IOVA_ALIGN)
+ *
+ *
+ * @return: 0 if success, otherwise failed
+ */
+int32_t apusys_kernel_apusys_rv_load_image(uint64_t res_mem_start,
+			uint64_t res_mem_size, uint64_t apusys_part_size)
+{
+	struct apusys_secure_info_t *sec_info = NULL;
+	struct apusys_aee_coredump_info_t *aee_coredump_info = NULL;
+	size_t tmp_ofs = 0;
+	size_t ret = 0;
+	uint64_t sec_info_pa = 0, sec_info_mem_sz = 0;
+	uint64_t sec_mem_addr_pa = 0, sec_mem_sz = 0, sec_mem_addr_ofs = 0;
+	uint64_t xfile_buf_sz = 0, coredump_buf_sz = 0, regdump_buf_sz = 0;
+	uint64_t aee_coredump_mem_addr_pa = 0, aee_coredump_mem_size = 0;
+	char *sig = NULL;
+
+	if (apusys_rv_load_image_called) {
+		ERROR("%s: only permitted called once\n", __func__);
+		return -EPERM;
+	}
+	apusys_rv_load_image_called = true;
+
+	apu_img_base_pa = APUSYS_RESERVED_MEM_START;
+	if (!is_valid_pa_dram_range(res_mem_start, res_mem_size,
+					apu_img_base_pa, apusys_part_size)) {
+		ERROR("%s: invalid res_mem_start(0x%llx), res_mem_size(0x%llx), addr(0x%llx), size(0x%llx)\n",
+			__func__, res_mem_start, res_mem_size,
+			apu_img_base_pa, apusys_part_size);
+		return -EINVAL;
+	}
+	tmp_ofs = ROUNDUP(apusys_part_size, APUSYS_MEM_ALIGN);
+
+	sec_info_pa = apu_img_base_pa + tmp_ofs;
+	sec_info_mem_sz = ROUNDUP(sizeof(struct apusys_secure_info_t),
+					APUSYS_MEM_ALIGN);
+	tmp_ofs += sec_info_mem_sz;
+
+	sec_mem_addr_ofs = ROUNDUP(tmp_ofs, APUSYS_MEM_IOVA_ALIGN);
+	sec_mem_addr_pa = apu_img_base_pa + sec_mem_addr_ofs;
+	apu_img_base_sz = sec_mem_addr_ofs;
+
+	INFO("%s: apu_img_base_pa is 0x%llx\n",
+		__func__, apu_img_base_pa);
+	INFO("%s: sec_info_pa is 0x%llx, sec_info_mem_sz is 0x%llx\n",
+		__func__, sec_info_pa, sec_info_mem_sz);
+	INFO("%s: sec_mem_addr_pa is 0x%llx\n",
+		__func__, sec_mem_addr_pa);
+
+	/* map non-sec apu mem region */
+	ret = apusys_rv_setup_apu_img_mem(apu_img_base_pa, apu_img_base_sz);
+	if (ret) {
+		ERROR("%s: apusys_rv_setup_apu_img_mem failed, ret(%d)\n",
+			__func__, (int)ret);
+		return ret;
+	}
+
+	/* fill in dts property sec_info */
+	sec_info = (struct apusys_secure_info_t *)sec_info_pa;
+	apusys_rv_fill_sec_info(apusys_part_size, sec_info);
+
+	/* verify img */
+	sig = (char *)(apu_img_base_pa + apusys_part_size - 256);
+
+	ret = apusys_image_verify((uint64_t *)apu_img_base_pa,
+					(uint32_t)apusys_part_size, sig);
+	if (ret) {
+		ERROR("%s: apusys_image_verify failed, ret(%d)\n",
+			__func__, (int)ret);
+		return ret;
+	}
+
+	/* map sec apu mem region */
+	sec_mem_sz = sec_info->total_sz;
+	ret = apusys_rv_setup_secure_mem(sec_mem_addr_pa, sec_mem_sz);
+	if (ret) {
+		ERROR("%s: apusys_rv_setup_secure_mem failed, ret(%d)\n",
+			__func__, (int)ret);
+		return ret;
+	}
+
+	/* load apu img */
+	ret = apusys_rv_load_apu_img(sec_info_pa);
+	if (ret) {
+		ERROR("%s: apusys_rv_load_apu_img failed, ret(%d)\n",
+			__func__, (int)ret);
+		return ret;
+	}
+
+	/* prepare & map aee coredump mem region */
+	xfile_buf_sz = sec_info->up_xfile_sz + sec_info->mdla_xfile_sz +
+			sec_info->mvpu_xfile_sz + sec_info->mvpu_sec_xfile_sz;
+	coredump_buf_sz = sec_info->up_coredump_sz +
+				sec_info->mdla_coredump_sz +
+				sec_info->mvpu_coredump_sz +
+				sec_info->mvpu_sec_coredump_sz;
+	regdump_buf_sz = REGDUMP_BUF_SZ;
+
+	INFO("%s: xfile_buf_sz = 0x%llx, sizeof(*aee_coredump_info) = 0x%llx, coredump_buf_sz = 0x%llx\n",
+		__func__, xfile_buf_sz,
+		(uint64_t)sizeof(*aee_coredump_info), coredump_buf_sz);
+
+	INFO("%s: regdump_buf_sz is 0x%llx\n", __func__, regdump_buf_sz);
+
+	aee_coredump_mem_addr_pa = apusys_rv_sec_buf_pa +
+					ROUNDUP(sec_mem_sz + APUSYS_IOVA_PAGE,
+						APUSYS_MEM_ALIGN);
+	aee_coredump_mem_size = ROUNDUP(sizeof(*aee_coredump_info) +
+					xfile_buf_sz +coredump_buf_sz +
+					regdump_buf_sz, APUSYS_MEM_ALIGN);
+
+	ret = apusys_rv_setup_aee_coredump_mem(aee_coredump_mem_addr_pa,
+						aee_coredump_mem_size);
+	if (ret) {
+		ERROR("%s: apusys_rv_setup_aee_coredump_mem failed, ret(%d)\n",
+			__func__, (int)ret);
+		return ret;
+	}
+
+	/* init aee coredump buf info */
+	apusys_rv_initialize_aee_coredump_buf(sec_info);
+	if (ret) {
+		ERROR("%s: apusys_rv_initialize_aee_coredump_buf failed, ret(%d)\n",
+			__func__, (int)ret);
+		return ret;
+	}
+
+	return 0;
+}

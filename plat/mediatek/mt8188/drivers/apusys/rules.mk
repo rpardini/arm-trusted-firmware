@@ -15,6 +15,7 @@ LOCAL_SRCS-$(CONFIG_MTK_APUSYS) += $(LOCAL_DIR)/apusys_security_ctrl_plat.c
 MTK_APUSYS_RV_VERSION := 2.0
 
 PLAT_INCLUDES += -I${LOCAL_DIR}
+PLAT_INCLUDES += -I$(MTK_PLAT)/drivers/apusys/apusys_rv/2.0
 PLAT_INCLUDES += -I$(MTK_PLAT)/drivers/apusys/devapc
 
 $(eval $(call MAKE_MODULE,$(MODULE),$(LOCAL_SRCS-y),$(MTK_BL)))
