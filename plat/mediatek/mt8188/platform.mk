@@ -81,6 +81,13 @@ BL31_SOURCES += drivers/delay_timer/delay_timer.c \
 ifeq (${MTK_IOT_YOCTO},1)
 BL31_LIBS += ${LIBBASE}
 include ${MTK_PLAT_SOC}/platform_bl2.mk
+include ${MTK_PLAT}/secure-boot.mk
+
+# Use the EFUSE HWID as HUK
+# Warning: Unsafe for secure storage
+ifeq (${HUK_EFUSE_HWID},1)
+TF_CFLAGS += -DHUK_EFUSE_HWID
+endif
 endif
 include plat/mediatek/build_helpers/mtk_build_helpers_epilogue.mk
 
