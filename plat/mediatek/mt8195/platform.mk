@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021-2022, MediaTek Inc. All rights reserved.
+# Copyright (c) 2021-2023, MediaTek Inc. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,7 +12,6 @@ include plat/mediatek/build_helpers/mtk_build_helpers.mk
 
 PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/common/drivers/                    \
-                 -I${MTK_PLAT}/common/lpm/                        \
                  -I${MTK_PLAT}/drivers/apusys/secure_boot/         \
                  -I${MTK_PLAT}/drivers/apusys/secure_boot/include/ \
                  -I${MTK_PLAT}/drivers/cirq/                      \
@@ -29,6 +28,7 @@ PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/drivers/wdt/                       \
                  -I${MTK_PLAT}/include/                           \
                  -I${MTK_PLAT_SOC}/drivers/                       \
+                 -I${MTK_PLAT}/include/lpm/                       \
                  -I${MTK_PLAT_SOC}/drivers/apusys/                \
                  -I${MTK_PLAT_SOC}/drivers/apusys/apusys_rv/2.0   \
                  -I${MTK_PLAT_SOC}/drivers/dcm                    \
