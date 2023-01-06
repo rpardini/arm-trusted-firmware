@@ -1381,8 +1381,8 @@ signed int pwrap_init(void)
 	/* Force SPI in normal mode in FPGA */
 	WRAP_WR32(PMIF_SPI_PMIF_SPI_MODE_CTRL, WRAP_RD32(PMIF_SPI_PMIF_SPI_MODE_CTRL) | 0x1 << 7);
 #else
-	/* Set SPI mode controlled by srclk_en and srvol_en instead of pmif_rdy */
-	WRAP_WR32(PMIF_SPI_PMIF_SPI_MODE_CTRL, WRAP_RD32(PMIF_SPI_PMIF_SPI_MODE_CTRL) |  0x3 << 10);
+	/* Set SPI mode controlled by srclk_en instead of pmif_rdy */
+	WRAP_WR32(PMIF_SPI_PMIF_SPI_MODE_CTRL, WRAP_RD32(PMIF_SPI_PMIF_SPI_MODE_CTRL) |  0x1 << 10);
 	WRAP_WR32(PMIF_SPI_PMIF_SPI_MODE_CTRL, WRAP_RD32(PMIF_SPI_PMIF_SPI_MODE_CTRL) & ~(0x1 << 9));
 
 	/* Set spm_sleep_req input from the outside */
