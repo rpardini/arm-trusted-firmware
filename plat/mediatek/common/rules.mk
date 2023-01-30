@@ -12,4 +12,8 @@ LOCAL_SRCS-y := ${LOCAL_DIR}/mtk_bl31_setup.c
 LOCAL_SRCS-y += ${LOCAL_DIR}/mtk_smc_handlers.c
 LOCAL_SRCS-$(MTK_SIP_KERNEL_BOOT_ENABLE) += ${LOCAL_DIR}/cold_boot.c
 
+ifeq (${MTK_IOT_YOCTO},1)
+LOCAL_SRCS-y += ${LOCAL_DIR}/mtk_rgu.c
+endif
+
 $(eval $(call MAKE_LOCALS,$(LOCAL_SRCS-y),$(MTK_BL)))

@@ -9,6 +9,10 @@ LOCAL_DIR := $(call GET_LOCAL_DIR)
 
 MODULE := system_reset
 
+ifeq (${MTK_IOT_YOCTO},1)
+LOCAL_SRCS-y := ${LOCAL_DIR}/reset_yocto.c
+else
 LOCAL_SRCS-y := ${LOCAL_DIR}/reset_cros.c
+endif
 
 $(eval $(call MAKE_MODULE,$(MODULE),$(LOCAL_SRCS-y),$(MTK_BL)))
