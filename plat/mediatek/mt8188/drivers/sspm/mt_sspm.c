@@ -17201,4 +17201,4 @@ int sspm_init(void)
 	return 0;
 }
 
-MTK_PLAT_SETUP_0_INIT(sspm_init);
+MTK_ARCH_INIT(sspm_init);

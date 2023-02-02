@@ -11146,4 +11146,4 @@ int mcupm_init(void)
 
 	return 0;
 }
-MTK_PLAT_SETUP_0_INIT(mcupm_init);
+MTK_ARCH_INIT(mcupm_init);

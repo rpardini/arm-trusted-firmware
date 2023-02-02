@@ -1535,4 +1535,4 @@ int spmfw_init(void)
 	return 0;
 }
 
-MTK_PLAT_SETUP_0_INIT(spmfw_init);
+MTK_ARCH_INIT(spmfw_init);

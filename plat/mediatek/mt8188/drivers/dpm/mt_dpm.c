@@ -2487,4 +2487,4 @@ int dpm_init(void)
 	return 0;
 }
 
-MTK_PLAT_SETUP_0_INIT(dpm_init);
+MTK_ARCH_INIT(dpm_init);

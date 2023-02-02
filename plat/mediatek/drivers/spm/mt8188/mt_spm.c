@@ -165,4 +165,4 @@ int spm_boot_init(void)
 
 	return 0;
 }
-MTK_PLAT_SETUP_1_INIT(spm_boot_init);
+MTK_ARCH_INIT(spm_boot_init);

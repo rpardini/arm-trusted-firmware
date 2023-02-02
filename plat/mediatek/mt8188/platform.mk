@@ -43,6 +43,7 @@ MODULES-y += $(MTK_PLAT)/drivers/pmic
 MODULES-y += $(MTK_PLAT)/drivers/pmic_wrap
 MODULES-y += $(MTK_PLAT)/drivers/ptp3
 MODULES-y += $(MTK_PLAT)/drivers/rtc
+MODULES-y += $(MTK_PLAT)/drivers/spm
 MODULES-y += $(MTK_PLAT)/drivers/timer
 MODULES-y += $(MTK_PLAT)/drivers/uart
 MODULES-y += $(MTK_PLAT)/helpers
@@ -50,16 +51,15 @@ MODULES-y += $(MTK_PLAT)/topology
 ifeq (${MTK_IOT_YOCTO},1)
 MODULES-y += $(MTK_PLAT)/drivers/l2c
 MODULES-y += $(MTK_PLAT)/drivers/apusys
-MODULES-y += $(MTK_PLAT)/drivers/spm
 MODULES-y += $(MTK_PLAT_SOC)/drivers/eint
 MODULES-y += $(MTK_PLAT_SOC)/drivers/apusys
 MODULES-y += ${MTK_PLAT_SOC}/drivers/input_gating
 MODULES-y += $(MTK_PLAT_SOC)/drivers/rng
 MODULES-y += $(MTK_PLAT_SOC)/drivers/devapc
-MODULES-y += $(MTK_PLAT_SOC)/drivers/spm
 MODULES-y += $(MTK_PLAT_SOC)/drivers/mcupm
-MODULES-y += $(MTK_PLAT_SOC)/drivers/dpm
 MODULES-y += $(MTK_PLAT_SOC)/drivers/sspm
+MODULES-y += $(MTK_PLAT_SOC)/drivers/dpm
+MODULES-y += $(MTK_PLAT_SOC)/drivers/spm
 endif
 
 PLAT_BL_COMMON_SOURCES := common/desc_image_load.c \
