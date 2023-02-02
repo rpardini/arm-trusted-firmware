@@ -303,6 +303,11 @@ void __spm_set_power_control(const struct pwr_ctrl *pwrctrl)
 		      ((pwrctrl->reg_ext_wakeup_event_mask & 0xffffffff) << 0));
 }
 
+void __spm_disable_pcm_timer(void)
+{
+	mmio_clrsetbits_32(PCM_CON1, RG_PCM_TIMER_EN_LSB, SPM_REGWR_CFG_KEY);
+}
+
 void __spm_set_wakeup_event(const struct pwr_ctrl *pwrctrl)
 {
 	uint32_t val, mask;

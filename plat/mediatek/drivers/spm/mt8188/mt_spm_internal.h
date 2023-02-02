@@ -666,6 +666,7 @@ void __spm_reset_and_init_pcm(void);
 void __spm_init_pcm_register(void);	/* init r0 and r7 */
 void __spm_src_req_update(const struct pwr_ctrl *pwrctrl, unsigned int resource_usage);
 void __spm_set_power_control(const struct pwr_ctrl *pwrctrl);
+void __spm_disable_pcm_timer(void);
 void __spm_set_wakeup_event(const struct pwr_ctrl *pwrctrl);
 void __spm_set_pcm_flags(struct pwr_ctrl *pwrctrl);
 void __spm_send_cpu_wakeup_event(void);

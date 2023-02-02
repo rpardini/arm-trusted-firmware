@@ -354,6 +354,8 @@ static struct pwr_ctrl suspend_ctrl = {
 	/*sw flag setting */
 	.pcm_flags = SPM_SUSPEND_PCM_FLAG,
 	.pcm_flags1 = SPM_SUSPEND_PCM_FLAG1,
+
+	.timer_val = 0x10000,   // PCM_TIMER timeout: 2 secs
 };
 
 struct spm_lp_scen __spm_suspend = {
