@@ -120,4 +120,4 @@ int emi_mpu_init(void)
 
 	return 0;
 }
-MTK_PLAT_SETUP_0_INIT(emi_mpu_init);
+MTK_PLAT_SETUP_1_INIT(emi_mpu_init);

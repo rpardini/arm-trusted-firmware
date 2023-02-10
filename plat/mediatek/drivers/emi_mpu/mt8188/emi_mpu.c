@@ -9,6 +9,25 @@
 
 void set_emi_mpu_regions(void)
 {
-	/* TODO: set emi mpu region */
-	INFO("%s, emi mpu is not setting currently\n", __func__);
+    struct emi_region_info_t region_info;
+
+    region_info.start = BL31_BASE;
+    region_info.end = BL31_LIMIT;
+    region_info.region = 0;
+    SET_ACCESS_PERMISSION(region_info.apc, 1,
+                            FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                            FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                            FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                            FORBIDDEN, FORBIDDEN, FORBIDDEN, SEC_RW);
+    emi_mpu_set_protection(&region_info);
+
+    region_info.start = BL32_BASE;
+    region_info.end = (BL32_BASE + BL32_LIMIT);
+    region_info.region = 1;
+    SET_ACCESS_PERMISSION(region_info.apc, 1,
+                            FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                            FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                            FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
+                            FORBIDDEN, FORBIDDEN, FORBIDDEN, SEC_RW);
+    emi_mpu_set_protection(&region_info);
 }
