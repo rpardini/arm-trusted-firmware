@@ -99,7 +99,7 @@ static struct pwr_ctrl suspend_ctrl = {
 
 	/* SPM_SRC_REQ */
 	/* [0] */
-	.reg_spm_apsrc_req = 1,
+	.reg_spm_apsrc_req = 0,
 	/* [1] */
 	.reg_spm_f26m_req = 0,
 	/* [3] */
