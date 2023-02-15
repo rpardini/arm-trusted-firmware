@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <mtk_iommu_plat.h>
+#include <mtk_iommu_priv.h>
 #include <mtk_mmap_pool.h>
 #include <platform_def.h>
 
@@ -42,7 +42,7 @@
 #define MMU_DEV_PCIE_0		(0)
 #define IFR_CFG_GROUP_NUM	(1)
 
-static struct mtk_smi_larb_config mt8188_larb_cfg[SMI_LARB_NUM] = {
+static struct mtk_smi_larb_config mt8188_larb_cfg[] = {
 	[SMI_L0_ID] = LARB_CFG_ENTRY(SMI_LARB_0_BASE, 7, 0),
 	[SMI_L1_ID] = LARB_CFG_ENTRY(SMI_LARB_1_BASE, 7, 0),
 	[SMI_L2_ID] = LARB_CFG_ENTRY(SMI_LARB_2_BASE, 5, 0),
@@ -80,12 +80,16 @@ static uint32_t mt8188_ifr_mst_cfg_base[IFR_CFG_GROUP_NUM] = {
 static uint32_t mt8188_ifr_mst_cfg_offs[IFR_CFG_GROUP_NUM] = {
 	PERICFG_AO_IOMMU_1,
 };
-static struct mtk_ifr_mst_config mt8188_ifr_mst_cfg[MMU_DEV_NUM] = {
+static struct mtk_ifr_mst_config mt8188_ifr_mst_cfg[] = {
 	[MMU_DEV_PCIE_0] = IFR_MST_CFG_ENTRY(0, 18),
 };
 
 struct mtk_smi_larb_config *g_larb_cfg = &mt8188_larb_cfg[0];
+const unsigned int g_larb_num = ARRAY_SIZE(mt8188_larb_cfg);
+
 struct mtk_ifr_mst_config *g_ifr_mst_cfg = &mt8188_ifr_mst_cfg[0];
+const unsigned int g_ifr_mst_num = ARRAY_SIZE(mt8188_ifr_mst_cfg);
+
 uint32_t *g_ifr_mst_cfg_base = &mt8188_ifr_mst_cfg_base[0];
 uint32_t *g_ifr_mst_cfg_offs = &mt8188_ifr_mst_cfg_offs[0];
 
@@ -100,34 +104,44 @@ void mtk_infra_iommu_enable_protect(void)
 
 /**** iommu mapping ****/
 
-#ifdef IMU_PTBL_MAPPING_SUPPORT
+#ifdef ATF_MTK_IOMMU_PTBL_MAPPING_SUPPORT
+
+#include <mtk_iommu_public.h>
 
 #define APU_IOMMU_0_ID		0
 #define APU_IOMMU_1_ID		1
 
-static struct mtk_iommu_data mt8188_mmu_data[APU_IOMMU_NUM] = {
+enum iommu_pgt_type {
+	IOMMU_PGT_APU_SECURE		= 0,
+	IOMMU_PGT_TYPE_NR,
+};
+
+static struct mtk_iommu_data mt8188_mmu_data[] = {
 	[APU_IOMMU_0_ID] = IOMMU_DATA_ENTRY(APU_IOMMU_0_BASE, 5),
 	[APU_IOMMU_1_ID] = IOMMU_DATA_ENTRY(APU_IOMMU_1_BASE, 5),
 };
 
 struct mtk_iommu_data *g_mmu_data = &mt8188_mmu_data[0];
+const unsigned int g_mmu_data_num = ARRAY_SIZE(mt8188_mmu_data);
 
-static uint32_t iommu_pgt_bank_info[APU_IOMMU_NUM] = {
+static uint32_t iommu_pgt_bank_info[] = {
 	/* use IOMMU_PGT_APU_SECURE */
 	IOMMU_PGT_BANK_INFO_SET(APU_IOMMU_0_ID, 4),
 	IOMMU_PGT_BANK_INFO_SET(APU_IOMMU_1_ID, 4),
 };
 
-static struct iommu_pgtable iommu_pgt[IOMMU_PGT_TYPE_NR] = {
+static struct iommu_pgtable iommu_pgt[] = {
 	[IOMMU_PGT_APU_SECURE] = {
 		.pgd_size	= 0x4000,
 		.mmu_bank_msk	= &iommu_pgt_bank_info[0],
-		.mmu_bank_nr	= APU_IOMMU_NUM,
+		.mmu_bank_nr	= ARRAY_SIZE(iommu_pgt_bank_info),
 	},
 };
-struct iommu_pgtable *g_mmu_pgt = &iommu_pgt[0];
 
-static struct iommu_reserved_mem iommu_resv_mem[IOMMU_RESV_MEM_NR] = {
+struct iommu_pgtable *g_mmu_pgt = &iommu_pgt[0];
+const unsigned int g_mmu_pgt_num = ARRAY_SIZE(iommu_pgt);
+
+static struct iommu_reserved_mem iommu_resv_mem[] = {
 	{	.type		= IOMMU_RESV_MEM_TYPE(MOD_APU_FW, SECURE_MEM) |
 				  IOMMU_RESV_MEM_TYPE_WITH_PGTBL,
 		.iova		= 0x200000,
@@ -136,5 +150,6 @@ static struct iommu_reserved_mem iommu_resv_mem[IOMMU_RESV_MEM_NR] = {
 	},
 };
 struct iommu_reserved_mem *g_mmu_resv_mem = &iommu_resv_mem[0];
+const unsigned int g_mmu_resv_mem_num = ARRAY_SIZE(iommu_pgt);
 
 #endif

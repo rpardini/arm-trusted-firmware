@@ -5,9 +5,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <mtk_iommu_plat.h>
+#include <mtk_iommu_priv.h>
+#include <mtk_iommu_public.h>
 
-#ifdef IMU_PTBL_MAPPING_SUPPORT
+#ifdef ATF_MTK_IOMMU_PTBL_MAPPING_SUPPORT
 
 #include <arch_helpers.h>
 #include <lib/libc/errno.h>
@@ -64,7 +65,7 @@ static int mtk_iommu_initial_banks_hw(struct iommu_pgtable *pgt)
 	for (i = 0; i < nr; i++) {
 		bank_msk = pgt->mmu_bank_msk[i];
 		mmu_id = IOMMU_PGT_BANK_INFO_GET_MMU_ID(bank_msk);
-		if (mmu_id >= APU_IOMMU_NUM) {
+		if (mmu_id >= g_mmu_data_num) {
 			ERROR("[iommu_ptbl] %s: invalid iommu_id at %u/%u\n",
 			      __func__, i, nr);
 			return -EFAULT;
@@ -166,7 +167,7 @@ uint64_t mtk_iommu_linear_secure_map(uint64_t mem_pa, uint64_t mem_size,
 	if ((mem_end_pa - mem_sta_pa) != mem_size)
 		goto map_fail;
 
-	for (idx = 0; idx < IOMMU_RESV_MEM_NR; idx++) {
+	for (idx = 0; idx < g_mmu_resv_mem_num; idx++) {
 		if (type != (g_mmu_resv_mem[idx].type & IOMMU_RESV_MEM_TYPE_MASK))
 			continue;
 
@@ -194,7 +195,7 @@ uint64_t mtk_iommu_linear_secure_map(uint64_t mem_pa, uint64_t mem_size,
 	if (!(resv_mem->type & IOMMU_RESV_MEM_TYPE_WITH_PGTBL))
 		mem_end_pa = 0ULL;
 
-	for (idx = 0; idx < IOMMU_PGT_TYPE_NR; idx++) {
+	for (idx = 0; idx < g_mmu_pgt_num; idx++) {
 		if (!(F_BIT(idx) & resv_mem->pgt_msk))
 			continue;
 
@@ -215,7 +216,7 @@ map_fail:
 	return 0ULL;
 }
 
-#else	/* !defined(IMU_PTBL_MAPPING_SUPPORT) */
+#else	/* !defined(ATF_MTK_IOMMU_PTBL_MAPPING_SUPPORT) */
 
 uint64_t mtk_iommu_linear_secure_map(uint64_t mem_pa, uint64_t mem_size,
 				     uint32_t mem_type, uint32_t mod_id)
@@ -225,5 +226,5 @@ uint64_t mtk_iommu_linear_secure_map(uint64_t mem_pa, uint64_t mem_size,
 	return 0ULL;
 }
 
-#endif	/* IMU_PTBL_MAPPING_SUPPORT */
+#endif	/* ATF_MTK_IOMMU_PTBL_MAPPING_SUPPORT */
 
