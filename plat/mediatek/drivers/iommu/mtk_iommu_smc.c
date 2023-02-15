@@ -24,8 +24,14 @@
 #define IFR_CFG_MMU_EN_MSK(r_bit)	(0x3 << (r_bit))
 
 /* secure iommu */
+#define MMU_PT_BASE_ADDR		(0x000)
+#define MMU_PT_BASE_DEFAULT		(0x4)
+#define MMU_TFRP_PADDR			(0x114)
 #define MMU_INT_CONTROL0		(0x120)
 #define INT_CLR				BIT(12)
+#define F_INT_CTRL0_MSK			0x6f
+#define MMU_INT_CONTROL1		(0x124)
+#define F_REG_MMU_INT_MASK		GENMASK(13, 0)
 #define MMU_FAULT_ST1			(0x134)
 #define MMU_AXI_0_ERR_MASK		GENMASK(6, 0)
 #define MMU_AXI_FAULT_STATUS(bus)	(0x13c + (bus) * 8)
@@ -122,7 +128,8 @@ static int mtk_infra_master_config_sec(uint32_t dev_id_msk, uint32_t enable)
 #endif /* ATF_MTK_INFRA_MASTER_CFG_SUPPORT */
 
 /* secure iommu */
-#ifdef ATF_MTK_IOMMU_FAULT_REPORT_SUPPORT
+#if defined(ATF_MTK_IOMMU_FAULT_REPORT_SUPPORT) ||	\
+	defined(ATF_MTK_IOMMU_RUNTIME_RS_SUPPORT)
 
 struct mtk_secure_iommu_config *mtk_get_sec_imu_cfg(uint32_t sec_mmu_base)
 {
@@ -137,6 +144,9 @@ struct mtk_secure_iommu_config *mtk_get_sec_imu_cfg(uint32_t sec_mmu_base)
 	}
 	return mmu_cfg;
 }
+#endif
+
+#ifdef ATF_MTK_IOMMU_FAULT_REPORT_SUPPORT
 
 static int mtk_secure_iommu_fault_report(uint32_t sec_mmu_base, uint32_t *f_sta,
 					 uint32_t *f_pa, uint32_t *f_id)
@@ -168,10 +178,59 @@ static int mtk_secure_iommu_fault_report(uint32_t sec_mmu_base, uint32_t *f_sta,
 	mmio_setbits_32(mmu_cfg->base + MMU_INT_CONTROL0, INT_CLR);
 
 	return MTK_SIP_E_NOT_SUPPORTED;
-#endif
+#endif /* DEBUG */
 }
 
 #endif /* ATF_MTK_IOMMU_FAULT_REPORT_SUPPORT */
+
+#ifdef ATF_MTK_IOMMU_RUNTIME_RS_SUPPORT
+
+static int mtk_iommu_back_up_bank(uint32_t sec_mmu_base)
+{
+	struct mtk_secure_iommu_config *mmu_cfg;
+	uint32_t bank_base, pt_base;
+
+	mmu_cfg = mtk_get_sec_imu_cfg(sec_mmu_base);
+	if (!mmu_cfg)
+		return MTK_SIP_E_INVALID_PARAM;
+
+	bank_base = mmu_cfg->base;
+	pt_base = mmio_read_32(bank_base + MMU_PT_BASE_ADDR);
+	if (!pt_base || pt_base == MMU_PT_BASE_DEFAULT)
+		return MTK_SIP_E_SUCCESS;
+
+	mmu_cfg->pt_base = pt_base;
+	mmu_cfg->trap_paddr = mmio_read_32(bank_base + MMU_TFRP_PADDR);
+
+	return MTK_SIP_E_SUCCESS;
+}
+
+static int mtk_iommu_restore_bank(uint32_t sec_mmu_base)
+{
+	struct mtk_secure_iommu_config *mmu_cfg;
+	uint32_t bank_base, pt_base;
+
+	mmu_cfg = mtk_get_sec_imu_cfg(sec_mmu_base);
+	if (!mmu_cfg)
+		return MTK_SIP_E_INVALID_PARAM;
+
+	pt_base = mmu_cfg->pt_base;
+	if (!pt_base || pt_base == MMU_PT_BASE_DEFAULT)
+		return MTK_SIP_E_SUCCESS;
+
+	bank_base = mmu_cfg->base;
+	mmio_write_32(bank_base + MMU_PT_BASE_ADDR, pt_base);
+	mmio_write_32(bank_base + MMU_TFRP_PADDR, mmu_cfg->trap_paddr);
+	mmio_write_32(bank_base + MMU_INT_CONTROL0, F_INT_CTRL0_MSK);
+	mmio_write_32(bank_base + MMU_INT_CONTROL1, F_REG_MMU_INT_MASK);
+
+	if (pt_base != mmio_read_32(bank_base + MMU_PT_BASE_ADDR))
+		return MTK_SIP_E_PERMISSION_DENY;
+
+	return MTK_SIP_E_SUCCESS;
+}
+
+#endif
 
 static u_register_t mtk_iommu_handler(u_register_t x1, u_register_t x2,
 				      u_register_t x3, u_register_t x4,
@@ -201,6 +260,16 @@ static u_register_t mtk_iommu_handler(u_register_t x1, u_register_t x2,
 					(uint32_t *)&smccc_ret->a1,
 					(uint32_t *)&smccc_ret->a2,
 					(uint32_t *)&smccc_ret->a3);
+		break;
+#endif
+#ifdef ATF_MTK_IOMMU_RUNTIME_RS_SUPPORT
+	case IOMMU_ATF_CMD_SECURE_IOMMU_RESUME:
+		(void)val;
+		ret = mtk_iommu_restore_bank(mdl_id);
+		break;
+	case IOMMU_ATF_CMD_SECURE_IOMMU_SUSPEND:
+		(void)val;
+		ret = mtk_iommu_back_up_bank(mdl_id);
 		break;
 #endif
 	default:

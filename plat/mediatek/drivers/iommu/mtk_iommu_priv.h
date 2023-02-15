@@ -42,6 +42,8 @@
 
 enum IOMMU_ATF_CMD {
 	IOMMU_ATF_CMD_SECURE_IOMMU_STATUS,	/* For secure iommu translation fault report */
+	IOMMU_ATF_CMD_SECURE_IOMMU_SUSPEND,	/* For secure iommu registers back up */
+	IOMMU_ATF_CMD_SECURE_IOMMU_RESUME,	/* For secure iommu registers restore */
 	IOMMU_ATF_CMD_CONFIG_SMI_LARB,		/* For mm master to enable iommu */
 	IOMMU_ATF_CMD_CONFIG_INFRA_IOMMU,	/* For infra master to enable iommu */
 	IOMMU_ATF_CMD_COUNT,
@@ -67,6 +69,8 @@ struct mtk_iommu_data {
 
 struct mtk_secure_iommu_config {
 	uint32_t base;
+	uint32_t pt_base;
+	uint32_t trap_paddr;
 };
 
 /**** IOMMU PAGETABLE MAPPING ****/
@@ -134,7 +138,8 @@ extern uint32_t *g_ifr_mst_cfg_offs;
 extern void mtk_infra_iommu_enable_protect(void);
 #endif
 
-#ifdef ATF_MTK_IOMMU_FAULT_REPORT_SUPPORT
+#if defined(ATF_MTK_IOMMU_FAULT_REPORT_SUPPORT) ||	\
+	defined(ATF_MTK_IOMMU_RUNTIME_RS_SUPPORT)
 /* secure iommu is used */
 extern struct mtk_secure_iommu_config *g_sec_iommu_cfg;
 extern const unsigned int g_sec_iommu_num;
