@@ -41,7 +41,9 @@
   * IOMMU & SMI related constants
   ******************************************************************************/
  #define APU_IOMMU_0_BASE		(IO_PHYS + 0x09010000)
+ #define SEC_APU_IOMMU_0_BASE		(IO_PHYS + 0x09014000)
  #define APU_IOMMU_1_BASE		(IO_PHYS + 0x09015000)
+ #define SEC_APU_IOMMU_1_BASE		(IO_PHYS + 0x09019000)
 
 /*******************************************************************************
  * DP/eDP related constants

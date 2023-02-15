@@ -7,6 +7,15 @@
 #include <mtk_iommu_priv.h>
 #include <platform_def.h>
 
+/* secure iommu */
+static struct mtk_secure_iommu_config mt8195_secure_iommu_config[] = {
+	SEC_IOMMU_CFG_ENTRY(SEC_APU_IOMMU_0_BASE),
+	SEC_IOMMU_CFG_ENTRY(SEC_APU_IOMMU_1_BASE),
+};
+
+struct mtk_secure_iommu_config *g_sec_iommu_cfg = &mt8195_secure_iommu_config[0];
+const unsigned int g_sec_iommu_num = ARRAY_SIZE(mt8195_secure_iommu_config);
+
 /**** iommu mapping ****/
 
 #ifdef ATF_MTK_IOMMU_PTBL_MAPPING_SUPPORT
@@ -48,7 +57,7 @@ const unsigned int g_mmu_pgt_num = ARRAY_SIZE(iommu_pgt);
 static struct iommu_reserved_mem iommu_resv_mem[] = {
 	{	.type		= IOMMU_RESV_MEM_TYPE(MOD_APU_FW, SECURE_MEM) |
 				  IOMMU_RESV_MEM_TYPE_WITH_PGTBL,
-		.iova		= 0x200000,
+		.iova		= 0x0,
 		.max_size	= 0x20000000,
 		.pgt_msk	= F_BIT(IOMMU_PGT_APU_SECURE),
 	},

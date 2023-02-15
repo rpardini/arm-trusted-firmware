@@ -9,6 +9,7 @@
 #include <mt_dp.h>
 #include <mt_spm.h>
 #include <mt_spm_vcorefs.h>
+#include <mtk_iommu_public.h>
 #include <mtk_sip_svc.h>
 #include <plat_dfd.h>
 #include "plat_sip_calls.h"
@@ -24,6 +25,7 @@ uintptr_t mediatek_plat_sip_handler(uint32_t smc_fid,
 {
 	int32_t ret;
 	uint32_t ret_val;
+	struct smccc_res smccc_ret;
 
 	switch (smc_fid) {
 	case MTK_SIP_DP_CONTROL_AARCH32:
@@ -45,6 +47,11 @@ uintptr_t mediatek_plat_sip_handler(uint32_t smc_fid,
 	case MTK_SIP_PARTNAME_ID_AARCH64:
 		ret = mtk_plat_get_partid(&ret_val);
 		SMC_RET2(handle, ret, ret_val);
+		break;
+	case MTK_SIP_IOMMU_CONTROL_AARCH32:
+	case MTK_SIP_IOMMU_CONTROL_AARCH64:
+		ret = mtk_iommu_handler(x1, x2, x3, x4, handle, &smccc_ret);
+		SMC_RET4(handle, ret, smccc_ret.a1, smccc_ret.a2, smccc_ret.a3);
 		break;
 	default:
 		ERROR("%s: unhandled SMC (0x%x)\n", __func__, smc_fid);

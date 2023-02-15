@@ -119,6 +119,7 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 ${MTK_PLAT}/drivers/gic600/mt_gic_v3.c                \
                 ${MTK_PLAT}/drivers/gpio/mtgpio_common.c              \
                 ${MTK_PLAT}/drivers/iommu/mtk_iommu_ptbl.c            \
+                ${MTK_PLAT}/drivers/iommu/mtk_iommu_smc.c             \
                 ${MTK_PLAT}/drivers/pmic/pmic.c                       \
                 ${MTK_PLAT}/drivers/pmic_wrap/pmic_wrap_init_v2.c     \
                 ${MTK_PLAT}/drivers/ptp3/ptp3_common.c                \

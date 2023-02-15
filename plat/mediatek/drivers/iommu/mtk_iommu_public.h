@@ -7,7 +7,7 @@
 #ifndef MTK_IOMMU_PUBLIC_H
 #define MTK_IOMMU_PUBLIC_H
 
-
+#include <mtk_sip_svc.h>
 
 /******************************************************************************
  * STRUCTURE DEFINITION
@@ -36,4 +36,8 @@ enum mem_type {
 uint64_t mtk_iommu_linear_secure_map(uint64_t mem_pa, uint64_t mem_size,
 		uint32_t mem_type, uint32_t mod_id);
 
+
+u_register_t mtk_iommu_handler(u_register_t x1, u_register_t x2,
+			       u_register_t x3, u_register_t x4,
+			       void *handle, struct smccc_res *smccc_ret);
 #endif /* MTK_IOMMU_PUBLIC_H */
