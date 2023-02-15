@@ -37,7 +37,11 @@
 #define IOMMU_BANK_BASE(pdata, bank_id)	\
 	((pdata)->base + 0x1000 * (bank_id))
 
+#define SEC_IOMMU_CFG_ENTRY(s_bs)	\
+	{ .base = (s_bs), }
+
 enum IOMMU_ATF_CMD {
+	IOMMU_ATF_CMD_SECURE_IOMMU_STATUS,	/* For secure iommu translation fault report */
 	IOMMU_ATF_CMD_CONFIG_SMI_LARB,		/* For mm master to enable iommu */
 	IOMMU_ATF_CMD_CONFIG_INFRA_IOMMU,	/* For infra master to enable iommu */
 	IOMMU_ATF_CMD_COUNT,
@@ -59,6 +63,10 @@ struct mtk_ifr_mst_config {
 struct mtk_iommu_data {
 	uint32_t	base;		/* bank 0 base */
 	uint32_t	bank_num;
+};
+
+struct mtk_secure_iommu_config {
+	uint32_t base;
 };
 
 /**** IOMMU PAGETABLE MAPPING ****/
@@ -124,6 +132,12 @@ extern const unsigned int g_ifr_mst_num;
 extern uint32_t *g_ifr_mst_cfg_base;
 extern uint32_t *g_ifr_mst_cfg_offs;
 extern void mtk_infra_iommu_enable_protect(void);
+#endif
+
+#ifdef ATF_MTK_IOMMU_FAULT_REPORT_SUPPORT
+/* secure iommu is used */
+extern struct mtk_secure_iommu_config *g_sec_iommu_cfg;
+extern const unsigned int g_sec_iommu_num;
 #endif
 
 #ifdef ATF_MTK_IOMMU_PTBL_MAPPING_SUPPORT
