@@ -23,7 +23,7 @@
 #endif
 
 #ifndef MTK_PLAT_SPM_UART_UNSUPPORT
-#include <drivers/uart.h>
+#include <uart.h>
 #endif
 
 #define SPM_SUSPEND_SLEEP_PCM_FLAG (\
@@ -399,7 +399,7 @@ int mt_spm_suspend_enter(int state_id,
 
 #ifndef MTK_PLAT_SPM_UART_UNSUPPORT
 	/* Notify UART to sleep */
-	mtk_uart_save();
+	mt_uart_save();
 #endif
 
 	ret = spm_conservation(state_id, ext_opand,
@@ -425,7 +425,7 @@ void mt_spm_suspend_resume(int state_id, unsigned int ext_opand,
 
 #ifndef MTK_PLAT_SPM_UART_UNSUPPORT
 	/* Notify UART to wakeup */
-	mtk_uart_restore();
+	mt_uart_restore();
 #endif
 
 	/* if FMAudio, ADSP is active,
