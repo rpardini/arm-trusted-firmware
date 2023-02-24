@@ -8,6 +8,7 @@
 
 #include <pmic_initial_setting.h>
 #include <pmic_wrap_init.h>
+#include <upmu_hw.h>
 
 static struct pmic_setting init_setting[] = {
 	{0x20, 0xA, 0xA, 0},
@@ -184,4 +185,9 @@ void pmic_initial_setting(void)
 	for (i = 0; i < ARRAY_SIZE(init_setting); i++)
 		pmic_config_interface(init_setting[i].addr, init_setting[i].val,
 				      init_setting[i].mask, init_setting[i].shift);
+
+	/* FIXME: Should be removed after MT6359 driver support in u-boot */
+	/* For USB P1 vcamio power on */
+	pwrap_write(MT6359_LDO_VCAMIO_CON0, 0x1);
+	pwrap_write(MT6359_LDO_VCAMIO_OP_EN, 0x8000);
 }
