@@ -117,10 +117,11 @@ static const io_dev_connector_t *storage_dev_con;
 static const io_dev_connector_t *fip_dev_con;
 static uintptr_t fip_dev_handle;
 
-static const io_block_dev_spec_t emmc_dev_spec = {
+static uint32_t mmc_buf_in_sram[PLAT_PARTITION_BLOCK_SIZE];
+static io_block_dev_spec_t emmc_dev_spec = {
 	.buffer = {
-		.offset = 0x41000000,
-		.length = 0x1000000,
+		.offset = &mmc_buf_in_sram,
+		.length = PLAT_PARTITION_BLOCK_SIZE,
 	},
 	.ops = {
 		.read = mmc_read_blocks,
@@ -329,9 +330,13 @@ void bl2_platform_setup(void)
 	pmic_init();
 	pmic_initial_setting();
 
-	mt_mem_init();
 	mtk_mmc_init(0x11230000, &mt8188_compat, 400000000);
-	mtk_io_setup();  
+	mtk_io_setup();
+	load_partition_table(GPT_IMAGE_ID);
+	mt_mem_init();
+	/* change emmc read buffer to DRAM */
+	emmc_dev_spec.buffer.offset = 0x41000000;
+	emmc_dev_spec.buffer.length = 0x1000000;
 }
 
 struct bl_load_info *plat_get_bl_image_load_info(void)
@@ -388,8 +393,10 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 	const char *name = get_boot_partition_name();
 
 	if (storage_fip_spec.length == 0) {
-		partition_init(GPT_IMAGE_ID);
-		entry = get_partition_entry(name);
+		if((entry = get_partition_entry(name)) == NULL) {
+			partition_init(GPT_IMAGE_ID);
+			entry = get_partition_entry(name);
+		}
 		if (entry == NULL) {
 			ERROR("Could NOT find the %s partition!\n", name);
 			return -ENOENT;
