@@ -16,7 +16,7 @@
 #include "apusys.h"
 #include "apusys_power.h"
 
-#define LOCAL_DEBUG	(1)
+#define LOCAL_DEBUG	(0)
 #define MODULE_TAG	"[APUSYS]"
 
 /* Weak definitions can be overridden in specific platform */
