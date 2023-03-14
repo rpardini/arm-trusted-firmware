@@ -18,11 +18,11 @@ static unsigned char region_lock_state[EMI_MPU_REGION_NUM];
 #define EMI_MPU_APC_SW_LOCK_MASK	(0x00FFFFFF)
 #define EMI_MPU_APC_HW_LOCK_MASK	(0x80FFFFFF)
 
-static int _emi_mpu_set_protection(unsigned int start, unsigned int end,
+static int _emi_mpu_set_protection(unsigned long long start, unsigned long long end,
 					unsigned int apc)
 {
-	unsigned int dgroup;
-	unsigned int region;
+	unsigned long long dgroup;
+	unsigned long long region;
 
 	region = (start >> 24) & 0xFF;
 	start &= EMI_MPU_START_MASK;
@@ -71,7 +71,7 @@ static int _emi_mpu_set_protection(unsigned int start, unsigned int end,
 
 int emi_mpu_set_protection(struct emi_region_info_t *region_info)
 {
-	unsigned int start, end;
+	unsigned long long start, end;
 	int i;
 
 	if (region_info->region >= EMI_MPU_REGION_NUM) {
@@ -79,11 +79,11 @@ int emi_mpu_set_protection(struct emi_region_info_t *region_info)
 		return -1;
 	}
 
-	start = (unsigned int)(region_info->start >> EMI_MPU_ALIGN_BITS) |
+	start = (unsigned long long)(region_info->start >> EMI_MPU_ALIGN_BITS) |
 		(region_info->region << 24);
 
 	for (i = EMI_MPU_DGROUP_NUM - 1; i >= 0; i--) {
-		end = (unsigned int)(region_info->end >> EMI_MPU_ALIGN_BITS) |
+		end = (unsigned long long)(region_info->end >> EMI_MPU_ALIGN_BITS) |
 			(i << 24);
 		_emi_mpu_set_protection(start, end, region_info->apc[i]);
 	}
@@ -96,7 +96,7 @@ void emi_mpu_init(void)
 	struct emi_region_info_t region_info;
 
 	region_info.start = BL31_BASE;
-	region_info.end = BL31_LIMIT;
+	region_info.end = (BL31_LIMIT - 1);
 	region_info.region = 1;
 	SET_ACCESS_PERMISSION(region_info.apc, 1,
 				FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW,
@@ -106,7 +106,7 @@ void emi_mpu_init(void)
 	emi_mpu_set_protection(&region_info);
 
 	region_info.start = BL32_BASE;
-	region_info.end = (BL32_BASE + BL32_LIMIT);
+	region_info.end = (BL32_BASE + BL32_LIMIT - 1);
 	region_info.region = 2;
 	SET_ACCESS_PERMISSION(region_info.apc, 1,
 				FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW, FORBIDDEN_RW,
