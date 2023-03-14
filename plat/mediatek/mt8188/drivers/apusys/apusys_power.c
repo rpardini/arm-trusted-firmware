@@ -14,7 +14,7 @@
 //#include <mtk_mmap_pool.h>
 #include "apusys_power.h"
 
-#define LOCAL_DEBUG	(1)
+#define LOCAL_DEBUG	(0)
 #define MODULE_TAG	"[APUSYS]"
 
 static const unsigned int reg_addr[APUPW_MAX_REGS] = {
