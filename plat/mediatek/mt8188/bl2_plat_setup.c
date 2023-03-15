@@ -39,6 +39,9 @@ static struct msdc_compatible mt8188_compat = {
 	.data_tune = true,
 	.busy_check = true,
 	.stop_clk_fix = true,
+	.enhance_rx = true,
+	.use_dma_mode = true,
+	.top_base = 0x11f50000,
 };
 
 static bl_mem_params_node_t bl2_mem_params_descs[] = {

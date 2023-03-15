@@ -449,6 +449,7 @@ static int mmc_enumerate(unsigned int clk, unsigned int bus_width)
 {
 	int ret;
 	unsigned int resp_data[4];
+	unsigned int swap;
 
 	ops->init();
 
@@ -502,6 +503,13 @@ static int mmc_enumerate(unsigned int clk, unsigned int bus_width)
 	if (ret != 0) {
 		return ret;
 	}
+
+	swap = resp_data[0];
+	resp_data[0] = resp_data[3];
+	resp_data[3] = swap;
+	swap = resp_data[1];
+	resp_data[1] = resp_data[2];
+	resp_data[2] = swap;
 
 	memcpy(&mmc_csd, &resp_data, sizeof(resp_data));
 

@@ -113,6 +113,8 @@ enum bus_mode {
 #define MSDC_INT_XFER_COMPL		BIT(12)
 #define MSDC_INT_DATTMO			BIT(14)
 #define MSDC_INT_DATCRCERR		BIT(15)
+#define MSDC_INT_BDCSERR		BIT(17)
+#define MSDC_INT_GPDCSERR		BIT(18)
 
 /* MSDC_FIFOCS */
 #define MSDC_FIFOCS_CLR			BIT(31)
@@ -147,6 +149,17 @@ enum bus_mode {
 
 /* SDC_ADV_CFG0 */
 #define SDC_RX_ENHANCE_EN		BIT(20)
+
+/* MSDC_DMA_CTRL */
+#define MSDC_DMA_CTRL_BURSTSZ_M		0x7000
+#define MSDC_DMA_CTRL_BURSTSZ_S		12
+#define MSDC_DMA_CTRL_LASTBUF		BIT(10)
+#define MSDC_DMA_CTRL_MODE			BIT(8)
+#define MSDC_DMA_CTRL_STOP			BIT(1)
+#define MSDC_DMA_CTRL_START			BIT(0)
+
+/* DMA_CFG */
+#define MSDC_DMA_CFG_STS		BIT(0)
 
 /* PATCH_BIT0 */
 #define MSDC_INT_DAT_LATCH_CK_SEL_M	0x380
@@ -186,6 +199,25 @@ enum bus_mode {
 #define SDC_FIFO_CFG_WRVALIDSEL		BIT(24)
 #define SDC_FIFO_CFG_RDVALIDSEL		BIT(25)
 
+/* EMMC_TOP_CONTROL mask */
+#define PAD_RXDLY_SEL			BIT(0)
+#define DELAY_EN				BIT(1)
+#define PAD_DAT_RD_RXDLY2		(0x1f << 2)
+#define PAD_DAT_RD_RXDLY		(0x1f << 7)
+#define PAD_DAT_RD_RXDLY_S		7
+#define PAD_DAT_RD_RXDLY2_SEL	BIT(12)
+#define PAD_DAT_RD_RXDLY_SEL	BIT(13)
+#define DATA_K_VALUE_SEL		BIT(14)
+#define SDC_RX_ENH_EN			BIT(15)
+
+/* EMMC_TOP_CMD mask */
+#define PAD_CMD_RXDLY2			(0x1f << 0)
+#define PAD_CMD_RXDLY			(0x1f << 5)
+#define PAD_CMD_RXDLY_S			5
+#define PAD_CMD_RD_RXDLY2_SEL	BIT(10)
+#define PAD_CMD_RD_RXDLY_SEL	BIT(11)
+#define PAD_CMD_TX_DLY			(0x1f << 12)
+
 /* SDC_CFG_BUSWIDTH */
 #define MSDC_BUS_1BITS			0x0
 #define MSDC_BUS_4BITS			0x1
@@ -201,7 +233,8 @@ enum bus_mode {
 	(MSDC_INT_CMDRDY | MSDC_INT_RSPCRCERR | MSDC_INT_CMDTMO)
 
 #define DATA_INTS_MASK	\
-	(MSDC_INT_XFER_COMPL | MSDC_INT_DATTMO | MSDC_INT_DATCRCERR)
+	(MSDC_INT_XFER_COMPL | MSDC_INT_DATTMO | MSDC_INT_DATCRCERR | \
+	MSDC_INT_BDCSERR | MSDC_INT_GPDCSERR)
 
 typedef uint32_t u32;
 typedef unsigned int uint;
@@ -272,6 +305,21 @@ struct mtk_sd_regs {
 	uint32_t sdc_fifo_cfg;
 };
 
+struct msdc_top_regs {
+	u32 emmc_top_control;
+	u32 emmc_top_cmd;
+	u32 emmc50_pad_ctl0;
+	u32 emmc50_pad_ds_tune;
+	u32 emmc50_pad_dat0_tune;
+	u32 emmc50_pad_dat1_tune;
+	u32 emmc50_pad_dat2_tune;
+	u32 emmc50_pad_dat3_tune;
+	u32 emmc50_pad_dat4_tune;
+	u32 emmc50_pad_dat5_tune;
+	u32 emmc50_pad_dat6_tune;
+	u32 emmc50_pad_dat7_tune;
+};
+
 struct msdc_delay_phase {
 	uint8_t maxlen;
 	uint8_t start;
@@ -285,6 +333,7 @@ struct msdc_tune_para {
 
 struct msdc_host {
 	struct mtk_sd_regs *base;
+	struct msdc_top_regs *top_base;
 	struct msdc_compatible *dev_comp;
 
 	uint32_t src_clk_freq;	/* source clock */
@@ -319,6 +368,7 @@ struct msdc_host {
 #define readl(addr) mmio_read_32((uintptr_t) addr)
 #define readb(addr) mmio_read_8((uintptr_t) addr)
 #define writel(val, addr) mmio_write_32((uintptr_t) addr, val)
+#define writeb(val, addr) mmio_write_8((uintptr_t) addr, val)
 
 #define readl_poll_timeout(_addr, _reg, _test, _timeout) \
 			({ do { \
@@ -350,8 +400,11 @@ static void msdc_init_hw(void)
 	/* Configure to MMC/SD mode, clock free running */
 	setbits_le32(&host->base->msdc_cfg, MSDC_CFG_MODE);
 
-	/* Use PIO mode */
-	setbits_le32(&host->base->msdc_cfg, MSDC_CFG_PIO);
+	/* Data transfer mode */
+	if (host->dev_comp->use_dma_mode)
+		clrbits_le32(&host->base->msdc_cfg, MSDC_CFG_PIO);
+	else
+		setbits_le32(&host->base->msdc_cfg, MSDC_CFG_PIO);
 
 	/* Reset */
 	msdc_reset_hw(host);
@@ -397,8 +450,12 @@ static void msdc_init_hw(void)
 				3 << MSDC_PB2_RESPWAIT_S);
 
 		if (host->dev_comp->enhance_rx) {
-			setbits_le32(&host->base->sdc_adv_cfg0,
-				     SDC_RX_ENHANCE_EN);
+			if (host->top_base)
+				setbits_le32(&host->top_base->emmc_top_control,
+					SDC_RX_ENH_EN);
+			else
+				setbits_le32(&host->base->sdc_adv_cfg0,
+					SDC_RX_ENHANCE_EN);
 		} else {
 			clrsetbits_le32(&host->base->patch_bit2,
 					MSDC_PB2_RESPSTSENSEL_M,
@@ -411,7 +468,7 @@ static void msdc_init_hw(void)
 		/* use async fifo to avoid tune internal delay */
 		clrbits_le32(&host->base->patch_bit2,
 			     MSDC_PB2_CFGRESP);
-		clrbits_le32(&host->base->patch_bit2,
+		setbits_le32(&host->base->patch_bit2,
 			     MSDC_PB2_CFGCRCSTS);
 	}
 
@@ -466,6 +523,12 @@ static u32 msdc_fifo_rx_bytes(struct msdc_host *host)
 		MSDC_FIFOCS_RXCNT_M) >> MSDC_FIFOCS_RXCNT_S;
 }
 
+static u32 msdc_fifo_tx_bytes(struct msdc_host *host)
+{
+	return (readl(&host->base->msdc_fifocs) &
+		MSDC_FIFOCS_TXCNT_M) >> MSDC_FIFOCS_TXCNT_S;
+}
+
 static u32 msdc_cmd_find_resp(struct msdc_host *host, struct mmc_cmd *cmd)
 {
 	u32 resp;
@@ -503,10 +566,12 @@ static u32 msdc_cmd_prepare_raw_cmd(struct msdc_host *host,
 
 	switch (opcode) {
 	case MMC_CMD_WRITE_MULTIPLE_BLOCK:
+		rawcmd |= SDC_CMD_WR;
 	case MMC_CMD_READ_MULTIPLE_BLOCK:
 		dtype = 2;
 		break;
 	case MMC_CMD_WRITE_SINGLE_BLOCK:
+		rawcmd |= SDC_CMD_WR;
 	case MMC_CMD_READ_SINGLE_BLOCK:
 	case SD_CMD_APP_SEND_SCR:
 		dtype = 1;
@@ -854,6 +919,29 @@ static int mtk_mmc_prepare(int lba, uintptr_t buf, size_t size)
 	return 0;
 }
 
+static void msdc_dump_regs(struct msdc_host *host)
+{
+	int i;
+
+	/* Normal regs */
+	for (i = 0; i <= 0x100; i += 4)
+		printf("reg[%04x]: %08x\n", i, readl((uint8_t *)(host->base) + i));
+	for (i = 0x180; i <= 0x228; i += 4)
+		printf("reg[%04x]: %08x\n", i, readl((uint8_t *)(host->base) + i));
+
+	/* Top regs */
+	for (i = 0; i <= 0x4c; i += 4)
+		printf("top_reg[%04x]: %08x\n", i, readl((uint8_t *)(host->top_base) + i));
+
+#if 1
+	/* Debug regs */
+	for (i = 0; i <= 0x46; i++) {
+		writel(i, &host->base->sw_dbg_sel);
+		printf("SEL[0xa0]=0x%02x\tOUT[0xa4]=0x%08x\n", i, readl(&host->base->sw_dbg_out));
+	}
+	writel(0, &host->base->sw_dbg_sel);
+#endif
+}
 
 static void msdc_fifo_read(struct msdc_host *host, uint8_t *buf, size_t size)
 {
@@ -877,7 +965,29 @@ static void msdc_fifo_read(struct msdc_host *host, uint8_t *buf, size_t size)
 	}
 }
 
-static int mtk_mmc_read(int lba, uintptr_t buf, size_t size)
+static void msdc_fifo_write(struct msdc_host *host, const uint8_t *buf, size_t size)
+{
+	const u32 *wbuf;
+
+	while ((size_t)buf % 4) {
+		writeb(*buf++, &host->base->msdc_txdata);
+		size--;
+	}
+
+	wbuf = (const uint32_t *)buf;
+	while (size >= 4) {
+		writel(*wbuf++, &host->base->msdc_txdata);
+		size -= 4;
+	}
+
+	buf = (const uint8_t *)wbuf;
+	while (size) {
+		writeb(*buf++, &host->base->msdc_txdata);
+		size--;
+	}
+}
+
+static int msdc_pio_read(uintptr_t buf, size_t size)
 {
 	u32 status;
 	u32 chksz;
@@ -919,10 +1029,169 @@ static int mtk_mmc_read(int lba, uintptr_t buf, size_t size)
 	return ret;
 }
 
+static int msdc_pio_write(uintptr_t buf, size_t size)
+{
+	u32 status;
+	u32 chksz;
+	int ret = 0;
+	struct msdc_host *host = &msdc_host;
+
+	ERROR("%s: buf 0x%x, size %d\n", __func__, (u32)buf, size);
+	msdc_dump_regs(host);
+
+	while (1) {
+		status = readl(&host->base->msdc_int);
+		writel(status, &host->base->msdc_int);
+		status &= DATA_INTS_MASK;
+		ERROR("%s: status 0x%08x\n", __func__, status);
+
+		if (status & MSDC_INT_DATCRCERR) {
+			ret = -EIO;
+			break;
+		}
+
+		if (status & MSDC_INT_DATTMO) {
+			ret = -ETIMEDOUT;
+			break;
+		}
+
+		if (status & MSDC_INT_XFER_COMPL) {
+			if (size) {
+				ERROR("data not fully written\n");
+				ret = -EIO;
+			}
+
+			break;
+		}
+
+		chksz = MIN(size, (u32)MSDC_FIFO_SIZE);
+
+		if (MSDC_FIFO_SIZE - msdc_fifo_tx_bytes(host) >= chksz) {
+			ERROR("%s: size %d, chksz %d\n", __func__, size, chksz);
+			msdc_fifo_write(host, (const uint8_t *)buf, chksz);
+			buf += chksz;
+			size -= chksz;
+		}
+	}
+
+	return ret;
+}
+
+static dma_addr_t msdc_flush_membuf(void *ptr, size_t size, enum dma_data_direction dir)
+{
+	dma_addr_t addr = (dma_addr_t)ptr;
+
+	if (dir == DMA_FROM_DEVICE)
+		inv_dcache_range(addr, size);
+	else
+		flush_dcache_range(addr, size);
+
+	return addr;
+}
+
+static void msdc_dma_start(struct msdc_host *host, dma_addr_t addr, u32 size)
+{
+	writel((u32)addr, &host->base->dma_sa);
+	clrsetbits_le32(&host->base->dma_ctrl, MSDC_DMA_CTRL_BURSTSZ_M,
+			(6 << MSDC_DMA_CTRL_BURSTSZ_S));
+
+	/* BASIC_DMA mode */
+	clrbits_le32(&host->base->dma_ctrl, MSDC_DMA_CTRL_MODE);
+
+	/* This is the last buffer */
+	setbits_le32(&host->base->dma_ctrl, MSDC_DMA_CTRL_LASTBUF);
+
+	/* Total transfer size */
+	writel(size, &host->base->dma_length);
+
+	/* Trigger DMA start */
+	setbits_le32(&host->base->dma_ctrl, MSDC_DMA_CTRL_START);
+}
+
+static void msdc_dma_stop(struct msdc_host *host)
+{
+	u32 reg;
+
+	setbits_le32(&host->base->dma_ctrl, MSDC_DMA_CTRL_STOP);
+	readl_poll_timeout(&host->base->dma_cfg, reg,
+			   !(reg & MSDC_DMA_CFG_STS), 1000000);
+}
+
+static int msdc_dma_done(struct msdc_host *host, int events)
+{
+	int ret = 0;
+	u32 rawcmd, arg;
+
+	if (!(events & MSDC_INT_XFER_COMPL)) {
+		rawcmd = readl(&host->base->sdc_cmd);
+		arg = readl(&host->base->sdc_arg);
+
+		if (events & MSDC_INT_DATTMO)
+			ret = -ETIMEDOUT;
+		else if (events & (MSDC_INT_DATCRCERR | MSDC_INT_GPDCSERR | MSDC_INT_BDCSERR))
+			ret = -EIO;
+		else
+			ret = -EINVAL;	//FIXME
+
+		ERROR("MSDC: start data failure with %d, INT(0x%x), rawcmd=0x%x, arg=0x%x\n",
+		       ret, events, rawcmd, arg);
+	}
+
+	/* Clear DAT interrupt */
+	writel(events & DATA_INTS_MASK, &host->base->msdc_int);
+
+	return ret;
+}
+
+static int msdc_dma_transfer(void *buf, size_t size, enum dma_data_direction dir)
+{
+	struct msdc_host *host = &msdc_host;
+	u32 status;
+	int ret;
+	dma_addr_t dma_addr;
+
+	dma_addr = msdc_flush_membuf(buf, size, dir);
+	msdc_dma_start(host, dma_addr, size);
+
+	ret = readl_poll_timeout(&host->base->msdc_int, status,
+				 status & DATA_INTS_MASK, 5000000);
+	if (ret)
+		status = MSDC_INT_DATTMO;
+
+	msdc_dma_stop(host);
+
+	/*
+	 * Need invalidate the dcache again to avoid any
+	 * cache-refill during the DMA operations (pre-fetching)
+	 */
+	if (dir == DMA_FROM_DEVICE)
+		inv_dcache_range(dma_addr, size);
+
+	return msdc_dma_done(host, status);
+}
+
+static int mtk_mmc_read(int lba, uintptr_t buf, size_t size)
+{
+	struct msdc_host *host = &msdc_host;
+
+	(void) lba;
+	if (host->dev_comp->use_dma_mode)
+		return msdc_dma_transfer((void *)buf, size, DMA_FROM_DEVICE);
+	else
+		return msdc_pio_read(buf, size);
+}
+
 static int mtk_mmc_write(int lba, uintptr_t buf, size_t size)
 {
-	INFO("mmc_write: %d:%zu\n", lba, size);
-	return -1;
+	struct msdc_host *host = &msdc_host;
+
+	(void) lba;
+	host->last_data_write = 1;
+
+	if (host->dev_comp->use_dma_mode)
+		return msdc_dma_transfer((void *)buf, size, DMA_TO_DEVICE);
+	else
+		return msdc_pio_write(buf, size);
 }
 
 static const struct mmc_ops mtk_mmc_ops = {
@@ -944,9 +1213,12 @@ void mtk_mmc_init(uintptr_t reg_base, struct msdc_compatible *compat,
 	msdc_host.base = (struct mtk_sd_regs*) reg_base;
 	msdc_host.dev_comp = compat;
 
+	if (msdc_host.dev_comp->top_base)
+		msdc_host.top_base = (struct msdc_top_regs *)(msdc_host.dev_comp->top_base);
+
 	msdc_host.src_clk_freq = src_clk;
 	msdc_host.timeout_ns = 100000000;
 	msdc_host.timeout_clks = 3 * 1048576;
 
-	mmc_init(&mtk_mmc_ops, 50000000, MMC_BUS_WIDTH_1, 0, &mtk_mmc_device_info);
+	mmc_init(&mtk_mmc_ops, 50000000, MMC_BUS_WIDTH_8, 0, &mtk_mmc_device_info);
 }
