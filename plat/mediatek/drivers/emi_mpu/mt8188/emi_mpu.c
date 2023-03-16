@@ -12,7 +12,7 @@ void set_emi_mpu_regions(void)
     struct emi_region_info_t region_info;
 
     region_info.start = BL31_BASE;
-    region_info.end = BL31_LIMIT;
+    region_info.end = (BL31_LIMIT - 1);
     region_info.region = 0;
     SET_ACCESS_PERMISSION(region_info.apc, 1,
                             FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
@@ -22,7 +22,7 @@ void set_emi_mpu_regions(void)
     emi_mpu_set_protection(&region_info);
 
     region_info.start = BL32_BASE;
-    region_info.end = (BL32_BASE + BL32_LIMIT);
+    region_info.end = (BL32_BASE + BL32_LIMIT - 1);
     region_info.region = 1;
     SET_ACCESS_PERMISSION(region_info.apc, 1,
                             FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN,
