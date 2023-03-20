@@ -39,8 +39,8 @@ static inline void emi_mpu_init(void)
         struct emi_region_info_t bl32_region;
         struct emi_region_info_t bl31_region;
 
-        REGION_INIT(bl31_region, BL32_BASE, BL32_LIMIT, BL32_REGION, BL32_APC);
-        REGION_INIT(bl32_region, BL31_BASE, BL31_END - BL31_START, BL31_REGION, BL31_APC);
+        REGION_INIT(bl32_region, BL32_BASE, BL32_LIMIT - 1, BL32_REGION, BL32_APC);
+        REGION_INIT(bl31_region, BL31_BASE, BL31_LIMIT - BL31_BASE - 1, BL31_REGION, BL31_APC);
 
         emi_mpu_set_protection(&bl31_region);
         emi_mpu_set_protection(&bl32_region);
