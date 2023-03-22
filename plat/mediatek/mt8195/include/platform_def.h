@@ -52,6 +52,46 @@
 #define DP_SEC_BASE		(IO_PHYS + 0x0C604000)
 #define EDP_SEC_SIZE		0x1000
 #define DP_SEC_SIZE		0x1000
+/*******************************************************************************
+ * APUSYS related constants
+ ******************************************************************************/
+#define APU_MD32_DEBUG_APB		(0x0d19c000)
+#define APU_MD32_SYSCTRL		(IO_PHYS + 0x09001000)
+#define APU_MD32_WDT			(IO_PHYS + 0x09002000)
+#define APU_RCX_CONFIG			(IO_PHYS + 0x09020000)
+#define APU_SCTRL_REVISER		(IO_PHYS + 0x09021000)
+#define APU_MBOX0			(IO_PHYS + 0x09000000)
+#define APU_MBOX1			(IO_PHYS + 0x09000100)
+#define APU_RPCTOP			(IO_PHYS + 0x090F0000)
+#define APU_PCUTOP			(IO_PHYS + 0x090F1000)
+#define APU_AO_CTRL			(IO_PHYS + 0x090f2000)
+#define APU_PLL				(IO_PHYS + 0x090F3000)
+#define APU_ACC				(IO_PHYS + 0x090F4000)
+#define APU_SEC_CON			(IO_PHYS + 0x090F5000)
+#define APU_ARETOP_ARE0			(IO_PHYS + 0x090F6000)
+#define APU_ARETOP_ARE1			(IO_PHYS + 0x090F7000)
+#define APU_ARETOP_ARE2			(IO_PHYS + 0x090F8000)
+#define APU_RCX_VCORE_CONFIG	(IO_PHYS + 0x09029000)
+#define APU_MD32_TCM			(IO_PHYS + 0x0df00000)
+
+#define APUSYS_BASE			0x19000000
+#define APUSYS_APC_AO_WRAPPER_OFFSET	0xf8000
+#define APUSYS_APC_AO_WRAPPER_BASE	(APUSYS_BASE +	\
+					 APUSYS_APC_AO_WRAPPER_OFFSET)
+#define APUSYS_APC_AO_WRAPPER_SIZE	0x1000
+#define APUSYS_SCTRL_REVISER_OFFSET		0x21000
+#define APUSYS_SCTRL_REVISER_BASE	(APUSYS_BASE + \
+					APUSYS_SCTRL_REVISER_OFFSET)
+#define APUSYS_SCTRL_REVISER_SIZE	0x1000
+#define APUSYS_APU_S_S_4_OFFSET		0xF2000
+#define APUSYS_APU_S_S_4_BASE		(APUSYS_BASE + \
+					APUSYS_APU_S_S_4_OFFSET)
+#define APUSYS_APU_S_S_4_SIZE		0x1000
+
+#define APUSYS_NOC_DAPC_AO_OFFSET	0xfc000
+#define APUSYS_NOC_DAPC_AO_BASE		(APUSYS_BASE +	\
+					APUSYS_NOC_DAPC_AO_OFFSET)
+#define APUSYS_NOC_DAPC_AO_SIZE		0x1000
 
 /*******************************************************************************
  * GPIO related constants
