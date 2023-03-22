@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
+#include <apusys.h>
 #include <common/debug.h>
 #include <common/runtime_svc.h>
 #include <mt_dp.h>
@@ -52,6 +52,11 @@ uintptr_t mediatek_plat_sip_handler(uint32_t smc_fid,
 	case MTK_SIP_IOMMU_CONTROL_AARCH64:
 		ret = mtk_iommu_handler(x1, x2, x3, x4, handle, &smccc_ret);
 		SMC_RET4(handle, ret, smccc_ret.a1, smccc_ret.a2, smccc_ret.a3);
+		break;
+	case MTK_SIP_APUSYS_CONTROL_AARCH32:
+	case MTK_SIP_APUSYS_CONTROL_AARCH64:
+		ret = apusys_kernel_handler(x1, x2, x3, x4, &ret_val);
+		SMC_RET2(handle, ret, ret_val);
 		break;
 	default:
 		ERROR("%s: unhandled SMC (0x%x)\n", __func__, smc_fid);

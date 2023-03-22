@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
+#include <apusys.h>
 /* System Includes */
 #include <assert.h>
 
@@ -126,6 +126,7 @@ void bl31_platform_setup(void)
 	emi_mpu_init();
 
 	rtc_power_on_sequence();
+	apusys_init();
 }
 
 /*******************************************************************************

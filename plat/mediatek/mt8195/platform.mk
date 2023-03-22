@@ -10,6 +10,8 @@ MTK_PLAT_SOC := ${MTK_PLAT}/${PLAT}
 PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/common/drivers/                    \
                  -I${MTK_PLAT}/common/lpm/                        \
+                 -I${MTK_PLAT}/drivers/apusys/secure_boot/         \
+                 -I${MTK_PLAT}/drivers/apusys/secure_boot/include/ \
                  -I${MTK_PLAT}/drivers/cirq/                      \
                  -I${MTK_PLAT}/drivers/dp/                        \
                  -I${MTK_PLAT}/drivers/gic600/                    \
@@ -24,6 +26,8 @@ PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/drivers/wdt/                       \
                  -I${MTK_PLAT}/include/                           \
                  -I${MTK_PLAT_SOC}/drivers/                       \
+                 -I${MTK_PLAT_SOC}/drivers/apusys/                \
+                 -I${MTK_PLAT_SOC}/drivers/apusys/apusys_rv/2.0   \
                  -I${MTK_PLAT_SOC}/drivers/dcm                    \
                  -I${MTK_PLAT_SOC}/drivers/dfd                    \
                  -I${MTK_PLAT_SOC}/drivers/emi_mpu/               \
@@ -114,6 +118,7 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 ${MTK_PLAT}/common/mtk_sip_svc.c                      \
                 ${MTK_PLAT}/common/params_setup.c                     \
                 ${MTK_PLAT}/common/lpm/mt_lp_rm.c                     \
+                ${MTK_PLAT}/drivers/apusys/secure_boot/apusys_secure_boot.c \
                 ${MTK_PLAT}/drivers/cirq/mt_cirq.c                    \
                 ${MTK_PLAT}/drivers/dp/mt_dp.c                        \
                 ${MTK_PLAT}/drivers/gic600/mt_gic_v3.c                \
@@ -130,6 +135,10 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 ${MTK_PLAT_SOC}/aarch64/platform_common.c             \
                 ${MTK_PLAT_SOC}/aarch64/plat_helpers.S                \
                 ${MTK_PLAT_SOC}/bl31_plat_setup.c                     \
+                ${MTK_PLAT_SOC}/drivers/apusys/apusys.c                   \
+                ${MTK_PLAT_SOC}/drivers/apusys/apusys_devapc.c            \
+                ${MTK_PLAT_SOC}/drivers/apusys/apusys_regdump.c           \
+                ${MTK_PLAT_SOC}/drivers/apusys/apusys_rv/2.0/apusys_rv.c  \
                 ${MTK_PLAT_SOC}/drivers/dcm/mtk_dcm.c                 \
                 ${MTK_PLAT_SOC}/drivers/dcm/mtk_dcm_utils.c           \
                 ${MTK_PLAT_SOC}/drivers/dfd/plat_dfd.c                \
@@ -154,6 +163,8 @@ BL31_SOURCES += common/desc_image_load.c                              \
                 ${MTK_PLAT_SOC}/plat_topology.c
 
 BL31_LIBS += ${LIBBASE}
+BL31_LIBS += ${MTK_PLAT}/drivers/apusys/secure_boot/lib/sec.a
+#$(eval LDLIBS += ${MTK_PLAT}/drivers/apusys/secure_boot/lib/sec.a)
 
 # Build SPM drivers
 include ${MTK_PLAT_SOC}/drivers/spm/build.mk
@@ -177,6 +188,10 @@ PROGRAMMABLE_RESET_ADDRESS := 1
 COLD_BOOT_SINGLE_CPU := 1
 
 BL2_AT_EL3 := 1
+
+#Enable dynamic memory mapping
+PLAT_XLAT_TABLES_DYNAMIC :=1
+$(eval $(call add_define,PLAT_XLAT_TABLES_DYNAMIC))
 
 MACH_MT8195 := 1
 $(eval $(call add_define,MACH_MT8195))
