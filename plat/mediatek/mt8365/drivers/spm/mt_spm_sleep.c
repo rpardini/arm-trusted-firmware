@@ -248,6 +248,8 @@ static void go_to_sleep_after_wfi(void)
 
 	pwrctrl = __spm_suspend.pwrctrl;
 
+	mt_pmic_resume();
+
 	if (is_infra_pdn(pwrctrl->pcm_flags))
 		mtk_uart_restore();
 

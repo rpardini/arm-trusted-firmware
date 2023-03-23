@@ -158,3 +158,8 @@ uint64_t mt_spm_pmic_wrap_get_cmd(enum pmic_wrap_phase_id phase, uint32_t idx)
 	/* just get wdata value */
 	return pw.set[phase]._[idx].cmd_wdata;
 }
+
+void mt_pmic_resume(void)
+{
+	pwrap_write_nochk(RG_BUCK_VCORE_VOSEL, VOLT_TO_PMIC_VAL(80000));
+}
