@@ -770,6 +770,7 @@ void mt_pll_init(void)
     DRV_WriteReg32(INFRACFG_AO_MODULE_SW_CG_4_SET, 0x81c20000);
 #endif
 
+    set_armpll_ll_rate(CPU_OPP0);
 #if CLKMGR_BRINGUP
     mt_get_cpu_freq();
 #endif
