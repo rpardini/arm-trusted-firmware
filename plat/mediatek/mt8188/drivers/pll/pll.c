@@ -668,7 +668,6 @@ void mt_pll_init(void)
     spm_mtcmos_on(MT8188_POWER_DOMAIN_VDOSYS0);
     spm_mtcmos_on(MT8188_POWER_DOMAIN_VDOSYS1);
     spm_mtcmos_on(MT8188_POWER_DOMAIN_VPPSYS1);
-    spm_mtcmos_on(MT8188_POWER_DOMAIN_HDMI_TX);
     /* for adsp/audio/asrc infra bus access */
     spm_mtcmos_on(MT8188_POWER_DOMAIN_ADSP_AO);
     spm_mtcmos_on(MT8188_POWER_DOMAIN_ADSP_INFRA);
