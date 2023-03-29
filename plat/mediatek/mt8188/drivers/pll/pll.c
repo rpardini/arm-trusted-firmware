@@ -767,6 +767,12 @@ void mt_pll_init(void)
     DRV_WriteReg32(INFRACFG_AO_MODULE_SW_CG_2_SET, 0xf0003802);
     DRV_WriteReg32(INFRACFG_AO_MODULE_SW_CG_3_SET, 0x30000000);
     DRV_WriteReg32(INFRACFG_AO_MODULE_SW_CG_4_SET, 0x81c20000);
+
+    /* SET OVL0 SMI PA MODE */
+    DRV_WriteReg32(0x1c022f80, 0x0);
+    DRV_WriteReg32(0x1c022f84, 0x0);
+    DRV_WriteReg32(0x1c022f88, 0x0);
+    DRV_WriteReg32(0x1c022f8c, 0x0);
 #endif
 
     set_armpll_ll_rate(CPU_OPP0);
