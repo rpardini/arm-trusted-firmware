@@ -307,6 +307,14 @@ static uint16_t get_frequency_meter(uint16_t val, uint16_t measureSrc,
 		rtc_xosc_write(osc32con | (val & 0x1f), false);
 	}
 
+	/*
+	 * RTC_FQMTR_RST = 1, reset FQMTR
+	 * RTC_FQMTR_RST = 0, release FQMTR
+	 */
+	RTC_Write(PMIC_SCK_TOP_RST_CON0, RTC_Read(PMIC_SCK_TOP_RST_CON0) | RTC_FQMTR_RST);
+	udelay(20);
+	RTC_Write(PMIC_SCK_TOP_RST_CON0, RTC_Read(PMIC_SCK_TOP_RST_CON0) & ~RTC_FQMTR_RST);
+
 	RTC_Config_Interface(PMIC_RG_TOP_CKPDN_CON0_CLR, 1,
 		PMIC_RG_FQMTR_CK_PDN_MASK, PMIC_RG_FQMTR_CK_PDN_SHIFT);
 
