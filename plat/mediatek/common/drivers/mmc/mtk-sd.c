@@ -285,12 +285,7 @@ struct msdc_tune_para {
 
 struct msdc_host {
 	struct mtk_sd_regs *base;
-//	struct mmc *mmc;
-
 	struct msdc_compatible *dev_comp;
-
-//	struct clk src_clk;	/* for SD/MMC bus clock */
-//	struct clk h_clk;	/* MSDC core clock */
 
 	uint32_t src_clk_freq;	/* source clock */
 	uint32_t mclk;		/* mmc framework required bus clock */
@@ -311,16 +306,8 @@ struct msdc_host {
 	/* whether to use gpio detection or built-in hw detection */
 	bool builtin_cd;
 
-	/* card detection / write protection GPIOs */
-//#if IS_ENABLED(DM_GPIO)
-//	struct gpio_desc gpio_wp;
-//	struct gpio_desc gpio_cd;
-//#endif
-
 	unsigned int last_resp_type;
 	unsigned int last_data_write;
-
-//	enum bus_mode timing;
 
 	struct msdc_tune_para def_tune_para;
 	struct msdc_tune_para saved_tune_para;
@@ -818,7 +805,6 @@ static void msdc_set_mclk(struct msdc_host *host, u32 hz)
 	setbits_le32(&host->base->msdc_cfg, MSDC_CFG_CKPDN);
 	host->sclk = sclk;
 	host->mclk = hz;
-//	host->timing = timing;
 
 	/* needed because clk changed. */
 	msdc_set_timeout(host, host->timeout_ns, host->timeout_clks);
