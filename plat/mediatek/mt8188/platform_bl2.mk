@@ -34,3 +34,9 @@ MODULES-BL2-y += $(MTK_PLAT_SOC)/drivers/pmic_wrap_bl2
 
 BL2_LIBS += ${LIBDRAM} \
 	    ${LIBBASE}
+
+ifeq (${PLAT_HW_CRYPTO},1)
+BL2_LIBS += ${MTK_PLAT}/lib/crypt/libarmcrypt.a
+$(eval $(call add_define,PLAT_HW_CRYPTO))
+endif
+
