@@ -90,6 +90,11 @@ $(eval $(call add_define,PLAT_PARTITION_BLOCK_SIZE))
 BL2_LIBS += ${LIBDRAM} \
             ${LIBBASE}
 
+ifeq (${PLAT_HW_CRYPTO},1)
+BL2_LIBS += ${MTK_PLAT}/lib/crypt/libarmcrypt.a
+$(eval $(call add_define,PLAT_HW_CRYPTO))
+endif
+
 BL31_SOURCES += common/desc_image_load.c                              \
                 drivers/delay_timer/delay_timer.c                     \
                 drivers/gpio/gpio.c                                   \
