@@ -1002,6 +1002,7 @@ void mt_pll_init(void)
     DRV_WriteReg32(PERICFG_AO_PERI_MODULE_SW_CG_0_SET, 0x00000010);
 #endif
 
+    set_armpll_ll_rate(CPU_OPP0);
 #if CLKMGR_BRINGUP
     mt_get_cpu_freq();
 #endif
