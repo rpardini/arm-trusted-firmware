@@ -30,20 +30,23 @@ void pwrap_init(void);
 void mt_mem_init(void);
 
 #if defined(STORAGE_UFS)
+static uint32_t ufs_desc_in_sram[0x8000] __aligned(4096);
 static ufs_params_t mt8195_ufs_params = {
 	.reg_base = 0x11270000,
-	.desc_base = 0x50000000,
+	.desc_base = &ufs_desc_in_sram,
 	.desc_size = 0x8000,
 	.flags = 0
 };
 #else
-static struct msdc_compatible mt8183_compat = {
+static struct msdc_compatible mt8195_compat = {
 	.clk_div_bits = 12,
 	.pad_tune0 = true,
 	.async_fifo = true,
 	.data_tune = true,
 	.busy_check = true,
 	.stop_clk_fix = true,
+	.enhance_rx = true,
+	.use_dma_mode = true,
 };
 #endif
 
@@ -123,18 +126,24 @@ static uintptr_t storage_dev_handle;
 static const io_dev_connector_t *storage_dev_con;
 static const io_dev_connector_t *fip_dev_con;
 static uintptr_t fip_dev_handle;
+static uint32_t mmc_buf_in_sram[PLAT_PARTITION_BLOCK_SIZE / sizeof(uint32_t)];
 
 #if defined(STORAGE_UFS)
 #define MAIN_STORAGE_LUN 2
-static size_t mtk_ufs_read(int lba, uintptr_t buf, size_t size)
+size_t mtk_ufs_read(int lba, uintptr_t buf, size_t size)
 {
 	return ufs_read_blocks(MAIN_STORAGE_LUN, lba, buf, size);
 }
 
-static const io_block_dev_spec_t ufs_dev_spec = {
+size_t mtk_ufs_write(int lba, uintptr_t buf, size_t size)
+{
+	return ufs_write_blocks(MAIN_STORAGE_LUN, lba, buf, size);
+}
+
+static io_block_dev_spec_t ufs_dev_spec = {
 	.buffer = {
-		.offset = 0x41000000,
-		.length = 0x1000000,
+		.offset = &mmc_buf_in_sram,
+		.length = PLAT_PARTITION_BLOCK_SIZE,
 	},
 	.ops = {
 		.read = mtk_ufs_read,
@@ -148,10 +157,10 @@ static const io_block_spec_t ufs_gpt_spec = {
 			  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
 };
 #else
-static const io_block_dev_spec_t emmc_dev_spec = {
+static io_block_dev_spec_t emmc_dev_spec = {
 	.buffer = {
-		.offset = 0x41000000,
-		.length = 0x1000000,
+		.offset = &mmc_buf_in_sram,
+		.length = PLAT_PARTITION_BLOCK_SIZE,
 	},
 	.ops = {
 		.read = mmc_read_blocks,
@@ -370,14 +379,23 @@ void bl2_platform_setup(void)
 	pmic_init();
 	pmic_initial_setting();
 
-	mt_mem_init();
-
 #if defined(STORAGE_UFS)
 	mtk_ufs_init(&mt8195_ufs_params);
 #else
-	mtk_mmc_init(0x11230000, &mt8183_compat, 400000000);
+	mtk_mmc_init(0x11230000, &mt8195_compat, 400000000);
 #endif
 	mtk_io_setup();
+	load_partition_table(GPT_IMAGE_ID);
+
+	mt_mem_init();
+	/* change emmc read buffer to DRAM */
+#if defined(STORAGE_UFS)
+	ufs_dev_spec.buffer.offset = 0x41000000;
+	ufs_dev_spec.buffer.length = 0x1000000;
+#else
+	emmc_dev_spec.buffer.offset = 0x41000000;
+	emmc_dev_spec.buffer.length = 0x1000000;
+#endif
 }
 
 struct bl_load_info *plat_get_bl_image_load_info(void)
@@ -435,8 +453,10 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 	const char *name = get_boot_partition_name();
 
 	if (storage_fip_spec.length == 0) {
-		partition_init(GPT_IMAGE_ID);
-		entry = get_partition_entry(name);
+		if((entry = get_partition_entry(name)) == NULL) {
+			partition_init(GPT_IMAGE_ID);
+			entry = get_partition_entry(name);
+		}
 		if (entry == NULL) {
 			ERROR("Could NOT find the %s partition!\n", name);
 			return -ENOENT;
