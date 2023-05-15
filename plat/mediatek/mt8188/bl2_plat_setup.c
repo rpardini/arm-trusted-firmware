@@ -121,7 +121,7 @@ static const io_dev_connector_t *storage_dev_con;
 static const io_dev_connector_t *fip_dev_con;
 static uintptr_t fip_dev_handle;
 
-static uint32_t mmc_buf_in_sram[PLAT_PARTITION_BLOCK_SIZE];
+static uint32_t mmc_buf_in_sram[PLAT_PARTITION_BLOCK_SIZE / sizeof(uint32_t)];
 static io_block_dev_spec_t emmc_dev_spec = {
 	.buffer = {
 		.offset = &mmc_buf_in_sram,
