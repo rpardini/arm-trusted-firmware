@@ -78,6 +78,7 @@ uint64_t mediatek_plat_sip_handler(uint32_t smc_fid,
 	cpu_context_t *ns_cpu_context;
 	uint32_t mpidr = 0;
 	uint32_t linear_id = 0;
+	uint32_t res = 0;
 	uint64_t spsr = 0;
 
 	mpidr = read_mpidr();
@@ -112,6 +113,10 @@ uint64_t mediatek_plat_sip_handler(uint32_t smc_fid,
 		case MTK_SIP_KERNEL_SPM_GET_PWR_CTRL_ARGS_AARCH64:
 			rc = spm_get_pwr_ctrl_args(x1, x2, x3);
 			break;
+		case MTK_SIP_PARTNAME_ID_AARCH64:
+			rc = mtk_plat_get_partid(&res);
+			SMC_RET2(handle, rc, res);
+			break;
 		default:
 			rc = -2;/*SMC_UNK;*/
 			ERROR("%s: unknown 64B kernel SMC(0x%x)\n", __func__, smc_fid);
@@ -125,6 +130,10 @@ uint64_t mediatek_plat_sip_handler(uint32_t smc_fid,
 			break;
 		case MTK_SIP_KERNEL_SPM_GET_PWR_CTRL_ARGS_AARCH32:
 			rc = spm_get_pwr_ctrl_args(x1, x2, x3);
+			break;
+		case MTK_SIP_PARTNAME_ID_AARCH32:
+			rc = mtk_plat_get_partid(&res);
+			SMC_RET2(handle, rc, res);
 			break;
 		default:
 			rc = -3;/*SMC_UNK;*/
