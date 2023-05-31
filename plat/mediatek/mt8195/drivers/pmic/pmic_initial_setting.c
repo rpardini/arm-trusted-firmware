@@ -182,9 +182,68 @@ void pmic_initial_setting(void)
 {
 	uint16_t i;
 
+	/* for AUXADC */
+	pmic_config_interface(PMIC_HK_AUXADC_KEY_ADDR, 0x6359,
+		      PMIC_HK_AUXADC_KEY_MASK,
+		      PMIC_HK_AUXADC_KEY_SHIFT);
+	/* for Power off sequence */
+	pmic_config_interface(PMIC_RG_CPS_W_KEY_ADDR, 0x4729,
+		      PMIC_RG_CPS_W_KEY_MASK,
+		      PMIC_RG_CPS_W_KEY_SHIFT);
+	/* for D type efuse */
+	pmic_config_interface(PMIC_TMA_KEY_ADDR, 0x9CA6,
+		      PMIC_TMA_KEY_MASK,
+		      PMIC_TMA_KEY_SHIFT);
+	/* for Buck */
+	pmic_config_interface(PMIC_BUCK_TOP_WRITE_KEY_ADDR, 0x5543,
+		      PMIC_BUCK_TOP_WRITE_KEY_MASK,
+		      PMIC_BUCK_TOP_WRITE_KEY_SHIFT);
+	/* for SPISLV */
+	pmic_config_interface(PMIC_SPISLV_KEY_ADDR, 0xBADE,
+		      PMIC_SPISLV_KEY_MASK,
+		      PMIC_SPISLV_KEY_SHIFT);
+	/* for BM */
+	pmic_config_interface(PMIC_BM_FGADC_KEY_ADDR, 0x1605,
+		      PMIC_BM_FGADC_KEY_MASK,
+		      PMIC_BM_FGADC_KEY_SHIFT);
+	pmic_config_interface(PMIC_BM_BATON_KEY_ADDR, 0x1706,
+		      PMIC_BM_BATON_KEY_MASK,
+		      PMIC_BM_BATON_KEY_SHIFT);
+	pmic_config_interface(PMIC_BM_BIF_KEY_ADDR, 0x1807,
+		      PMIC_BM_BIF_KEY_MASK,
+		      PMIC_BM_BIF_KEY_SHIFT);
+
+	pmic_config_interface(PMIC_BM_BIF_KEY_ADDR, 0,
+		      PMIC_BM_BIF_KEY_MASK,
+		      PMIC_BM_BIF_KEY_SHIFT);
+	pmic_config_interface(PMIC_BM_BATON_KEY_ADDR, 0,
+		      PMIC_BM_BATON_KEY_MASK,
+		      PMIC_BM_BATON_KEY_SHIFT);
+	pmic_config_interface(PMIC_BM_FGADC_KEY_ADDR, 0,
+		      PMIC_BM_FGADC_KEY_MASK,
+		      PMIC_BM_FGADC_KEY_SHIFT);
+	pmic_config_interface(PMIC_SPISLV_KEY_ADDR, 0,
+		      PMIC_SPISLV_KEY_MASK,
+		      PMIC_SPISLV_KEY_SHIFT);
+	pmic_config_interface(PMIC_BUCK_TOP_WRITE_KEY_ADDR, 0,
+		      PMIC_BUCK_TOP_WRITE_KEY_MASK,
+		      PMIC_BUCK_TOP_WRITE_KEY_SHIFT);
+	pmic_config_interface(PMIC_TMA_KEY_ADDR, 0,
+		      PMIC_TMA_KEY_MASK,
+		      PMIC_TMA_KEY_SHIFT);
+	pmic_config_interface(PMIC_RG_CPS_W_KEY_ADDR, 0,
+		      PMIC_RG_CPS_W_KEY_MASK,
+		      PMIC_RG_CPS_W_KEY_SHIFT);
+	pmic_config_interface(PMIC_HK_AUXADC_KEY_ADDR, 0,
+		      PMIC_HK_AUXADC_KEY_MASK,
+		      PMIC_HK_AUXADC_KEY_SHIFT);
+
 	for (i = 0; i < ARRAY_SIZE(init_setting); i++)
 		pmic_config_interface(init_setting[i].addr, init_setting[i].val,
 				      init_setting[i].mask, init_setting[i].shift);
+
+	pmic_config_interface(0x1bd0, 0, 0xff, 0);
+	pmic_config_interface(0x1bd6, 0x8000, 0xffff, 0);
 
 	/* FIXME: Should be removed after MT6359 driver support in u-boot */
 	/* For USB P1 vcamio power on */
