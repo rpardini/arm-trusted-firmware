@@ -249,4 +249,11 @@ void pmic_initial_setting(void)
 	/* For USB P1 vcamio power on */
 	pwrap_write(MT6359_LDO_VCAMIO_CON0, 0x1);
 	pwrap_write(MT6359_LDO_VCAMIO_OP_EN, 0x8000);
+
+	/* mt6360 ldo1, for DSI0 panel 3.3v on */
+	mt6360_ldo_config_interface(0x1B, 0xD, 0xD, 0x4);
+	mt6360_ldo_config_interface(0x17, 0x3, 0x3, 0x6);
+
+	/* mt6360 ldo2, for DSI0 panel 1.8v on */
+	mt6360_ldo_config_interface(0x11, 0x3, 0x3, 0x6);
 }
