@@ -75,6 +75,13 @@ BL2_SOURCES     += common/desc_image_load.c                              \
 BL2_LIBS += ${LIBDRAM} \
             ${LIBBASE}
 
+ifeq (${PLAT_AB_BOOT_ENABLE},1)
+include lib/zlib/zlib.mk
+BL2_SOURCES     += ${MTK_PLAT}/common/mtk_ab.c                        \
+                   $(ZLIB_SOURCES)                                    \
+$(eval $(call add_define,PLAT_AB_BOOT_ENABLE))
+endif
+
 BL31_SOURCES    += common/desc_image_load.c                              \
                    drivers/delay_timer/delay_timer.c                     \
                    drivers/delay_timer/generic_delay_timer.c             \

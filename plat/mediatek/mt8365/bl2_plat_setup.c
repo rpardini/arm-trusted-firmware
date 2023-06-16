@@ -24,6 +24,9 @@
 #include <pll/pll.h>
 
 #include <rtc.h>
+#if defined(PLAT_AB_BOOT_ENABLE)
+#include <mtk_ab.h>
+#endif
 
 #define GPIO_MODEC 0x100052A0
 #define GPIO_DIR4 0x10005170
@@ -144,6 +147,7 @@ static const io_block_dev_spec_t emmc_dev_spec = {
 	},
 	.ops = {
 		.read = mmc_read_blocks,
+		.write = mmc_write_blocks,
 	},
 	.block_size = MMC_BLOCK_SIZE,
 };
@@ -155,6 +159,9 @@ static const io_block_spec_t emmc_gpt_spec = {
 };
 
 static io_block_spec_t emmc_fip_spec;
+#if defined(PLAT_AB_BOOT_ENABLE)
+static io_block_spec_t emmc_misc_spec;
+#endif
 
 static const io_uuid_spec_t bl31_uuid_spec = {
 	.uuid = UUID_EL3_RUNTIME_FIRMWARE_BL31,
@@ -232,6 +239,13 @@ static const struct plat_io_policy policies[] = {
 		(uintptr_t)&emmc_gpt_spec,
 		check_emmc
 	},
+#if defined(PLAT_AB_BOOT_ENABLE)
+	[MISC_IMAGE_ID] = {
+		&emmc_dev_handle,
+		(uintptr_t) &emmc_misc_spec,
+		check_emmc
+	},
+#endif
 #if TRUSTED_BOARD_BOOT
 	[TRUSTED_KEY_CERT_ID] = {
 		&fip_dev_handle,
@@ -409,8 +423,23 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 	const char *name = get_boot_partition_name();
 
 	if (emmc_fip_spec.length == 0) {
+#if defined(PLAT_AB_BOOT_ENABLE)
+		partition_init(GPT_IMAGE_ID);
+		entry = get_partition_entry(BOOTCTRL_PART);
+		if (entry == NULL) {
+			ERROR("Could NOT find the %s partition!\n", BOOTCTRL_PART);
+			return -ENOENT;
+		}
+		emmc_misc_spec.offset = entry->start;
+		emmc_misc_spec.length = entry->length;
+
+		const char *ab_boot = plat_ab_handle_boot();
+
+		entry = get_partition_entry(ab_boot);
+#else
 		partition_init(GPT_IMAGE_ID);
 		entry = get_partition_entry(name);
+#endif
 		if (entry == NULL) {
 			ERROR("Could NOT find the %s partition!\n", name);
 			return -ENOENT;
