@@ -40,3 +40,9 @@ BL2_LIBS += ${MTK_PLAT}/lib/crypt/libarmcrypt.a
 $(eval $(call add_define,PLAT_HW_CRYPTO))
 endif
 
+ifeq (${PLAT_AB_BOOT_ENABLE},1)
+include lib/zlib/zlib.mk
+BL2_SOURCES += ${MTK_PLAT}/common/mtk_ab.c \
+	        $(ZLIB_SOURCES) \
+$(eval $(call add_define,PLAT_AB_BOOT_ENABLE))
+endif
