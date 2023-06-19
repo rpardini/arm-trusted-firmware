@@ -97,15 +97,32 @@ static void __apu_pll_init(void)
 			       PLL4H_PLL3_CON1, PLL4H_PLL4_CON1};
 	uint32_t pll_fhctl_dds[] = {PLL4HPLL_FHCTL0_DDS, PLL4HPLL_FHCTL1_DDS,
 				    PLL4HPLL_FHCTL2_DDS, PLL4HPLL_FHCTL3_DDS};
-	int32_t pll_freq_out[] = {900, 832,
+	int32_t pll_freq_out_default[] = {900, 832,
 				  700, 700}; /* MHz */
+	int32_t pll_freq_out_mt8370[] = {700, 832,
+				  700, 700}; /* MHz */
+	int32_t *pll_freq_out = NULL;
 	uint32_t pcw_val, posdiv_val;
 	int pll_idx;
 	uint32_t tmp = 0;
+	uint32_t ret_val = 0;
 
 #if LOCAL_DEBUG
 	NOTICE(MODULE_TAG "PLL init %s %d ++\n", __func__, __LINE__);
 #endif
+
+	/* according to segment id in efuse to setup default max freq values of apusys */
+	mtk_plat_get_partid(&ret_val);
+	if (ret_val == 0x00008370) {
+		// 8370
+		pll_freq_out = &pll_freq_out_mt8370;
+		NOTICE(MODULE_TAG "PLL init for mt8370, %s %d --\n", __func__, __LINE__);
+	} else {
+		// 8390 (aka 8188)
+		pll_freq_out = &pll_freq_out_default;
+		NOTICE(MODULE_TAG "PLL init for mt8390, %s %d --\n", __func__, __LINE__);
+	}
+
 
 	/* Step4. Initial PLL setting */
 
