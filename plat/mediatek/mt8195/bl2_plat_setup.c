@@ -150,6 +150,7 @@ static io_block_dev_spec_t ufs_dev_spec = {
 	},
 	.ops = {
 		.read = mtk_ufs_read,
+		.write = mtk_ufs_write,
 	},
 	.block_size = UFS_BLOCK_SIZE,
 };
