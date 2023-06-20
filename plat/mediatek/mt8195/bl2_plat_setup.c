@@ -25,7 +25,9 @@
 #include <wdt.h>
 #include <rtc.h>
 #include <pmic_initial_setting.h>
+#if defined(PLAT_AB_BOOT_ENABLE)
 #include <mtk_ab.h>
+#endif
 
 void pwrap_init(void);
 void mt_mem_init(void);
