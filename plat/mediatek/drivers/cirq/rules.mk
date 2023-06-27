@@ -8,6 +8,7 @@ LOCAL_DIR := $(call GET_LOCAL_DIR)
 
 MODULE := cirq
 LOCAL_SRCS-y := $(LOCAL_DIR)/mt_cirq.c
+LOCAL_SRCS-$(CONFIG_MTK_CIRQ_REMAIN) += ${LOCAL_DIR}/${MTK_SOC}/mtk_cirq_remain.c
 
 PLAT_INCLUDES += -I${LOCAL_DIR}
 
