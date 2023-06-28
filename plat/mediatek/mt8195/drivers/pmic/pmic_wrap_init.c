@@ -1548,21 +1548,6 @@ signed int pwrap_init(void)
 	PWRAPLOG("PMIF_SPI_PMIF_MONITOR_TARGET_WDATA_0 = 0x%x\n", WRAP_RD32(PMIF_SPI_PMIF_MONITOR_TARGET_WDATA_0));
 #endif
 
-	/*
-	 * Stop restart after shutdown.
-	 * Write pmic register RG_ENVTEM_D and RG_ENVTEM_EN
-	 * to stop restart after shutdown by blockig chr_det signal
-	 */
-	pwrap_read_nochk(PMIC_RG_ENVTEM_D_ADDR, &rdata);
-	rdata &= ~(PMIC_RG_ENVTEM_D_MASK << PMIC_RG_ENVTEM_D_SHIFT);
-	rdata |= (1 << PMIC_RG_ENVTEM_D_SHIFT);
-	pwrap_write_nochk(PMIC_RG_ENVTEM_D_ADDR, rdata);
-
-	pwrap_read_nochk(PMIC_RG_ENVTEM_EN_ADDR, &rdata);
-	rdata &= ~(PMIC_RG_ENVTEM_EN_MASK << PMIC_RG_ENVTEM_EN_SHIFT);
-	rdata |= (1 << PMIC_RG_ENVTEM_EN_SHIFT);
-	pwrap_write_nochk(PMIC_RG_ENVTEM_EN_ADDR, rdata);
-
 	return 0;
 }
 
