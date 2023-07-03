@@ -41,11 +41,11 @@
 	{ .base = (s_bs), }
 
 enum IOMMU_ATF_CMD {
+	IOMMU_ATF_CMD_CONFIG_SMI_LARB,		/* For mm master to enable iommu */
+	IOMMU_ATF_CMD_CONFIG_INFRA_IOMMU,	/* For infra master to enable iommu */
 	IOMMU_ATF_CMD_SECURE_IOMMU_STATUS,	/* For secure iommu translation fault report */
 	IOMMU_ATF_CMD_SECURE_IOMMU_SUSPEND,	/* For secure iommu registers back up */
 	IOMMU_ATF_CMD_SECURE_IOMMU_RESUME,	/* For secure iommu registers restore */
-	IOMMU_ATF_CMD_CONFIG_SMI_LARB,		/* For mm master to enable iommu */
-	IOMMU_ATF_CMD_CONFIG_INFRA_IOMMU,	/* For infra master to enable iommu */
 	IOMMU_ATF_CMD_COUNT,
 };
 
