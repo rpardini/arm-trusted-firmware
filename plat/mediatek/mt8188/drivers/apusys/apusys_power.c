@@ -9,6 +9,7 @@
 #include <lib/mmio.h>
 #include <lib/utils_def.h>
 #include <lib/xlat_tables/xlat_tables_v2.h>
+#include <drivers/delay_timer.h>
 
 /* Vendor header */
 //#include <mtk_mmap_pool.h>
@@ -55,7 +56,23 @@ int apusys_kernel_apusys_pwr_rcx(uint32_t op)
 	case SMC_RCX_PWR_CG_EN:
 		mmio_write_32(APU_VCORE_BASE + APUSYS_VCORE_CG_CLR, 0xFFFFFFFF);
 		mmio_write_32(APU_RCX_BASE + APU_RCX_CG_CLR, 0xFFFFFFFF);
+		break;
+	case SMC_RCX_PWR_OFF:
+		/* set REG_WAKEUP_CLR */
+		mmio_write_32(APU_RPC_BASE + APU_RPC_TOP_CON, 0x00001000);
+		udelay(10);
 
+		/* mask RPC IRQ and bypass WFI */
+		mmio_setbits_32(APU_RPC_BASE + APU_RPC_TOP_SEL, 0x49E);
+		udelay(10);
+
+		/* clean up wakeup source (uP part), clear rpc irq */
+		mmio_setbits_32(APU_RPC_BASE + APU_RPC_TOP_CON, 0x6);
+		udelay(10);
+
+		/* send sleep request to RPC */
+		mmio_setbits_32(APU_RPC_BASE + APU_RPC_TOP_CON, 0x1);
+		udelay(100);
 		break;
 	default:
 		ERROR("%s invalid op:%d\n", __func__, op);
