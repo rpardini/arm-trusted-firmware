@@ -369,7 +369,11 @@ static void __apu_rpc_init(void)
 
 	/* Step9. RPCtop initial */
 	/* RPC */
+#if ENABLE_SW_BUCK_CTL
+	apu_setl(0x0800101E, apupw.regs[apu_rpc] + APU_RPC_TOP_SEL);
+#else
 	apu_setl(0x0800501E, apupw.regs[apu_rpc] + APU_RPC_TOP_SEL);
+#endif
 
 	/* BUCK_PROT_SEL */
 	apu_setl((0x1 << 20), apupw.regs[apu_rpc] + APU_RPC_TOP_SEL_1);

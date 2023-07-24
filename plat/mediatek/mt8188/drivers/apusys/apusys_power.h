@@ -233,6 +233,8 @@ struct apu_power {
 #define APU_PCU_BUCK_ON_SLE1			0x00C4
 #define APU_PCU_BUCK_ON_SETTLE_TIME		0x12C
 
+#define ENABLE_SW_BUCK_CTL	(1) /* 1: enable regulator in rpm resume */
+
 static inline void apu_writel(const unsigned int val, uintptr_t regs)
 {
 	mmio_write_32(regs, val);
