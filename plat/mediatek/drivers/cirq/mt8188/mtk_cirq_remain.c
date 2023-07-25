@@ -14,6 +14,14 @@
 
 /*GIC interrupt ID*/
 #define UART0_IRQ_ID		173
+#define CAMSV1_IRQ_ID		349
+#define CAMSV2_IRQ_ID		350
+#define CAMSV3_IRQ_ID		351
+#define CAMSV4_IRQ_ID		352
+#define CAMSV5_IRQ_ID		361
+#define CAMSV6_IRQ_ID		362
+#define CAMSV7_IRQ_ID		363
+#define CAMSV8_IRQ_ID		364
 
 static struct mt_irqremain remain_irqs;
 
@@ -57,6 +65,14 @@ int mt_cirq_irqremain_init(void)
 
 	remain_irqs.count = 0;
 	add_remain_irq(UART0_IRQ_ID);
+	add_remain_irq(CAMSV1_IRQ_ID);
+	add_remain_irq(CAMSV2_IRQ_ID);
+	add_remain_irq(CAMSV3_IRQ_ID);
+	add_remain_irq(CAMSV4_IRQ_ID);
+	add_remain_irq(CAMSV5_IRQ_ID);
+	add_remain_irq(CAMSV6_IRQ_ID);
+	add_remain_irq(CAMSV7_IRQ_ID);
+	add_remain_irq(CAMSV8_IRQ_ID);
 	remain_sta = mt_cirq_irqremain_submit();
 	if (remain_sta < 0)
 		INFO("%s: no irq uses cirq\n", __func__);
