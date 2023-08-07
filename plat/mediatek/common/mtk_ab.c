@@ -69,7 +69,8 @@ char *plat_ab_handle_boot(void)
 		goto exit;
 	}
 
-	crc = tf_crc32(0, &bl_ctrl, sizeof(struct mtk_bl_ctrl) - sizeof(uint32_t));
+	crc = tf_crc32(0, (const unsigned char *)&bl_ctrl,
+					sizeof(struct mtk_bl_ctrl) - sizeof(uint32_t));
 
 	if (bl_ctrl.magic != BOOTCTRL_MAGIC || bl_ctrl.crc32_le != crc) {
 		INFO("Incorrect Boot Control content, establishing.\n");
