@@ -22,6 +22,9 @@
 #define CAMSV6_IRQ_ID		362
 #define CAMSV7_IRQ_ID		363
 #define CAMSV8_IRQ_ID		364
+#define DISP_ETHDR_IRQ_ID	598
+#define DISP_OVL_IRQ_ID		668
+#define DISP_RDMA_IRQ_ID	670
 
 static struct mt_irqremain remain_irqs;
 
@@ -73,6 +76,9 @@ int mt_cirq_irqremain_init(void)
 	add_remain_irq(CAMSV6_IRQ_ID);
 	add_remain_irq(CAMSV7_IRQ_ID);
 	add_remain_irq(CAMSV8_IRQ_ID);
+	add_remain_irq(DISP_ETHDR_IRQ_ID);
+	add_remain_irq(DISP_OVL_IRQ_ID);
+	add_remain_irq(DISP_RDMA_IRQ_ID);
 	remain_sta = mt_cirq_irqremain_submit();
 	if (remain_sta < 0)
 		INFO("%s: no irq uses cirq\n", __func__);
