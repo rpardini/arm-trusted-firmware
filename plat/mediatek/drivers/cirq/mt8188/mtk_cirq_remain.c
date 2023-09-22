@@ -13,6 +13,7 @@
 #include <lpm/mt_lp_rm.h>
 
 /*GIC interrupt ID*/
+#define SSUSB_XHCI_INT_0_IRQ_ID  161
 #define UART0_IRQ_ID		173
 #define CAMSV1_IRQ_ID		349
 #define CAMSV2_IRQ_ID		350
@@ -22,6 +23,8 @@
 #define CAMSV6_IRQ_ID		362
 #define CAMSV7_IRQ_ID		363
 #define CAMSV8_IRQ_ID		364
+#define SSUSB_XHCI_INT_P0_IRQ_ID 565
+#define SSUSB_XHCI_INT_P2_IRQ_ID 568
 #define DISP_ETHDR_IRQ_ID	598
 #define DISP_OVL_IRQ_ID		668
 #define DISP_RDMA_IRQ_ID	670
@@ -67,6 +70,7 @@ int mt_cirq_irqremain_init(void)
 	int remain_sta;
 
 	remain_irqs.count = 0;
+	add_remain_irq(SSUSB_XHCI_INT_0_IRQ_ID);
 	add_remain_irq(UART0_IRQ_ID);
 	add_remain_irq(CAMSV1_IRQ_ID);
 	add_remain_irq(CAMSV2_IRQ_ID);
@@ -76,6 +80,8 @@ int mt_cirq_irqremain_init(void)
 	add_remain_irq(CAMSV6_IRQ_ID);
 	add_remain_irq(CAMSV7_IRQ_ID);
 	add_remain_irq(CAMSV8_IRQ_ID);
+	add_remain_irq(SSUSB_XHCI_INT_P0_IRQ_ID);
+	add_remain_irq(SSUSB_XHCI_INT_P2_IRQ_ID);
 	add_remain_irq(DISP_ETHDR_IRQ_ID);
 	add_remain_irq(DISP_OVL_IRQ_ID);
 	add_remain_irq(DISP_RDMA_IRQ_ID);
