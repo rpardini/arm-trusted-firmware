@@ -571,7 +571,7 @@ void mt_pll_init(void)
     DRV_WriteReg32(CLK_CFG_6_SET, 0x01010400);
 
     DRV_WriteReg32(CLK_CFG_7_CLR, 0xFFFFFFFF);
-    DRV_WriteReg32(CLK_CFG_7_SET, 0x01030101);
+    DRV_WriteReg32(CLK_CFG_7_SET, 0x01030404);
 
     DRV_WriteReg32(CLK_CFG_8_CLR, 0xFFFFFFFF);
     DRV_WriteReg32(CLK_CFG_8_SET, 0x03010102);
