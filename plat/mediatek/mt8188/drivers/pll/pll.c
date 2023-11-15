@@ -668,6 +668,7 @@ void mt_pll_init(void)
     spm_mtcmos_on(MT8188_POWER_DOMAIN_VDOSYS0);
     spm_mtcmos_on(MT8188_POWER_DOMAIN_VDOSYS1);
     spm_mtcmos_on(MT8188_POWER_DOMAIN_VPPSYS1);
+    spm_mtcmos_on(MT8188_POWER_DOMAIN_EDP_TX);
     /* for adsp/audio/asrc infra bus access */
     spm_mtcmos_on(MT8188_POWER_DOMAIN_ADSP_AO);
     spm_mtcmos_on(MT8188_POWER_DOMAIN_ADSP_INFRA);
@@ -773,6 +774,9 @@ void mt_pll_init(void)
     DRV_WriteReg32(0x1c022f84, 0x0);
     DRV_WriteReg32(0x1c022f88, 0x0);
     DRV_WriteReg32(0x1c022f8c, 0x0);
+
+     /* configure the mute and un-mute register to normal mode */
+    DRV_WriteReg32(0x1c505000, 0x1);
 #endif
 
     set_armpll_ll_rate(CPU_OPP0);
