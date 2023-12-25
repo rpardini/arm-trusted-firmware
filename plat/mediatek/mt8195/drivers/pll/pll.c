@@ -873,7 +873,6 @@ void mt_pll_init(void)
     spm_mtcmos_on(MT8195_POWER_DOMAIN_VDOSYS0);
     spm_mtcmos_on(MT8195_POWER_DOMAIN_VPPSYS1);
     spm_mtcmos_on(MT8195_POWER_DOMAIN_VDOSYS1);
-    spm_mtcmos_on(MT8195_POWER_DOMAIN_EPD_TX);
 #endif
 	#endif
     print("MTCMOS init Done!\n");
@@ -991,15 +990,13 @@ void mt_pll_init(void)
     temp = DRV_Reg32(TOPCKGEN_CLK_MISC_CFG_1);
     DRV_WriteReg32(TOPCKGEN_CLK_MISC_CFG_1, temp | 0x0000000c);
     DRV_WriteReg32(INFRACFG_AO_MODULE_SW_CG_1_CLR, 0x00023001);
-    DRV_WriteReg32(VDOSYS0_CONFIG_GLOBAL0_CG_0_CLR, 0x06e80555);
-    DRV_WriteReg32(VDOSYS0_CONFIG_GLOBAL0_CG_2_CLR, 0x00010101);
+    DRV_WriteReg32(VDOSYS0_CONFIG_GLOBAL0_CG_0_CLR, 0x04e80555);
+    DRV_WriteReg32(VDOSYS0_CONFIG_GLOBAL0_CG_2_CLR, 0x00000101);
     DRV_WriteReg32(VDOSYS1_CONFIG_VDOSYS1_CG_0_CLR, 0x28c72800);
     DRV_WriteReg32(VDOSYS1_CONFIG_VDOSYS1_CG_1_CLR, 0x00ff0007);
     DRV_WriteReg32(VDOSYS1_CONFIG_VDOSYS1_CG_2_CLR, 0x00000101);
     DRV_WriteReg32(VDOSYS1_CONFIG_VDOSYS1_CG_3_CLR, 0x00000100);
     DRV_WriteReg32(VPPSYS1_CONFIG_VPPSYS1_CG_1_CLR, 0x00001000);
-     /* configure the mute and un-mute register to normal mode */
-    DRV_WriteReg32(0x1c505000, 0x1);
     /* not model in kernel, make it default off */
     DRV_WriteReg32(PERICFG_AO_PERI_MODULE_SW_CG_0_SET, 0x00000010);
 #endif
