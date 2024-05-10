@@ -329,6 +329,7 @@
 #define BL32_HEADER_SIZE	(0x1c)
 
 #define BL33_BASE		(0x4c000000)
+#define BL33_LIMIT		(0x00300000)
 
 /*******************************************************************************
  * BL31 specific defines.
