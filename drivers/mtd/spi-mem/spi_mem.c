@@ -205,7 +205,7 @@ int spi_mem_init_slave(void *fdt, int bus_node, const struct spi_bus_ops *ops)
 
 	if (nchips != 1) {
 		ERROR("Only one SPI device is currently supported\n");
-		return -EINVAL;
+		//return -EINVAL;
 	}
 
 	fdt_for_each_subnode(bus_subnode, fdt, bus_node) {
@@ -285,6 +285,8 @@ int spi_mem_init_slave(void *fdt, int bus_node, const struct spi_bus_ops *ops)
 		spi_slave.mode = mode;
 		spi_slave.ops = ops;
 	}
+	spi_slave.mode = mode;
+	spi_slave.ops = ops;
 
 	return spi_mem_set_speed_mode();
 }
