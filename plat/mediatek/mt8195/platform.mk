@@ -84,9 +84,14 @@ BL2_SOURCES     += drivers/ufs/ufs.c                                  \
 PLAT_PARTITION_BLOCK_SIZE := 4096
 $(eval $(call add_define,STORAGE_UFS))
 else
+ifeq (${STORAGE_NOR},1)
+PLAT_PARTITION_BLOCK_SIZE := 4096
+$(eval $(call add_define,STORAGE_NOR))
+else
 BL2_SOURCES     += drivers/mmc/mmc.c                                  \
                    ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c
 PLAT_PARTITION_BLOCK_SIZE := 512
+endif
 endif
 
 $(eval $(call add_define,PLAT_PARTITION_BLOCK_SIZE))

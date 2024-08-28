@@ -185,6 +185,7 @@
 #define MAX_IO_DEVICES			U(3)
 #define MAX_IO_HANDLES			U(4)
 #define MAX_IO_BLOCK_DEVICES			1
+#define MAX_IO_MTD_DEVICES              U(1)
 
 #define BL31_BASE		(TZRAM_BASE + 0x1000)
 #define BL31_LIMIT		(TZRAM_BASE + TZRAM_SIZE)

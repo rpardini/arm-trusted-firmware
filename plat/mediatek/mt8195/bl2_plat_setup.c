@@ -160,6 +160,25 @@ static const io_block_spec_t ufs_gpt_spec = {
 	.length		= 0x1000 *
 			  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
 };
+#elif defined(STORAGE_NOR)
+static io_block_dev_spec_t spi_nor_dev_spec = {
+	.buffer = {
+		.offset = 0,
+		.length = 0,
+	},
+
+	.ops = {
+		.read = spi_nor_read,
+	},
+
+	.block_size = 1,
+};
+
+static const io_block_spec_t nor_gpt_spec = {
+	.offset		= 0,
+	.length		= PLAT_PARTITION_BLOCK_SIZE *
+			  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
+};
 #else
 static io_block_dev_spec_t emmc_dev_spec = {
 	.buffer = {
@@ -260,6 +279,8 @@ static const struct plat_io_policy policies[] = {
 		&storage_dev_handle,
 #if defined(STORAGE_UFS)
 		(uintptr_t)&ufs_gpt_spec,
+#elif defined(STORAGE_NOR)
+		(uintptr_t)&nor_gpt_spec,
 #else
 		(uintptr_t)&emmc_gpt_spec,
 #endif
@@ -365,6 +386,9 @@ void mtk_io_setup(void)
 #if defined(STORAGE_UFS)
 	result = io_dev_open(storage_dev_con, (uintptr_t)&ufs_dev_spec,
 			     &storage_dev_handle);
+#elif defined(STORAGE_NOR)
+	result = io_dev_open(storage_dev_con, (uintptr_t)&spi_nor_dev_spec,
+			     &storage_dev_handle);
 #else
 	result = io_dev_open(storage_dev_con, (uintptr_t)&emmc_dev_spec,
 			     &storage_dev_handle);
@@ -396,6 +420,9 @@ void bl2_platform_setup(void)
 
 #if defined(STORAGE_UFS)
 	mtk_ufs_init(&mt8195_ufs_params);
+#elif defined(STORAGE_NOR)
+	spi_nor_dev_spec.buffer.length = 0;
+	spi_nor_dev_spec.buffer.offset = 0xe00000;
 #else
 	mtk_mmc_init(0x11230000, &mt8195_compat, 400000000);
 #endif
@@ -407,6 +434,9 @@ void bl2_platform_setup(void)
 #if defined(STORAGE_UFS)
 	ufs_dev_spec.buffer.offset = 0x41000000;
 	ufs_dev_spec.buffer.length = 0x1000000;
+#elif defined(STORAGE_NOR)
+	spi_nor_dev_spec.buffer.offset = 0x41000000;
+	spi_nor_dev_spec.buffer.length = 0x1000000;
 #else
 	emmc_dev_spec.buffer.offset = 0x41000000;
 	emmc_dev_spec.buffer.length = 0x1000000;
@@ -481,10 +511,18 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 		const char *ab_boot = plat_ab_handle_boot();
 		entry = get_partition_entry(ab_boot);
 #else
+#if defined(STORAGE_NOR)
+		partition_entry_t storage;
+
+		storage.start = 0x400000;
+		storage.length = 0x400000;
+		entry = &storage;
+#else
 		if((entry = get_partition_entry(name)) == NULL) {
 			partition_init(GPT_IMAGE_ID);
 			entry = get_partition_entry(name);
 		}
+#endif
 #endif
 		if (entry == NULL) {
 			ERROR("Could NOT find the %s partition!\n", name);

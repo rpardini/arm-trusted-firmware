@@ -65,7 +65,7 @@ int32_t plat_get_soc_revision(void)
 	return 0;
 }
 
-#if defined(STORAGE_UFS)
+#if defined(STORAGE_UFS) || defined(STORAGE_NOR)
 char *get_boot_partition_name(void)
 {
 	return "bootloaders";
