@@ -256,4 +256,10 @@ void pmic_initial_setting(void)
 
 	/* mt6360 ldo2, for DSI0 panel 1.8v on */
 	mt6360_ldo_config_interface(0x11, 0x3, 0x3, 0x6);
+
+	/* mt6360 ldo3 3V on, mt6360 ldo5 3V on, for turn on MMC1 power */
+	mt6360_ldo_config_interface(0x05, 0x3, 0x3, 0x6); /* LDO3 EN */
+	mt6360_ldo_config_interface(0x09, 0xb, 0xf, 0x4); /* LDO3 VOSEL */
+	mt6360_ldo_config_interface(0x0b, 0x3, 0x3, 0x6); /* LDO5 EN */
+	mt6360_ldo_config_interface(0x0f, 0x30, 0x7f, 0x0); /* LDO5 VOSEL */
 }
