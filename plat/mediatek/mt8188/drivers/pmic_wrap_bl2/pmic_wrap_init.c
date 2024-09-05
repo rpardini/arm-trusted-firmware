@@ -1507,6 +1507,35 @@ signed int pwrap_init(void)
 	PWRAPLOG("PMIF_SPI_PMIF_MONITOR_TARGET_WDATA_0 = 0x%x\n", WRAP_RD32(PMIF_SPI_PMIF_MONITOR_TARGET_WDATA_0));
 #endif
 
+	/* FIXME: Should be removed after MT6359 driver support in u-boot */
+	/* For Genio 700 mmc1 power supply in u-boot */
+	/* enable vpa */
+	pwrap_read_nochk(PMIC_RG_BUCK_VPA_EN_ADDR, &rdata);
+	rdata &= ~(PMIC_RG_BUCK_VPA_EN_MASK << PMIC_RG_BUCK_VPA_EN_SHIFT);
+	rdata |= (1 << PMIC_RG_BUCK_VPA_EN_SHIFT);
+	pwrap_write_nochk(PMIC_RG_BUCK_VPA_EN_ADDR, rdata);
+	/* set vpa to 3V */
+	pwrap_read_nochk(PMIC_RG_BUCK_VPA_VOSEL_ADDR, &rdata);
+	rdata &= ~(PMIC_RG_BUCK_VPA_VOSEL_MASK << PMIC_RG_BUCK_VPA_VOSEL_SHIFT);
+	rdata |= (0x32 << PMIC_RG_BUCK_VPA_VOSEL_SHIFT);
+	pwrap_write_nochk(PMIC_RG_BUCK_VPA_VOSEL_ADDR, rdata);
+
+	/* enable VSIM1 */
+	pwrap_read_nochk(PMIC_RG_LDO_VSIM1_EN_ADDR, &rdata);
+	rdata &= ~(PMIC_RG_LDO_VSIM1_EN_MASK << PMIC_RG_LDO_VSIM1_EN_SHIFT);
+	rdata |= (1 << PMIC_RG_LDO_VSIM1_EN_SHIFT);
+	pwrap_write_nochk(PMIC_RG_LDO_VSIM1_EN_ADDR, rdata);
+
+	/* set VSIM1 to 3V */
+	pwrap_read_nochk(PMIC_RG_VSIM1_VOSEL_ADDR, &rdata);
+	rdata &= ~(PMIC_RG_VSIM1_VOSEL_MASK << PMIC_RG_VSIM1_VOSEL_SHIFT);
+	rdata |= (0xb << PMIC_RG_VSIM1_VOSEL_SHIFT);
+	pwrap_write_nochk(PMIC_RG_VSIM1_VOSEL_ADDR, rdata);
+	pwrap_read_nochk(PMIC_RG_VSIM1_VOCAL_ADDR, &rdata);
+	rdata &= ~(PMIC_RG_VSIM1_VOCAL_MASK << PMIC_RG_VSIM1_VOCAL_SHIFT);
+	rdata |= (0 << PMIC_RG_VSIM1_VOCAL_SHIFT);
+	pwrap_write_nochk(PMIC_RG_VSIM1_VOCAL_ADDR, rdata);
+
 	return 0;
 }
 
