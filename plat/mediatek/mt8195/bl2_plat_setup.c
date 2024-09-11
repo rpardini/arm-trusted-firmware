@@ -20,7 +20,7 @@
 #include <drivers/ti/uart/uart_16550.h>
 #include <blkdev/blkdev-mmc.h>
 #include <blkdev/blkdev-ufs.h>
-
+#include <drivers/spi_nor.h>
 #include <mmc/mtk-sd.h>
 #include <ufs/mtk-ufs.h>
 #include <pll/pll.h>
@@ -436,6 +436,7 @@ void bl2_platform_setup(void)
 	mtk_ufs_init(&mt8195_ufs_params);
 	ufs_register_blkdev();
 #elif defined(STORAGE_NOR)
+	mtk_snfc_plat();
 	spi_nor_dev_spec.buffer.length = 0;
 	spi_nor_dev_spec.buffer.offset = 0xe00000;
 #else

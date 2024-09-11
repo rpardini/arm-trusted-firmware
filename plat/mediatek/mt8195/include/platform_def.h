@@ -125,6 +125,25 @@
 #define SUB_EMI_MPU_BASE	(IO_PHYS + 0x00225000)
 
 /*******************************************************************************
+ * SNFC related constants
+ ******************************************************************************/
+#define SNFC_REG_BASE			0x1132C000
+#define SNFC_MEM_BASE			0x28000000
+
+#define SNFC_GPIO_GPOUP1		(GPIO_BASE + 0x400)
+#define SNFC_GPIO_GPOUP2		(GPIO_BASE + 0x410)
+
+#define SNFC_PU0_SET_GROUP		(IOCFG_BM_BASE + 0x0B0)
+#define SNFC_PU1_SET_GROUP		(IOCFG_BR_BASE + 0x070)
+
+#define SNFC_PD0_SET_GROUP		(IOCFG_BM_BASE + 0x090)
+#define SNFC_PD1_SET_GROUP		(IOCFG_BR_BASE + 0x050)
+
+#define SNFC_DRIVING0_SET		(IOCFG_BM_BASE + 0x020)
+#define SNFC_DRIVING1_SET		(IOCFG_BR_BASE + 0x010)
+#define SNFC_DRIVING2_SET		(IOCFG_BR_BASE + 0x020)
+
+/*******************************************************************************
  * System counter frequency related constants
  ******************************************************************************/
 #define SYS_COUNTER_FREQ_IN_TICKS	13000000

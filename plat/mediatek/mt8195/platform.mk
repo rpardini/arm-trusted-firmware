@@ -87,8 +87,13 @@ PLAT_PARTITION_BLOCK_SIZE := 4096
 $(eval $(call add_define,STORAGE_UFS))
 else
 ifeq (${STORAGE_NOR},1)
+BL2_SOURCES     += drivers/mtd/nor/spi_nor.c                          \
+                   drivers/mtd/spi-mem/spi_mem.c                      \
+                   ${MTK_PLAT}/common/drivers/nor/mtk-snfc.c          \
+                   ${MTK_PLAT_SOC}/drivers/snfc/mtk_snfc_plat.c
 PLAT_PARTITION_BLOCK_SIZE := 4096
 $(eval $(call add_define,STORAGE_NOR))
+include lib/libfdt/libfdt.mk
 else
 BL2_SOURCES     += drivers/mmc/mmc.c                                  \
                    ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c
