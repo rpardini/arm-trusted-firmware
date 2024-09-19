@@ -71,6 +71,7 @@ BL2_SOURCES     += common/desc_image_load.c                           \
                    ${MTK_PLAT}/drivers/wdt/wdt.c                      \
                    ${MTK_PLAT}/drivers/wdt/mt8195/wdt_platform.c      \
                    ${MTK_PLAT}/common/drivers/blkdev/blkdev-mmc.c     \
+                   ${MTK_PLAT}/common/drivers/blkdev/blkdev-ufs.c     \
                    ${MTK_PLAT_SOC}/aarch64/plat_helpers.S             \
                    ${MTK_PLAT_SOC}/aarch64/platform_common.c          \
                    ${MTK_PLAT_SOC}/bl2_plat_setup.c                   \
