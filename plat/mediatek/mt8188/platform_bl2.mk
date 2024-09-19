@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-PLAT_INCLUDES += -I${MTK_PLAT_SOC}/drivers/pmic/
+PLAT_INCLUDES += -I${MTK_PLAT_SOC}/drivers/pmic/ \
+		 -I${MTK_PLAT}/common/drivers
 
 BL2_SOURCES += lib/cpus/aarch64/cortex_a55.S \
 	       lib/cpus/aarch64/cortex_a78.S \
@@ -23,7 +24,8 @@ BL2_SOURCES += lib/cpus/aarch64/cortex_a55.S \
 	       $(MTK_PLAT_SOC)/plat_mmap.c \
 	       ${MTK_PLAT_SOC}/bl2_plat_setup.c \
 	       drivers/mmc/mmc.c \
-	       ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c
+	       ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c \
+	       ${MTK_PLAT}/common/drivers/blkdev/blkdev-mmc.c
 
 MODULES-BL2-y += $(MTK_PLAT)/drivers/uart
 MODULES-BL2-y += $(MTK_PLAT)/drivers/pmic

@@ -18,6 +18,7 @@
 #include <common/desc_image_load.h>
 #include <plat/common/platform.h>
 #include <drivers/ti/uart/uart_16550.h>
+#include <blkdev/blkdev-mmc.h>
 
 #include <mmc/mtk-sd.h>
 #include <ufs/mtk-ufs.h>
@@ -402,6 +403,18 @@ void mtk_io_setup(void)
 	(void)result;
 }
 
+uint64_t get_part_addr(const char *name)
+{
+	const partition_entry_t *entry;
+
+	entry = get_partition_entry(name);
+	if (entry == NULL) {
+		NOTICE("Could NOT find the %s partition!\n", name);
+		return 0;
+	}
+	return entry->start;
+}
+
 void bl2_platform_setup(void)
 {
 	generic_delay_timer_init();
@@ -425,10 +438,11 @@ void bl2_platform_setup(void)
 	spi_nor_dev_spec.buffer.offset = 0xe00000;
 #else
 	mtk_mmc_init(0x11230000, &mt8195_compat, 400000000);
+	mmc_register_blkdev();
 #endif
 	mtk_io_setup();
 	load_partition_table(GPT_IMAGE_ID);
-
+	blkdev_set_dramk_data_offset(get_part_addr("dramk"));
 	mt_mem_init();
 	/* change emmc read buffer to DRAM */
 #if defined(STORAGE_UFS)
