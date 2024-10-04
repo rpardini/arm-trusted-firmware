@@ -23,9 +23,7 @@ BL2_SOURCES += lib/cpus/aarch64/cortex_a55.S \
 	       ${MTK_PLAT}/common/mtk_plat_common.c \
 	       $(MTK_PLAT_SOC)/plat_mmap.c \
 	       ${MTK_PLAT_SOC}/bl2_plat_setup.c \
-	       drivers/mmc/mmc.c \
-	       ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c \
-	       ${MTK_PLAT}/common/drivers/blkdev/blkdev-mmc.c
+	       ${MTK_PLAT}/common/drivers/blkdev/blkdev-mmc.c \
 
 MODULES-BL2-y += $(MTK_PLAT)/drivers/uart
 MODULES-BL2-y += $(MTK_PLAT)/drivers/pmic
@@ -47,4 +45,15 @@ include lib/zlib/zlib.mk
 BL2_SOURCES += ${MTK_PLAT}/common/mtk_ab.c \
 	        $(ZLIB_SOURCES) \
 $(eval $(call add_define,PLAT_AB_BOOT_ENABLE))
+endif
+
+ifeq (${STORAGE_NOR},1)
+BL2_SOURCES += drivers/mtd/nor/spi_nor.c \
+            drivers/mtd/spi-mem/spi_mem.c
+PLAT_PARTITION_BLOCK_SIZE := 4096
+$(eval $(call add_define,STORAGE_NOR))
+include lib/libfdt/libfdt.mk
+else
+BL2_SOURCES += drivers/mmc/mmc.c \
+            ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c
 endif

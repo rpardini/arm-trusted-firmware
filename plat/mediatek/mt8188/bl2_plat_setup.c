@@ -20,6 +20,7 @@
 #include <common/tbbr/tbbr_img_def.h>
 #include <drivers/io/io_fip.h>
 #include <drivers/partition/partition.h>
+#include <drivers/spi_nor.h>
 #include <common/bl_common.h>
 #include <common/desc_image_load.h>
 #include <plat/common/platform.h>
@@ -35,6 +36,7 @@
 void pwrap_init(void);
 void mt_mem_init(void);
 
+#if !defined(STORAGE_NOR)
 static struct msdc_compatible mt8188_compat = {
 	.clk_div_bits = 12,
 	.pad_tune0 = true,
@@ -46,6 +48,7 @@ static struct msdc_compatible mt8188_compat = {
 	.use_dma_mode = true,
 	.top_base = 0x11f50000,
 };
+#endif
 
 static bl_mem_params_node_t bl2_mem_params_descs[] = {
 	/* Fill BL31 related information */
@@ -125,6 +128,27 @@ static const io_dev_connector_t *fip_dev_con;
 static uintptr_t fip_dev_handle;
 
 static uint32_t mmc_buf_in_sram[PLAT_PARTITION_BLOCK_SIZE / sizeof(uint32_t)];
+
+#if defined(STORAGE_NOR)
+static io_block_dev_spec_t spi_nor_dev_spec = {
+	.buffer = {
+		.offset = 0,
+		.length = 0,
+	},
+
+	.ops = {
+		.read = spi_nor_read,
+	},
+
+	.block_size = 1,
+};
+
+static const io_block_spec_t nor_gpt_spec = {
+	.offset		= 0,
+	.length		= PLAT_PARTITION_BLOCK_SIZE *
+			  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
+};
+#else
 static io_block_dev_spec_t emmc_dev_spec = {
 	.buffer = {
 		.offset = &mmc_buf_in_sram,
@@ -142,6 +166,7 @@ static const io_block_spec_t emmc_gpt_spec = {
 	.length	= PLAT_PARTITION_BLOCK_SIZE *
 		  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
 };
+#endif
 
 static io_block_spec_t storage_fip_spec;
 #if defined(PLAT_AB_BOOT_ENABLE)
@@ -221,7 +246,11 @@ static const struct plat_io_policy policies[] = {
 	},
 	[GPT_IMAGE_ID] = {
 		&storage_dev_handle,
+#if defined(STORAGE_NOR)
+		(uintptr_t)&nor_gpt_spec,
+#else
 		(uintptr_t)&emmc_gpt_spec,
+#endif
 		check_storage
 	},
 #if defined(PLAT_AB_BOOT_ENABLE)
@@ -321,8 +350,13 @@ void mtk_io_setup(void)
 	result = register_io_dev_fip(&fip_dev_con);
 	assert(result == 0);
 
+#if defined(STORAGE_NOR)
+	result = io_dev_open(storage_dev_con, (uintptr_t)&spi_nor_dev_spec,
+			     &storage_dev_handle);
+#else
 	result = io_dev_open(storage_dev_con, (uintptr_t)&emmc_dev_spec,
 			     &storage_dev_handle);
+#endif
 	assert(result == 0);
 
 	result = io_dev_open(fip_dev_con, (uintptr_t)NULL, &fip_dev_handle);
@@ -360,15 +394,25 @@ void bl2_platform_setup(void)
 	pmic_init();
 	pmic_initial_setting();
 
+#if defined(STORAGE_NOR)
+	spi_nor_dev_spec.buffer.length = 0;
+	spi_nor_dev_spec.buffer.offset = 0xe00000;
+#else
 	mtk_mmc_init(0x11230000, &mt8188_compat, 400000000);
 	mmc_register_blkdev();
+#endif
 	mtk_io_setup();
 	load_partition_table(GPT_IMAGE_ID);
 	blkdev_set_dramk_data_offset(get_part_addr("dramk"));
 	mt_mem_init();
 	/* change emmc read buffer to DRAM */
+#if defined(STORAGE_NOR)
+	spi_nor_dev_spec.buffer.offset = 0x41000000;
+	spi_nor_dev_spec.buffer.length = 0x1000000;
+#else
 	emmc_dev_spec.buffer.offset = 0x41000000;
 	emmc_dev_spec.buffer.length = 0x1000000;
+#endif
 }
 
 struct bl_load_info *plat_get_bl_image_load_info(void)
@@ -440,10 +484,18 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 
 		entry = get_partition_entry(ab_boot);
 #else
+#if defined(STORAGE_NOR)
+		partition_entry_t storage;
+
+		storage.start = 0x400000;
+		storage.length = 0x400000;
+		entry = &storage;
+#else
 		if((entry = get_partition_entry(name)) == NULL) {
 			partition_init(GPT_IMAGE_ID);
 			entry = get_partition_entry(name);
 		}
+#endif
 #endif
 		if (entry == NULL) {
 			ERROR("Could NOT find the %s partition!\n", name);
