@@ -167,6 +167,11 @@ void psci_cpu_suspend_start(const entry_point_info_t *ep,
 	assert((psci_plat_pm_ops->pwr_domain_suspend != NULL) &&
 	       (psci_plat_pm_ops->pwr_domain_suspend_finish != NULL));
 
+	spin_lock(&plug_lock);
+	under_idle |= (1<<idx);
+	dsbish();
+	spin_unlock(&plug_lock);
+
 	/* Get the parent nodes */
 	psci_get_parent_pwr_domain_nodes(idx, end_pwrlvl, parent_nodes);
 
@@ -221,8 +226,13 @@ exit:
 	 */
 	psci_release_pwr_domain_locks(end_pwrlvl, parent_nodes);
 
-	if (skip_wfi == 1)
+	if (skip_wfi == 1) {
+		spin_lock(&plug_lock);
+		under_idle = under_idle & ~(1<<idx);
+		dsbish();
+		spin_unlock(&plug_lock);
 		return;
+	}
 
 	if (is_power_down_state != 0U) {
 #if ENABLE_RUNTIME_INSTRUMENTATION
@@ -285,6 +295,11 @@ void psci_cpu_suspend_finish(unsigned int cpu_idx, const psci_power_state_t *sta
 	assert((psci_get_aff_info_state() == AFF_STATE_ON) &&
 		(is_local_state_off(
 			state_info->pwr_domain_state[PSCI_CPU_PWR_LVL]) != 0));
+
+	spin_lock(&plug_lock);
+	under_idle = under_idle & ~(1<<cpu_idx);
+	dsbish();
+	spin_unlock(&plug_lock);
 
 	/*
 	 * Plat. management: Perform the platform specific actions

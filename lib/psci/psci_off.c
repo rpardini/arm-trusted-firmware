@@ -70,6 +70,10 @@ int psci_do_cpu_off(unsigned int end_pwrlvl)
 	 * level so that by the time all locks are taken, the system topology
 	 * is snapshot and state management can be done safely.
 	 */
+	under_off = 1;
+	dsbish();
+	while (under_idle)
+		;
 	psci_acquire_pwr_domain_locks(end_pwrlvl, parent_nodes);
 
 	/*
@@ -133,6 +137,7 @@ exit:
 	 * reverse order to which they were acquired.
 	 */
 	psci_release_pwr_domain_locks(end_pwrlvl, parent_nodes);
+	under_off = 0;
 
 	/*
 	 * Check if all actions needed to safely power down this cpu have

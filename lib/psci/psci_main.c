@@ -136,6 +136,9 @@ int psci_cpu_suspend(unsigned int power_state,
 			return rc;
 	}
 
+	if (under_off)
+		return PSCI_E_DENIED;
+
 	/*
 	 * Do what is needed to enter the power down state. Upon success,
 	 * enter the final wfi which will power down this CPU. This function

@@ -255,6 +255,9 @@ static inline void psci_lock_init(non_cpu_pd_node_t *non_cpu_pd_node,
 extern const plat_psci_ops_t *psci_plat_pm_ops;
 extern non_cpu_pd_node_t psci_non_cpu_pd_nodes[PSCI_NUM_NON_CPU_PWR_DOMAINS];
 extern cpu_pd_node_t psci_cpu_pd_nodes[PLATFORM_CORE_COUNT];
+extern unsigned int under_idle;
+extern unsigned int under_off;
+extern spinlock_t plug_lock;
 extern unsigned int psci_caps;
 extern unsigned int psci_plat_core_count;
 
