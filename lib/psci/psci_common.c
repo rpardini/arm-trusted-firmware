@@ -63,7 +63,7 @@ __section("tzfw_coherent_mem")
 DEFINE_PSCI_LOCK(psci_locks[PSCI_NUM_NON_CPU_PWR_DOMAINS]);
 
 cpu_pd_node_t psci_cpu_pd_nodes[PLATFORM_CORE_COUNT];
-unsigned int under_idle;
+volatile unsigned int under_idle;
 unsigned int under_off;
 spinlock_t plug_lock;
 /*******************************************************************************
