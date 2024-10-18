@@ -70,10 +70,12 @@ int psci_do_cpu_off(unsigned int end_pwrlvl)
 	 * level so that by the time all locks are taken, the system topology
 	 * is snapshot and state management can be done safely.
 	 */
+#ifdef PLAT_mt8188
 	under_off = 1;
 	dsbish();
 	while (under_idle)
 		;
+#endif
 	psci_acquire_pwr_domain_locks(end_pwrlvl, parent_nodes);
 
 	/*

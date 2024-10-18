@@ -135,10 +135,10 @@ int psci_cpu_suspend(unsigned int power_state,
 		if (rc != PSCI_E_SUCCESS)
 			return rc;
 	}
-
+#ifdef PLAT_mt8188
 	if (under_off)
 		return PSCI_E_DENIED;
-
+#endif
 	/*
 	 * Do what is needed to enter the power down state. Upon success,
 	 * enter the final wfi which will power down this CPU. This function

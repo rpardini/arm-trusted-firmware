@@ -167,11 +167,12 @@ void psci_cpu_suspend_start(const entry_point_info_t *ep,
 	assert((psci_plat_pm_ops->pwr_domain_suspend != NULL) &&
 	       (psci_plat_pm_ops->pwr_domain_suspend_finish != NULL));
 
+#ifdef PLAT_mt8188
 	spin_lock(&plug_lock);
 	under_idle |= (1<<idx);
 	dsbish();
 	spin_unlock(&plug_lock);
-
+#endif
 	/* Get the parent nodes */
 	psci_get_parent_pwr_domain_nodes(idx, end_pwrlvl, parent_nodes);
 
@@ -227,10 +228,12 @@ exit:
 	psci_release_pwr_domain_locks(end_pwrlvl, parent_nodes);
 
 	if (skip_wfi == 1) {
+#ifdef PLAT_mt8188
 		spin_lock(&plug_lock);
 		under_idle = under_idle & ~(1<<idx);
 		dsbish();
 		spin_unlock(&plug_lock);
+#endif
 		return;
 	}
 
@@ -296,10 +299,12 @@ void psci_cpu_suspend_finish(unsigned int cpu_idx, const psci_power_state_t *sta
 		(is_local_state_off(
 			state_info->pwr_domain_state[PSCI_CPU_PWR_LVL]) != 0));
 
+#ifdef PLAT_mt8188
 	spin_lock(&plug_lock);
 	under_idle = under_idle & ~(1<<cpu_idx);
 	dsbish();
 	spin_unlock(&plug_lock);
+#endif
 
 	/*
 	 * Plat. management: Perform the platform specific actions
