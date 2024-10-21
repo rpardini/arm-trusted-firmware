@@ -185,6 +185,37 @@ static bool mtk_nor_match_read(const struct spi_mem_op *op)
 	return false;
 }
 
+static int mtk_nor_adjust_op_size(struct spi_mem_op *op)
+{
+	if (!op->data.nbytes)
+		return 0;
+
+	if (op->addr.nbytes == 3 || op->addr.nbytes == 4) {
+		if (op->data.dir == SPI_MEM_DATA_IN) { //&&
+			// limit size to prevent timeout calculation overflow
+			if (op->data.nbytes > 0x400000)
+				op->data.nbytes = 0x400000;
+			//if (op->addr.val & MTK_NOR_DMA_ALIGN_MASK ||
+			//    op->data.nbytes < MTK_NOR_DMA_ALIGN)
+			//	op->data.nbytes = 1;
+			//else if (!need_bounce(op))
+			//	op->data.nbytes &= ~MTK_NOR_DMA_ALIGN_MASK;
+			//else if (op->data.nbytes > MTK_NOR_BOUNCE_BUF_SIZE)
+			//	op->data.nbytes = MTK_NOR_BOUNCE_BUF_SIZE;
+			return 0;
+		} else if (op->data.dir == SPI_MEM_DATA_OUT) {
+			if (op->data.nbytes >= MTK_NOR_PP_SIZE &&
+					 (op->addr.val % MTK_NOR_PP_SIZE) == 0)
+				op->data.nbytes = MTK_NOR_PP_SIZE;
+			else
+				op->data.nbytes = 1;
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
 static mtk_nor_setup_bus(struct mtk_nor *sp, const struct spi_mem_op *op)
 {
 	unsigned int reg = 0;
@@ -407,6 +438,7 @@ static const struct spi_bus_ops mtk_nor_ops = {
 	.set_speed = mtk_nor_set_speed,
 	.set_mode = mtk_nor_set_mode,
 	.exec_op = mtk_nor_exec_op,
+	.adjust_op_size = mtk_nor_adjust_op_size,
 };
 
 static void *fdt;

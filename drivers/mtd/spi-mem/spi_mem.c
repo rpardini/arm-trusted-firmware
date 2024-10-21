@@ -138,6 +138,40 @@ static int spi_mem_check_bus_ops(const struct spi_bus_ops *ops)
 	return error ? -EINVAL : 0;
 }
 
+/**
+ * spi_mem_adjust_op_size() - Adjust the data size of a SPI mem operation to
+ *				 match controller limitations
+ * @slave: the SPI device
+ * @op: the operation to adjust
+ *
+ * Some controllers have FIFO limitations and must split a data transfer
+ * operation into multiple ones, others require a specific alignment for
+ * optimized accesses. This function allows SPI mem drivers to split a single
+ * operation into multiple sub-operations when required.
+ *
+ * Return: a negative error code if the controller can't properly adjust @op,
+ *	   0 otherwise. Note that @op->data.nbytes will be updated if @op
+ *	   can't be handled in a single step.
+ */
+int spi_mem_adjust_op_size(struct spi_mem_op *op)
+{
+	const struct spi_bus_ops *ops = spi_slave.ops;
+
+	if (ops && ops->adjust_op_size)
+		return ops->adjust_op_size(op);
+
+	if (!ops || !ops->exec_op) {
+
+		if (op->data.dir == SPI_MEM_DATA_IN)
+			op->data.nbytes = op->data.nbytes;
+
+		if (!op->data.nbytes)
+			return -EINVAL;
+	}
+
+	return 0;
+}
+
 /*
  * spi_mem_exec_op() - Execute a memory operation.
  * @op: The memory operation to execute.
@@ -169,7 +203,6 @@ int spi_mem_exec_op(const struct spi_mem_op *op)
 	}
 
 	ret = ops->exec_op(op);
-
 	ops->release_bus();
 
 	return ret;

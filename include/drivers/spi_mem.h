@@ -121,6 +121,14 @@ struct spi_bus_ops {
 	 * Returns: 0 on success, a negative error code otherwise.
 	 */
 	int (*exec_op)(const struct spi_mem_op *op);
+
+	/*
+	 * Adjust op size.
+	 *
+	 * @op:	shrink the data xfer of an operation to match controller's limitations.
+	 * Returns: 0 on success, a negative error code otherwise.
+	 */
+	int (*adjust_op_size)(struct spi_mem_op *op);
 };
 
 int spi_mem_exec_op(const struct spi_mem_op *op);

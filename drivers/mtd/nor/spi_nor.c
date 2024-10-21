@@ -25,7 +25,12 @@
 
 #define BANK_SIZE		0x1000000U
 
-#define SPI_READY_TIMEOUT_US	40000U
+#define SPI_READY_TIMEOUT_US	40000000U
+
+#define PAGE_SIZE		256U
+#define BLOCK_4KB_SIZE		0x1000U
+
+#define ALIGNED_4K(x)	(!((x) & (uint32_t)(BLOCK_4KB_SIZE - 1)))
 
 static struct nor_device nor_dev;
 
@@ -114,11 +119,12 @@ static int spi_nor_wait_ready(void)
 	int ret;
 	uint64_t timeout = timeout_init_us(SPI_READY_TIMEOUT_US);
 
-	while (!timeout_elapsed(timeout)) {
+	while (timeout--) {
 		ret = spi_nor_ready();
 		if (ret <= 0) {
 			return ret;
 		}
+		udelay(1);
 	}
 
 	return -ETIMEDOUT;
@@ -284,35 +290,37 @@ int spi_nor_read(unsigned int offset, uintptr_t buffer, size_t length,
 	int ret;
 
 	*length_read = 0U;
-	nor_dev.read_op.addr.val = offset;
-	nor_dev.read_op.data.buf = (void *)buffer;
+	nor_dev.op.addr.val = offset;
+	nor_dev.op.data.buf = (void *)buffer;
+	nor_dev.op.cmd.opcode = SPI_NOR_OP_READ;
+	nor_dev.op.data.dir = SPI_MEM_DATA_IN;
 
 	VERBOSE("%s offset %i length %zu\n", __func__, offset, length);
 
 	while (length != 0U) {
 		if ((nor_dev.flags & SPI_NOR_USE_BANK) != 0U) {
-			ret = spi_nor_write_bar(nor_dev.read_op.addr.val);
+			ret = spi_nor_write_bar(nor_dev.op.addr.val);
 			if (ret != 0) {
 				return ret;
 			}
 
 			remain_len = (BANK_SIZE * (nor_dev.selected_bank + 1)) -
-				nor_dev.read_op.addr.val;
-			nor_dev.read_op.data.nbytes = MIN(length, remain_len);
+				nor_dev.op.addr.val;
+			nor_dev.op.data.nbytes = MIN(length, remain_len);
 		} else {
-			nor_dev.read_op.data.nbytes = length;
+			nor_dev.op.data.nbytes = length;
 		}
 
-		ret = spi_mem_exec_op(&nor_dev.read_op);
+		ret = spi_mem_exec_op(&nor_dev.op);
 		if (ret != 0) {
 			spi_nor_clean_bar();
 			return ret;
 		}
 
-		length -= nor_dev.read_op.data.nbytes;
-		nor_dev.read_op.addr.val += nor_dev.read_op.data.nbytes;
-		nor_dev.read_op.data.buf += nor_dev.read_op.data.nbytes;
-		*length_read += nor_dev.read_op.data.nbytes;
+		length -= nor_dev.op.data.nbytes;
+		nor_dev.op.addr.val += nor_dev.op.data.nbytes;
+		nor_dev.op.data.buf += nor_dev.op.data.nbytes;
+		*length_read += nor_dev.op.data.nbytes;
 	}
 
 	if ((nor_dev.flags & SPI_NOR_USE_BANK) != 0U) {
@@ -323,6 +331,121 @@ int spi_nor_read(unsigned int offset, uintptr_t buffer, size_t length,
 	}
 
 	return 0;
+}
+
+int spi_nor_write(unsigned int offset, uintptr_t buffer, size_t length,
+		 size_t *length_write)
+{
+	size_t page_offset, page_remain, i;
+	ssize_t ret;
+
+	nor_dev.op.addr.val = offset;
+	nor_dev.op.cmd.opcode = SPI_NOR_OP_PP;
+	nor_dev.op.data.dir = SPI_MEM_DATA_OUT;
+
+	for (i = 0; i < length; ) {
+		ssize_t written;
+		unsigned int addr = offset + i;
+
+		/*
+		 * If page_size is a power of two, the offset can be quickly
+		 * calculated with an AND operation. On the other cases we
+		 * need to do a modulus operation (more expensive).
+		 */
+
+		page_offset = addr & (PAGE_SIZE - 1);
+
+		/* the size of data remaining on the first page */
+		page_remain = MIN(PAGE_SIZE - page_offset, length - i);
+
+		nor_dev.op.data.nbytes = page_remain;
+		nor_dev.op.data.buf = (void *)buffer;
+
+		if ((nor_dev.flags & SPI_NOR_USE_BANK) != 0U) {
+			ret = spi_nor_write_bar(nor_dev.op.addr.val);
+			if (ret < 0)
+				return ret;
+		}
+
+		ret = spi_nor_write_en();
+		if (ret != 0)
+			return ret;
+
+		ret = spi_mem_adjust_op_size(&nor_dev.op);
+		if (ret < 0)
+			goto write_err;
+
+		ret = spi_mem_exec_op(&nor_dev.op);
+		if (ret < 0)
+			goto write_err;
+
+		ret = spi_nor_wait_ready();
+		if (ret)
+			goto write_err;
+
+		written = nor_dev.op.data.nbytes;
+		nor_dev.op.addr.val += nor_dev.op.data.nbytes;
+		i += written;
+		length_write += written;
+		nor_dev.op.data.buf += nor_dev.op.data.nbytes;
+
+	}
+
+write_err:
+	if ((nor_dev.flags & SPI_NOR_USE_BANK) != 0U)
+		ret = spi_nor_clean_bar();
+
+	return ret;
+}
+
+/*
+ * Erase an address range on the nor chip.  The address range may extend
+ * one or more erase sectors.  Return an error is there is a problem erasing.
+ */
+static int spi_nor_erase(unsigned int offset, size_t length,
+		 size_t *length_erase)
+{
+	int ret, err;
+
+	nor_dev.op.cmd.opcode = SPI_NOR_OP_SE;
+	nor_dev.op.data.dir = SPI_MEM_DATA_OUT;
+	nor_dev.op.addr.nbytes = 0x03;
+	nor_dev.op.addr.val = offset;
+	nor_dev.op.data.nbytes = 0x00;
+
+	if ((!ALIGNED_4K(offset)) || (!ALIGNED_4K(length))) {
+		ERROR("Offset or Length not aligned to 4KB boundary!\n");
+		return -EINVAL;
+	}
+
+	while (length) {
+
+		if ((nor_dev.flags & SPI_NOR_USE_BANK) != 0U) {
+			ret = spi_nor_write_bar(nor_dev.op.addr.val);
+			if (ret < 0)
+				return ret;
+		}
+
+		ret = spi_nor_write_en();
+		if (ret != 0)
+			goto erase_err;
+
+		ret = spi_mem_exec_op(&nor_dev.op);
+		if (ret < 0)
+			goto erase_err;
+
+		nor_dev.op.addr.val += 0x1000;
+		length -= 0x1000;
+
+		ret = spi_nor_wait_ready();
+		if (ret)
+			goto erase_err;
+	}
+
+erase_err:
+	if ((nor_dev.flags & SPI_NOR_USE_BANK) != 0U)
+		ret = spi_nor_clean_bar();
+	return ret;
 }
 
 struct nor_device_info nor_flash_info_table[] = {
@@ -350,7 +473,7 @@ struct nor_device_info nor_flash_info_table[] = {
 	{"IS25LP512", {0x9D, 0x60, 0x1A}, 0x4000000, 0},
 	{"IS25LP01G", {0x9D, 0x60, 0x1B}, 0x8000000, 0},
 
-	{"MX25L6EJV", {0xC2, 0x25, 0x39}, 0x800000, 0},
+	{"MX25U25635F", {0xC2, 0x25, 0x39}, 0x2000000, 0},
 	{"MX25L12805D", {0xC2, 0x20, 0x18}, 0x1000000, 0},
 	{"MX25L12855E", {0xC2, 0x26, 0x18}, 0x1000000, 0},
 	{"MX25L25635E", {0xC2, 0x20, 0x19}, 0x2000000, 0},
@@ -397,13 +520,7 @@ struct nor_device_info nor_flash_info_table[] = {
 
 	{"FM25Q128", {0xA1, 0x40, 0x18}, 0x1000000, 0},
 
-#ifdef FPGA
-	/* 1.8V for FPGA verification only */
-	{"MX25U25635", {0xC2, 0x25, 0x39}, 0x2000000, 0},
-	{"W25Q256JW", {0xEF, 0x80, 0x19}, 0x2000000, 0},
-#endif
 };
-
 
 struct nor_device_info *get_flash_info(uint8_t *id)
 {
@@ -423,7 +540,6 @@ struct nor_device_info *get_flash_info(uint8_t *id)
 	return NULL;
 }
 
-
 int spi_nor_init(unsigned long long *size, unsigned int *erase_size)
 {
 	int ret = 0;
@@ -431,12 +547,10 @@ int spi_nor_init(unsigned long long *size, unsigned int *erase_size)
 	struct nor_device_info *nor_info = NULL;
 
 	/* Default read command used */
-	nor_dev.read_op.cmd.opcode = SPI_NOR_OP_READ;
-	nor_dev.read_op.cmd.buswidth = SPI_MEM_BUSWIDTH_1_LINE;
-	nor_dev.read_op.addr.nbytes = 3U;
-	nor_dev.read_op.addr.buswidth = SPI_MEM_BUSWIDTH_1_LINE;
-	nor_dev.read_op.data.buswidth = SPI_MEM_BUSWIDTH_1_LINE;
-	nor_dev.read_op.data.dir = SPI_MEM_DATA_IN;
+	nor_dev.op.cmd.buswidth = SPI_MEM_BUSWIDTH_1_LINE;
+	nor_dev.op.addr.nbytes = 3U;
+	nor_dev.op.addr.buswidth = SPI_MEM_BUSWIDTH_1_LINE;
+	nor_dev.op.data.buswidth = SPI_MEM_BUSWIDTH_1_LINE;
 
 	ret = spi_nor_read_id(id);
 
@@ -473,7 +587,7 @@ int spi_nor_init(unsigned long long *size, unsigned int *erase_size)
 		}
 	}
 
-	if (nor_dev.read_op.data.buswidth == 4U) {
+	if (nor_dev.op.data.buswidth == 4U) {
 		switch (id[0]) {
 		case MACRONIX_ID:
 			INFO("Enable Macronix quad support\n");

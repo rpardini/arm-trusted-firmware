@@ -29,13 +29,15 @@
 #define SPI_NOR_OP_READ_1_2_2	0xBBU	/* Read data bytes (Dual I/O SPI) */
 #define SPI_NOR_OP_READ_1_1_4	0x6BU	/* Read data bytes (Quad Output SPI) */
 #define SPI_NOR_OP_READ_1_4_4	0xEBU	/* Read data bytes (Quad I/O SPI) */
+#define SPI_NOR_OP_PP		0x02U	/* Page Program */
+#define SPI_NOR_OP_SE		0x20U	/* Sector Erase */
 
 /* Flags for NOR specific configuration */
 #define SPI_NOR_USE_FSR		BIT(0)
 #define SPI_NOR_USE_BANK	BIT(1)
 
 struct nor_device {
-	struct spi_mem_op read_op;
+	struct spi_mem_op op;
 	uint32_t size;
 	uint32_t flags;
 	uint8_t selected_bank;
