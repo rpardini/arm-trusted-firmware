@@ -31,6 +31,9 @@ MODULES-BL2-y += ${MTK_PLAT}/drivers/wdt
 MODULES-BL2-y += ${MTK_PLAT_SOC}/drivers/pll
 MODULES-BL2-y += $(MTK_PLAT_SOC)/drivers/pmic_bl2
 MODULES-BL2-y += $(MTK_PLAT_SOC)/drivers/pmic_wrap_bl2
+ifeq (${STORAGE_NOR},1)
+MODULES-BL2-y += $(MTK_PLAT_SOC)/drivers/snfc
+endif
 
 BL2_LIBS += ${LIBDRAM} \
 	    ${LIBBASE}
@@ -49,7 +52,8 @@ endif
 
 ifeq (${STORAGE_NOR},1)
 BL2_SOURCES += drivers/mtd/nor/spi_nor.c \
-            drivers/mtd/spi-mem/spi_mem.c
+            drivers/mtd/spi-mem/spi_mem.c \
+            ${MTK_PLAT}/common/drivers/nor/mtk-snfc.c
 PLAT_PARTITION_BLOCK_SIZE := 4096
 $(eval $(call add_define,STORAGE_NOR))
 include lib/libfdt/libfdt.mk

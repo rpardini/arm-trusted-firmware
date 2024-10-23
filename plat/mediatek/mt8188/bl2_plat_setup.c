@@ -395,8 +395,7 @@ void bl2_platform_setup(void)
 	pmic_initial_setting();
 
 #if defined(STORAGE_NOR)
-	spi_nor_dev_spec.buffer.length = 0;
-	spi_nor_dev_spec.buffer.offset = 0xe00000;
+	mtk_snfc_plat();
 #else
 	mtk_mmc_init(0x11230000, &mt8188_compat, 400000000);
 	mmc_register_blkdev();
@@ -471,6 +470,13 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 
 	if (storage_fip_spec.length == 0) {
 #if defined(PLAT_AB_BOOT_ENABLE)
+#if defined(STORAGE_NOR)
+		partition_entry_t storage;
+
+		storage.start = 0x400000;
+		storage.length = 0x400000;
+		entry = &storage;
+#else
 		partition_init(GPT_IMAGE_ID);
 		entry = get_partition_entry(BOOTCTRL_PART);
 		if (entry == NULL) {
@@ -483,6 +489,7 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 		const char *ab_boot = plat_ab_handle_boot();
 
 		entry = get_partition_entry(ab_boot);
+#endif
 #else
 #if defined(STORAGE_NOR)
 		partition_entry_t storage;
