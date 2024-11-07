@@ -471,11 +471,7 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 	if (storage_fip_spec.length == 0) {
 #if defined(PLAT_AB_BOOT_ENABLE)
 #if defined(STORAGE_NOR)
-		partition_entry_t storage;
-
-		storage.start = 0x400000;
-		storage.length = 0x400000;
-		entry = &storage;
+		entry = plat_ab_handle_entry();
 #else
 		partition_init(GPT_IMAGE_ID);
 		entry = get_partition_entry(BOOTCTRL_PART);
