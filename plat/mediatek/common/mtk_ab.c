@@ -6,6 +6,10 @@
 
 #include <mtk_ab.h>
 
+#if defined(STORAGE_NOR)
+static partition_entry_t entry;
+#endif
+
 static void plat_ab_handle_init(struct mtk_bl_ctrl *bctrl)
 {
 	memset(bctrl, 0, sizeof(struct mtk_bl_ctrl));
@@ -24,19 +28,30 @@ static int32_t plat_ab_handle_blctrl(struct mtk_bl_ctrl *bctrl, uintptr_t dev, i
 	int ret = 0;
 	switch (mode) {
 		case BOOTCTRL_GET:
+#if defined(STORAGE_NOR)
+			spi_nor_read(BOOTCTRL_PART_NOR, bctrl, sizeof(struct mtk_bl_ctrl), &rs);
+			rs = 1;
+#else
 			if (io_read(dev, bctrl, sizeof(struct mtk_bl_ctrl), &rs)) {
 				return -EPERM;
 			}
+#endif
 			break;
 		case BOOTCTRL_SET:
 			bctrl->crc32_le = tf_crc32(0, (const unsigned char *)bctrl,
 										sizeof(struct mtk_bl_ctrl) - sizeof(uint32_t));
+#if defined(STORAGE_NOR)
+			spi_nor_erase(BOOTCTRL_PART_NOR, BOOTCTRL_NOR_BLK, &rs);
+			spi_nor_write(BOOTCTRL_PART_NOR, bctrl, BOOTCTRL_NOR_BLK/32, &rs);
+			rs = 1;
+#else
 			if (io_seek(dev, IO_SEEK_SET, BOOTCTRL_GET)) {
 				return -EPERM;
 			}
 			if (io_write(dev, bctrl, sizeof(struct mtk_bl_ctrl), &rs)) {
 				return -EPERM;
 			}
+#endif
 			break;
 		default:
 			ret = -1;
@@ -52,10 +67,11 @@ static int32_t plat_ab_handle_blctrl(struct mtk_bl_ctrl *bctrl, uintptr_t dev, i
 char *plat_ab_handle_boot(void)
 {
 	struct mtk_bl_ctrl bl_ctrl = {0};
-	uintptr_t dev, image;
 	uintptr_t dev_io = NULL;
 	int32_t ret = -1;
 	int32_t crc = 0;
+#if !defined(STORAGE_NOR)
+	uintptr_t dev, image;
 
 	if (plat_get_image_source(MISC_IMAGE_ID, &dev, &image)) {
 		goto exit;
@@ -64,6 +80,7 @@ char *plat_ab_handle_boot(void)
 	if (io_open(dev, image, &dev_io)) {
 		goto exit;
 	}
+#endif
 
 	if (plat_ab_handle_blctrl(&bl_ctrl, dev_io, BOOTCTRL_GET) < 0) {
 		goto exit;
@@ -114,3 +131,18 @@ exit:
 	else
 		return PART_SUFFIX_A;
 }
+
+#if defined(STORAGE_NOR)
+const partition_entry_t *plat_ab_handle_entry(void)
+{
+	const char *boot = plat_ab_handle_boot();
+
+	if (!strcmp(PART_SUFFIX_B, boot))
+		entry.start = PART_BOOT_B_NOR;
+	else
+		entry.start = PART_BOOT_A_NOR;
+
+	entry.length = PART_BOOT_SIZE;
+	return &entry;
+}
+#endif
