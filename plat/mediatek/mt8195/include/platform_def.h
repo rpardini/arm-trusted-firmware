@@ -129,6 +129,7 @@
  ******************************************************************************/
 #define SNFC_REG_BASE			0x1132C000
 #define SNFC_MEM_BASE			0x28000000
+#define EXTRA_DUMMY_BIT			0
 
 #define SNFC_GPIO_GPOUP1		(GPIO_BASE + 0x400)
 #define SNFC_GPIO_GPOUP2		(GPIO_BASE + 0x410)
