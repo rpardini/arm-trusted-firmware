@@ -56,6 +56,10 @@ struct nor_device_info {
 
 int spi_nor_read(unsigned int offset, uintptr_t buffer, size_t length,
 		 size_t *length_read);
+int spi_nor_erase(unsigned int offset, size_t length,
+		 size_t *length_erase);
+int spi_nor_write(unsigned int offset, uintptr_t buffer, size_t length,
+		 size_t *length_write);
 int spi_nor_init(unsigned long long *device_size, unsigned int *erase_size);
 
 /*

@@ -402,7 +402,7 @@ write_err:
  * Erase an address range on the nor chip.  The address range may extend
  * one or more erase sectors.  Return an error is there is a problem erasing.
  */
-static int spi_nor_erase(unsigned int offset, size_t length,
+int spi_nor_erase(unsigned int offset, size_t length,
 		 size_t *length_erase)
 {
 	int ret, err;
