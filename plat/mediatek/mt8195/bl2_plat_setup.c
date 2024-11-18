@@ -163,6 +163,11 @@ static const io_block_spec_t ufs_gpt_spec = {
 			  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
 };
 #elif defined(STORAGE_NOR)
+size_t mtk_nor_read(int lba, uintptr_t buf, size_t size)
+{
+	return (size_t)spi_nor_read(lba, buf, size, NULL);
+}
+
 static io_block_dev_spec_t spi_nor_dev_spec = {
 	.buffer = {
 		.offset = 0,
@@ -170,7 +175,7 @@ static io_block_dev_spec_t spi_nor_dev_spec = {
 	},
 
 	.ops = {
-		.read = spi_nor_read,
+		.read = mtk_nor_read,
 	},
 
 	.block_size = 1,
