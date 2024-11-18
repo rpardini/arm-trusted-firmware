@@ -130,6 +130,11 @@ static uintptr_t fip_dev_handle;
 static uint32_t mmc_buf_in_sram[PLAT_PARTITION_BLOCK_SIZE / sizeof(uint32_t)];
 
 #if defined(STORAGE_NOR)
+size_t mtk_nor_read(int lba, uintptr_t buf, size_t size)
+{
+	return (size_t)spi_nor_read(lba, buf, size, NULL);
+}
+
 static io_block_dev_spec_t spi_nor_dev_spec = {
 	.buffer = {
 		.offset = 0,
@@ -137,7 +142,7 @@ static io_block_dev_spec_t spi_nor_dev_spec = {
 	},
 
 	.ops = {
-		.read = spi_nor_read,
+		.read = mtk_nor_read,
 	},
 
 	.block_size = 1,
