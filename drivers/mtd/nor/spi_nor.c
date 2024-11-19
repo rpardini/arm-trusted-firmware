@@ -342,6 +342,7 @@ int spi_nor_write(unsigned int offset, uintptr_t buffer, size_t length,
 	nor_dev.op.addr.val = offset;
 	nor_dev.op.cmd.opcode = SPI_NOR_OP_PP;
 	nor_dev.op.data.dir = SPI_MEM_DATA_OUT;
+	nor_dev.op.data.buf = (void *)buffer;
 
 	for (i = 0; i < length; ) {
 		ssize_t written;
@@ -359,7 +360,7 @@ int spi_nor_write(unsigned int offset, uintptr_t buffer, size_t length,
 		page_remain = MIN(PAGE_SIZE - page_offset, length - i);
 
 		nor_dev.op.data.nbytes = page_remain;
-		nor_dev.op.data.buf = (void *)buffer;
+
 
 		if ((nor_dev.flags & SPI_NOR_USE_BANK) != 0U) {
 			ret = spi_nor_write_bar(nor_dev.op.addr.val);
