@@ -12,6 +12,7 @@
 #define BOOTDEV_SDMMC		(1)
 #define BOOTDEV_UFS		(2)
 #define BOOTDEV_NOR		(3)
+#define BOOTDEV_DEFAULT		(4)
 
 struct blkdev {
 	uint32_t type;       /* block device type */
