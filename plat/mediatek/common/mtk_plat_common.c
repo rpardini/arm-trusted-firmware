@@ -10,6 +10,7 @@
 #include <drivers/arm/cci.h>
 #include <drivers/console.h>
 #include <drivers/mmc.h>
+#include <drivers/partition/partition.h>
 #include <lib/mmio.h>
 #include <lib/smccc.h>
 #include <lib/xlat_tables/xlat_tables.h>
@@ -88,3 +89,21 @@ char *get_boot_partition_name(void)
 	}
 }
 #endif
+
+uint64_t get_part_addr(const char *name)
+{
+#ifdef STORAGE_NOR
+	if (strncmp(name, "dramk", 5) == 0)
+		return 0x1400000;
+	return 0;
+#else
+	const partition_entry_t *entry;
+
+	entry = get_partition_entry(name);
+	if (entry == NULL) {
+		NOTICE("Could NOT find the %s partition!\n", name);
+		return 0;
+	}
+	return entry->start;
+#endif
+}

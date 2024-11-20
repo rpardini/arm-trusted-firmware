@@ -20,12 +20,15 @@
 #include <drivers/ti/uart/uart_16550.h>
 #include <blkdev/blkdev-mmc.h>
 #include <blkdev/blkdev-ufs.h>
+#include <blkdev/blkdev-nor.h>
 #include <drivers/spi_nor.h>
 #include <mmc/mtk-sd.h>
 #include <ufs/mtk-ufs.h>
 #include <pll/pll.h>
 #include <wdt.h>
 #include <rtc.h>
+#include <uart.h>
+#include <mtk_plat_common.h>
 #include <pmic_initial_setting.h>
 #if defined(PLAT_AB_BOOT_ENABLE)
 #include <mtk_ab.h>
@@ -385,18 +388,6 @@ void mtk_io_setup(void)
 	(void)result;
 }
 
-uint64_t get_part_addr(const char *name)
-{
-	const partition_entry_t *entry;
-
-	entry = get_partition_entry(name);
-	if (entry == NULL) {
-		NOTICE("Could NOT find the %s partition!\n", name);
-		return 0;
-	}
-	return entry->start;
-}
-
 void bl2_platform_setup(void)
 {
 	generic_delay_timer_init();
@@ -420,6 +411,7 @@ void bl2_platform_setup(void)
 	mtk_snfc_plat();
 	spi_nor_dev_spec.buffer.length = 0;
 	spi_nor_dev_spec.buffer.offset = 0xe00000;
+	nor_register_blkdev();
 #else
 	mtk_mmc_init(0x11230000, &mt8195_compat, 400000000);
 	mmc_register_blkdev();
