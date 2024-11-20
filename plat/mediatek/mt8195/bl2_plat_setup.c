@@ -156,12 +156,7 @@ static io_block_dev_spec_t ufs_dev_spec = {
 	},
 	.block_size = UFS_BLOCK_SIZE,
 };
-
-static const io_block_spec_t ufs_gpt_spec = {
-	.offset		= 0,
-	.length		= 0x1000 *
-			  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
-};
+static io_block_dev_spec_t *boot_dev_spec = &ufs_dev_spec;
 #elif defined(STORAGE_NOR)
 size_t mtk_nor_read(int lba, uintptr_t buf, size_t size)
 {
@@ -180,12 +175,7 @@ static io_block_dev_spec_t spi_nor_dev_spec = {
 
 	.block_size = 1,
 };
-
-static const io_block_spec_t nor_gpt_spec = {
-	.offset		= 0,
-	.length		= PLAT_PARTITION_BLOCK_SIZE *
-			  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
-};
+static io_block_dev_spec_t *boot_dev_spec = &spi_nor_dev_spec;
 #else
 static io_block_dev_spec_t emmc_dev_spec = {
 	.buffer = {
@@ -198,13 +188,13 @@ static io_block_dev_spec_t emmc_dev_spec = {
 	},
 	.block_size = MMC_BLOCK_SIZE,
 };
-
-static const io_block_spec_t emmc_gpt_spec = {
+static io_block_dev_spec_t *boot_dev_spec = &emmc_dev_spec;
+#endif
+static const io_block_spec_t storage_gpt_spec = {
 	.offset		= 0,
 	.length		= PLAT_PARTITION_BLOCK_SIZE *
 			  (PLAT_PARTITION_MAX_ENTRIES / 4 + 2),
 };
-#endif
 
 static io_block_spec_t storage_fip_spec;
 #if defined(PLAT_AB_BOOT_ENABLE)
@@ -284,13 +274,7 @@ static const struct plat_io_policy policies[] = {
 	},
 	[GPT_IMAGE_ID] = {
 		&storage_dev_handle,
-#if defined(STORAGE_UFS)
-		(uintptr_t)&ufs_gpt_spec,
-#elif defined(STORAGE_NOR)
-		(uintptr_t)&nor_gpt_spec,
-#else
-		(uintptr_t)&emmc_gpt_spec,
-#endif
+		(uintptr_t)&storage_gpt_spec,
 		check_storage
 	},
 #if defined(PLAT_AB_BOOT_ENABLE)
@@ -390,16 +374,8 @@ void mtk_io_setup(void)
 	result = register_io_dev_fip(&fip_dev_con);
 	assert(result == 0);
 
-#if defined(STORAGE_UFS)
-	result = io_dev_open(storage_dev_con, (uintptr_t)&ufs_dev_spec,
+	result = io_dev_open(storage_dev_con, (uintptr_t)boot_dev_spec,
 			     &storage_dev_handle);
-#elif defined(STORAGE_NOR)
-	result = io_dev_open(storage_dev_con, (uintptr_t)&spi_nor_dev_spec,
-			     &storage_dev_handle);
-#else
-	result = io_dev_open(storage_dev_con, (uintptr_t)&emmc_dev_spec,
-			     &storage_dev_handle);
-#endif
 	assert(result == 0);
 
 	result = io_dev_open(fip_dev_con, (uintptr_t)NULL, &fip_dev_handle);
@@ -452,17 +428,9 @@ void bl2_platform_setup(void)
 	load_partition_table(GPT_IMAGE_ID);
 	blkdev_set_dramk_data_offset(get_part_addr("dramk"));
 	mt_mem_init();
-	/* change emmc read buffer to DRAM */
-#if defined(STORAGE_UFS)
-	ufs_dev_spec.buffer.offset = 0x41000000;
-	ufs_dev_spec.buffer.length = 0x1000000;
-#elif defined(STORAGE_NOR)
-	spi_nor_dev_spec.buffer.offset = 0x41000000;
-	spi_nor_dev_spec.buffer.length = 0x1000000;
-#else
-	emmc_dev_spec.buffer.offset = 0x41000000;
-	emmc_dev_spec.buffer.length = 0x1000000;
-#endif
+	/* change storage read buffer to DRAM */
+	boot_dev_spec->buffer.offset = 0x41000000;
+	boot_dev_spec->buffer.length = 0x1000000;
 }
 
 struct bl_load_info *plat_get_bl_image_load_info(void)
