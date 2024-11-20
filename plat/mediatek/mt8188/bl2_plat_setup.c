@@ -26,6 +26,7 @@
 #include <plat/common/platform.h>
 #include <platform_def.h>
 #include <uart.h>
+#include <mtk_plat_common.h>
 #include <mmc/mtk-sd.h>
 #include <blkdev/blkdev-mmc.h>
 #include <drivers/ti/uart/uart_16550.h>
@@ -363,18 +364,6 @@ void mtk_io_setup(void)
 	(void)result;
 }
 
-uint64_t get_part_addr(const char *name)
-{
-	const partition_entry_t *entry;
-
-	entry = get_partition_entry(name);
-	if (entry == NULL) {
-		NOTICE("Could NOT find the %s partition!\n", name);
-		return 0;
-	}
-	return entry->start;
-}
-
 void bl2_platform_setup(void)
 {
 	generic_delay_timer_init();
@@ -393,6 +382,7 @@ void bl2_platform_setup(void)
 
 #if defined(STORAGE_NOR)
 	mtk_snfc_plat();
+	nor_register_blkdev();
 #else
 	mtk_mmc_init(0x11230000, &mt8188_compat, 400000000);
 	mmc_register_blkdev();
