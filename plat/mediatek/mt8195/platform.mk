@@ -6,6 +6,9 @@
 
 MTK_PLAT     := plat/mediatek
 MTK_PLAT_SOC := ${MTK_PLAT}/${PLAT}
+MTK_SOC := ${PLAT}
+
+include plat/mediatek/build_helpers/mtk_build_helpers.mk
 
 PLAT_INCLUDES := -I${MTK_PLAT}/common/                            \
                  -I${MTK_PLAT}/common/drivers/                    \
@@ -181,32 +184,7 @@ BL31_LIBS += ${MTK_PLAT}/drivers/apusys/secure_boot/lib/sec.a
 # Build SPM drivers
 include ${MTK_PLAT_SOC}/drivers/spm/build.mk
 
-# Configs for A78 and A55
-HW_ASSISTED_COHERENCY := 1
-USE_COHERENT_MEM := 0
-CTX_INCLUDE_AARCH32_REGS := 0
-ERRATA_A55_1530923 := 1
-
-ERRATA_A78_1688305 := 1
-ERRATA_A78_1941498 := 1
-ERRATA_A78_1951500 := 1
-ERRATA_A78_1821534 := 1
-ERRATA_A78_2132060 := 1
-ERRATA_A78_2242635 := 1
-
-# indicate the reset vector address can be programmed
-PROGRAMMABLE_RESET_ADDRESS := 1
-
-COLD_BOOT_SINGLE_CPU := 1
-
-BL2_AT_EL3 := 1
-
-#Enable dynamic memory mapping
-PLAT_XLAT_TABLES_DYNAMIC :=1
-$(eval $(call add_define,PLAT_XLAT_TABLES_DYNAMIC))
-
-MACH_MT8195 := 1
-$(eval $(call add_define,MACH_MT8195))
+include plat/mediatek/build_helpers/mtk_build_helpers_epilogue.mk
 
 include lib/coreboot/coreboot.mk
 include ${MTK_PLAT}/secure-boot.mk
