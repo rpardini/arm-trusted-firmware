@@ -23,7 +23,6 @@ BL2_SOURCES += lib/cpus/aarch64/cortex_a55.S \
 	       ${MTK_PLAT}/common/mtk_plat_common.c \
 	       $(MTK_PLAT_SOC)/plat_mmap.c \
 	       ${MTK_PLAT_SOC}/bl2_plat_setup.c \
-	       ${MTK_PLAT}/common/drivers/blkdev/blkdev-mmc.c \
 
 MODULES-BL2-y += $(MTK_PLAT)/drivers/uart
 MODULES-BL2-y += $(MTK_PLAT)/drivers/pmic
@@ -31,6 +30,7 @@ MODULES-BL2-y += ${MTK_PLAT}/drivers/wdt
 MODULES-BL2-y += ${MTK_PLAT_SOC}/drivers/pll
 MODULES-BL2-y += $(MTK_PLAT_SOC)/drivers/pmic_bl2
 MODULES-BL2-y += $(MTK_PLAT_SOC)/drivers/pmic_wrap_bl2
+MODULES-BL2-y += ${MTK_PLAT}/common/drivers/blkdev
 ifeq (${STORAGE_NOR},1)
 MODULES-BL2-y += $(MTK_PLAT_SOC)/drivers/snfc
 endif
