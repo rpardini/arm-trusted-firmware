@@ -14,10 +14,12 @@
 #include "platform_def.h"
 #include "mtk_bl2_common.h"
 #include "mmc/mtk-sd.h"
+#include "mtk_plat_common.h"
 #include "wdt.h"
 #include "pll.h"
 #include "libdram.h"
 #include "pmic_initial_setting.h"
+#include "blkdev/blkdev-mmc.h"
 
 uint32_t g_ddr_reserve_enable;
 uint32_t g_ddr_reserve_success;
@@ -98,11 +100,13 @@ void bl2_platform_setup(void)
 	if (storage_type == STORAGE_EMMC) {
 		boot_dev_spec = &emmc_dev_spec;
 		mtk_mmc_init(MSDC0_BASE, &msdc_compat, 400000000);
+		mmc_register_blkdev();
 	}
 
 	mtk_io_setup((uintptr_t)boot_dev_spec);
 	load_partition_table(GPT_IMAGE_ID);
 
+	blkdev_set_dramk_data_offset(get_part_addr("dramk"));
 	mt_mem_init();
 
 	/* change storage read buffer to DRAM */

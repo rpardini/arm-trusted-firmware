@@ -48,6 +48,7 @@ BL2_SOURCES += lib/cpus/aarch64/cortex_a55.S \
 	       lib/libc/strlen.c \
 
 MODULES-BL2-y				+= $(MTK_PLAT)/drivers/uart
+MODULES-BL2-y				+= ${MTK_PLAT}/common/drivers/blkdev
 MODULES-BL2-$(CONFIG_MTK_MMC_SUPPORT)	+= ${MTK_PLAT}/common/drivers/mmc
 MODULES-BL2-y				+= ${MTK_PLAT}/drivers/wdt
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/libdram
