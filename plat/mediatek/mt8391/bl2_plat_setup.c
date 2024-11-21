@@ -15,6 +15,7 @@
 #include "mtk_bl2_common.h"
 #include "mmc/mtk-sd.h"
 #include "wdt.h"
+#include "pll.h"
 
 uint32_t g_ddr_reserve_enable;
 uint32_t g_ddr_reserve_success;
@@ -80,6 +81,8 @@ void bl2_platform_setup(void)
 
 	generic_delay_timer_init();
 	mtk_wdt_init();
+
+	mt_pll_init();
 
 
 	storage_type = mt_get_storage_type();

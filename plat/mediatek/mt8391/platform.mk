@@ -47,6 +47,8 @@ BL2_SOURCES += lib/cpus/aarch64/cortex_a55.S \
 MODULES-BL2-y				+= $(MTK_PLAT)/drivers/uart
 MODULES-BL2-$(CONFIG_MTK_MMC_SUPPORT)	+= ${MTK_PLAT}/common/drivers/mmc
 MODULES-BL2-y				+= ${MTK_PLAT}/drivers/wdt
+MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/pll
+MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/mtcmos
 
 include plat/mediatek/build_helpers/mtk_build_helpers_epilogue.mk
 
