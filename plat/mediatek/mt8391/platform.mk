@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2024, MediaTek Inc. All rights reserved.
+# Copyright (c) 2025, MediaTek Inc. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -53,6 +53,7 @@ MODULES-BL2-y				+= ${MTK_PLAT}/drivers/wdt
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/libdram
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/pll
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/mtcmos
+MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/pmic
 
 include plat/mediatek/build_helpers/mtk_build_helpers_epilogue.mk
 
