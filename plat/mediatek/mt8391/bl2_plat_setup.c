@@ -16,6 +16,7 @@
 #include "mmc/mtk-sd.h"
 #include "wdt.h"
 #include "pll.h"
+#include "libdram.h"
 
 uint32_t g_ddr_reserve_enable;
 uint32_t g_ddr_reserve_success;
@@ -84,6 +85,12 @@ void bl2_platform_setup(void)
 
 	mt_pll_init();
 
+	pmifclkmgr_init();
+	pmif_spmi_init(SPMI_MASTER_P_1);
+	pwrap_init_preloader();
+
+	i2c_hw_init();
+	pmic_init();
 
 	storage_type = mt_get_storage_type();
 	if (storage_type == STORAGE_EMMC) {
@@ -93,6 +100,8 @@ void bl2_platform_setup(void)
 
 	mtk_io_setup((uintptr_t)boot_dev_spec);
 	load_partition_table(GPT_IMAGE_ID);
+
+	mt_mem_init();
 
 	/* change storage read buffer to DRAM */
 	boot_dev_spec->buffer.offset = 0x41000000;

@@ -43,10 +43,14 @@ BL2_SOURCES += lib/cpus/aarch64/cortex_a55.S \
 	       ${MTK_PLAT}/common/mtk_plat_common.c \
 	       ${MTK_PLAT}/common/mtk_bl2_common.c \
 	       ${MTK_PLAT_SOC}/bl2_plat_setup.c \
+	       lib/libc/memset.c \
+	       lib/libc/strncmp.c \
+	       lib/libc/strlen.c \
 
 MODULES-BL2-y				+= $(MTK_PLAT)/drivers/uart
 MODULES-BL2-$(CONFIG_MTK_MMC_SUPPORT)	+= ${MTK_PLAT}/common/drivers/mmc
 MODULES-BL2-y				+= ${MTK_PLAT}/drivers/wdt
+MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/libdram
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/pll
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/mtcmos
 
