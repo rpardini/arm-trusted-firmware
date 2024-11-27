@@ -9,6 +9,7 @@
 #include <drivers/delay_timer.h>
 #include <spm_mtcmos.h>
 #include "include/pll.h"
+#include "libdram.h"
 
 #define CLKMGR_BRINGUP			0
 
@@ -972,9 +973,12 @@ void mt_pll_init(void)
 
     /* None */
     DRV_WriteReg32(CLK_CFG_1_CLR, 0xFFFFFFFF);
-
-    /* disp0=687.5Mhz(MMPLL_D4)\mminfra=687.5Mhz(MMPLL_D4)\uart=52Mhz(UNIVPLL_D6_D8)\spi0=208Mhz(UNIVPLL_D6_D2) */
-    DRV_WriteReg32(CLK_CFG_1_SET, 0x01010E0B);
+    if (mt_get_dram_type() == TYPE_LPDDR5)
+        /* disp0=624Mhz(UNIVPLL_D4)\mminfra=624Mhz(UNIVPLL_D4)\uart=52Mhz(UNIVPLL_D6_D8)\spi0=208Mhz(UNIVPLL_D6_D2) */
+        DRV_WriteReg32(CLK_CFG_1_SET, 0x01010D0A);
+    else
+        /* disp0=416Mhz(UNIVPLL_D6)\mminfra=458.33Mhz(MMPLL_D6)\uart=52Mhz(UNIVPLL_D6_D8)\spi0=208Mhz(UNIVPLL_D6_D2) */
+        DRV_WriteReg32(CLK_CFG_1_SET, 0x01010A06);
 
     INFO("%s %d\n", __func__, __LINE__);
 
@@ -1043,27 +1047,39 @@ void mt_pll_init(void)
 
     /* None */
     DRV_WriteReg32(CLK_CFG_11_CLR, 0xFFFFFFFF);
-
-    /* aud_1=180.6336Mhz(APLL1_CK)\aud_2=196.608Mhz(APLL2_CK)\venc=687.5Mhz(MMPLL_D4)\vdec=624Mhz(UNIVPLL_D4) */
-    DRV_WriteReg32(CLK_CFG_11_SET, 0x0E0A0101);
+    if (mt_get_dram_type() == TYPE_LPDDR5)
+        /* aud_1=180.6336Mhz(APLL1_CK)\aud_2=196.608Mhz(APLL2_CK)\venc=624Mhz(UNIVPLL_D4)\vdec=546Mhz(MAINPLL_D4) */
+        DRV_WriteReg32(CLK_CFG_11_SET, 0x0D0C0101);
+    else
+        /* aud_1=180.6336Mhz(APLL1_CK)\aud_2=196.608Mhz(APLL2_CK)\venc=458.33Mhz(MMPLL_D6)\vdec=416Mhz(UNIVPLL_D6) */
+        DRV_WriteReg32(CLK_CFG_11_SET, 0x0C060101);
 
     /* None */
     DRV_WriteReg32(CLK_CFG_12_CLR, 0xFFFFFFFF);
-
-    /* pwm=26Mhz(tck_26m_mx9_ck)\audio_h=196.608Mhz(APLL2_CK)\mcupm=218.4Mhz(MAINPLL_D5_D2)\mem_sub=546Mhz(MAINPLL_D4) */
-    DRV_WriteReg32(CLK_CFG_12_SET, 0x09020300);
+    if (mt_get_dram_type() == TYPE_LPDDR5)
+        /* pwm=26Mhz(tck_26m_mx9_ck)\audio_h=196.608Mhz(APLL2_CK)\mcupm=218.4Mhz(MAINPLL_D5_D2)\mem_sub=546Mhz(MAINPLL_D4) */
+        DRV_WriteReg32(CLK_CFG_12_SET, 0x09020300);
+    else
+        /* pwm=26Mhz(tck_26m_mx9_ck)\audio_h=196.608Mhz(APLL2_CK)\mcupm=218.4Mhz(MAINPLL_D5_D2)\mem_sub=436.8Mhz(MAINPLL_D5) */
+        DRV_WriteReg32(CLK_CFG_12_SET, 0x07020300);
 
     /* None */
     DRV_WriteReg32(CLK_CFG_13_CLR, 0xFFFFFFFF);
-
-    /* mem_sub_peri=546Mhz(MAINPLL_D4)\mem_sub_ufs=546Mhz(MAINPLL_D4)\emi_n=242.667Mhz(MAINPLL_D9)\dsi_occ=312Mhz(UNIVPLL_D4_D2) */
-    DRV_WriteReg32(CLK_CFG_13_SET, 0x03020707);
+    if (mt_get_dram_type() == TYPE_LPDDR5)
+        /* mem_sub_peri=546Mhz(MAINPLL_D4)\mem_sub_ufs=546Mhz(MAINPLL_D4)\emi_n=242.667Mhz(MAINPLL_D9)\dsi_occ=312Mhz(UNIVPLL_D4_D2) */
+        DRV_WriteReg32(CLK_CFG_13_SET, 0x03020707);
+    else
+        /* mem_sub_peri=436.8Mhz(MAINPLL_D5)\mem_sub_ufs=436.8Mhz(MAINPLL_D5)\emi_n=242.667Mhz(MAINPLL_D9)\dsi_occ=312Mhz(UNIVPLL_D4_D2) */
+        DRV_WriteReg32(CLK_CFG_13_SET, 0x03020505);
 
     /* None */
     DRV_WriteReg32(CLK_CFG_14_CLR, 0xFFFFFFFF);
-
-    /* ap2conn_host=78Mhz(MAINPLL_D7_D4)\img1=624Mhz(UNIVPLL_D4)\ipe=546Mhz(MAINPLL_D4)\cam=624Mhz(UNIVPLL_D4) */
-    DRV_WriteReg32(CLK_CFG_14_SET, 0x03020101);
+    if (mt_get_dram_type() == TYPE_LPDDR5)
+        /* ap2conn_host=78Mhz(MAINPLL_D7_D4)\img1=624Mhz(UNIVPLL_D4)\ipe=546Mhz(MAINPLL_D4)\cam=624Mhz(UNIVPLL_D4) */
+        DRV_WriteReg32(CLK_CFG_14_SET, 0x03020101);
+    else
+    /* ap2conn_host=78Mhz(MAINPLL_D7_D4)\img1=458.33Mhz(MMPLL_D6)\ipe=416Mhz(UNIVPLL_D6)\cam=546Mhz(MAINPLL_D4) */
+        DRV_WriteReg32(CLK_CFG_14_SET, 0x01040301);
 
     INFO("%s %d\n", __func__, __LINE__);
 
@@ -1075,39 +1091,43 @@ void mt_pll_init(void)
 
     /* None */
     DRV_WriteReg32(CLK_CFG_16_CLR, 0xFFFFFFFF);
-
-    /* mfg_ref=364Mhz(MAINPLL_D6)\mdp0=687.5Mhz(MMPLL_D4)\dp=297Mhz(TVDPLL1_D2)\edp=297Mhz(TVDPLL2_D2) */
-    DRV_WriteReg32(CLK_CFG_16_SET, 0x04040B02);
+    if (mt_get_dram_type() == TYPE_LPDDR5)
+        /* mfg_ref=364Mhz(MAINPLL_D6)\mdp0=624Mhz(UNIVPLL_D4)\dp=297Mhz(TVDPLL1_D2)\edp=297Mhz(TVDPLL2_D2) */
+        DRV_WriteReg32(CLK_CFG_16_SET, 0x04040A02);
+    else
+        /* mfg_ref=364Mhz(MAINPLL_D6)\mdp0=416Mhz(UNIVPLL_D6)\dp=148.5Mhz(TVDPLL1_D4)\edp=148.5Mhz(TVDPLL2_D4) */
+        DRV_WriteReg32(CLK_CFG_16_SET, 0x03030602);
 
     /* None */
     DRV_WriteReg32(CLK_CFG_17_CLR, 0xFFFFFFFF);
-
-    /* edp_favt=297Mhz(TVDPLL2_D2)\snps_eth_250m=250Mhz(ETHPLL_D2)\snps_eth_62p4m_ptp=62.5Mhz(ETHPLL_D8)\snps_eth_50m_rmii=50Mhz(ETHPLL_D10) */
-    DRV_WriteReg32(CLK_CFG_17_SET, 0x01010104);
+    if (mt_get_dram_type() == TYPE_LPDDR5)
+        /* edp_favt=297Mhz(TVDPLL2_D2)\snps_eth_250m=250Mhz(ETHPLL_D2)\snps_eth_62p4m_ptp=62.5Mhz(ETHPLL_D8)\snps_eth_50m_rmii=50Mhz(ETHPLL_D10) */
+        DRV_WriteReg32(CLK_CFG_17_SET, 0x01010104);
+    else
+        /* edp_favt=148.5Mhz(TVDPLL2_D4)\snps_eth_250m=250Mhz(ETHPLL_D2)\snps_eth_62p4m_ptp=62.5Mhz(ETHPLL_D8)\snps_eth_50m_rmii=50Mhz(ETHPLL_D10) */
+        DRV_WriteReg32(CLK_CFG_17_SET, 0x01010103);
 
     /* None */
     DRV_WriteReg32(CLK_CFG_18_CLR, 0xFFFFFFFF);
-
-    /* sflash=26Mhz(tck_26m_mx9_ck)\gcpu=416Mhz(UNIVPLL_D6)\cie_mac_tl=136.5Mhz(MAINPLL_D4_D4)\vdstx_clkdig_cts=118.9Mhz(LVDSTX_CLKDIG_CTS_CK) */
-    DRV_WriteReg32(CLK_CFG_18_SET, 0x01010600);
-
-    INFO("%s %d\n", __func__, __LINE__);
+    if (mt_get_dram_type() == TYPE_LPDDR5)
+        /* sflash=26Mhz(tck_26m_mx9_ck)\gcpu=416Mhz(UNIVPLL_D6)\cie_mac_tl=136.5Mhz(MAINPLL_D4_D4)\vdstx_clkdig_cts=118.9Mhz(LVDSTX_CLKDIG_CTS_CK) */
+        DRV_WriteReg32(CLK_CFG_18_SET, 0x01010600);
+    else
+        /* sflash=26Mhz(tck_26m_mx9_ck)\gcpu=364Mhz(MAINPLL_D6)\cie_mac_tl=136.5Mhz(MAINPLL_D4_D4)\vdstx_clkdig_cts=118.9Mhz(LVDSTX_CLKDIG_CTS_CK) */
+        DRV_WriteReg32(CLK_CFG_18_SET, 0x01010100);
 
     /* None */
     DRV_WriteReg32(CLK_CFG_19_CLR, 0x0000FFFF);
-
-    INFO("%s %d\n", __func__, __LINE__);
-
-    /* pll_dpix=171.9Mhz(VPLL_DPIX_CK)\ecc=624Mhz(UNIVPLL_D4) */
-    DRV_WriteReg32(CLK_CFG_19_SET, 0x00000501);
-
-    INFO("%s %d\n", __func__, __LINE__);
+    if (mt_get_dram_type() == TYPE_LPDDR5)
+        /* pll_dpix=171.9Mhz(VPLL_DPIX_CK)\ecc=546Mhz(MAINPLL_D4) */
+        DRV_WriteReg32(CLK_CFG_19_SET, 0x00000401);
+    else
+        /* pll_dpix=171.9Mhz(VPLL_DPIX_CK)\ecc=416Mhz(UNIVPLL_D6) */
+        DRV_WriteReg32(CLK_CFG_19_SET, 0x00000301);
 
     //__asm__    __volatile__ ("b ." : : : "memory");
     /* update mux */
     DRV_WriteReg32(CLK_CFG_UPDATE, 0x7FFFFFFF);
-
-    INFO("%s %d\n", __func__, __LINE__);
 
     /* update mux */
     DRV_WriteReg32(CLK_CFG_UPDATE1, 0x7FFFFFFF);
