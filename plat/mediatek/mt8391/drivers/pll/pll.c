@@ -48,6 +48,9 @@
 #define FM_POSTDIV_MASK			GENMASK(26, 24)
 
 #define EFUSE_MTCMOS_DPTX_DIS_S1B10 BITS(10)
+#define EFUSE_MTCMOS_ADSP_TOP_DIS_S1B15 BITS(15)
+#define EFUSE_MTCMOS_ADSP_INFRA_DIS_S1B16 BITS(16)
+#define EFUSE_MTCMOS_ADSP_AO_DIS_S1B17 BITS(17)
 
 #define EFUSE_MTCMOS_MFG0_DIS_S2B0 BITS(0)
 #define EFUSE_MTCMOS_MFG1_DIS_S2B1 BITS(1)
@@ -1194,17 +1197,23 @@ void mt_pll_init(void)
     spm_mtcmos_ctrl_audio(STA_POWER_ON);
     INFO("audio mtcmos Done!\n");
 
-    INFO("adsp_ao mtcmos Start..\n");
-    spm_mtcmos_ctrl_adsp_ao(STA_POWER_ON);
-    INFO("adsp_ao mtcmos Done!\n");
+    if(!(ucSpare1 & EFUSE_MTCMOS_ADSP_AO_DIS_S1B17)) {
+        INFO("adsp_ao mtcmos Start..\n");
+        spm_mtcmos_ctrl_adsp_ao(STA_POWER_ON);
+        INFO("adsp_ao mtcmos Done!\n");
+    }
 
-    INFO("adsp_infra mtcmos Start..\n");
-    spm_mtcmos_ctrl_adsp_infra(STA_POWER_ON);
-    INFO("adsp_infra mtcmos Done!\n");
+    if(!(ucSpare1 & EFUSE_MTCMOS_ADSP_INFRA_DIS_S1B16)) {
+        INFO("adsp_infra mtcmos Start..\n");
+        spm_mtcmos_ctrl_adsp_infra(STA_POWER_ON);
+        INFO("adsp_infra mtcmos Done!\n");
+    }
 
-    INFO("adsp_top_shutdown mtcmos Start..\n");
-    spm_mtcmos_ctrl_adsp_top_shutdown(STA_POWER_ON);
-    INFO("adsp_top_shutdown mtcmos Done!\n");
+    if(!(ucSpare1 & EFUSE_MTCMOS_ADSP_TOP_DIS_S1B15)) {
+        INFO("adsp_top_shutdown mtcmos Start..\n");
+        spm_mtcmos_ctrl_adsp_top_shutdown(STA_POWER_ON);
+        INFO("adsp_top_shutdown mtcmos Done!\n");
+    }
 
     INFO("mm_infra mtcmos Start..\n");
     spm_mtcmos_ctrl_mm_infra(STA_POWER_ON);
@@ -1352,8 +1361,10 @@ void mt_pll_init(void)
     /* SCP CG Clear*/
     DRV_WriteReg32(SCP_AP_SPI_CG, DRV_Reg32(SCP_AP_SPI_CG) | 0x00000003);
     /* VAD CG Clear*/
-    DRV_WriteReg32(VAD_VADSYS_CK_EN, DRV_Reg32(VAD_VADSYS_CK_EN) | 0x0001003D);
-    DRV_WriteReg32(VAD_VOW_AUDIODSP_SW_CG, DRV_Reg32(VAD_VOW_AUDIODSP_SW_CG) & ~(0x00000024));
+    if(!(ucSpare1 & EFUSE_MTCMOS_ADSP_AO_DIS_S1B17)) {
+        DRV_WriteReg32(VAD_VADSYS_CK_EN, DRV_Reg32(VAD_VADSYS_CK_EN) | 0x0001003D);
+        DRV_WriteReg32(VAD_VOW_AUDIODSP_SW_CG, DRV_Reg32(VAD_VOW_AUDIODSP_SW_CG) & ~(0x00000024));
+    }
     /* IPE CG Clear*/
     DRV_WriteReg32(IPE_IMG_CG_CLR, 0x0000013F);
     /* VLPCFG_AO_REG CG Clear*/
