@@ -1,7 +1,6 @@
+// SPDX-License-Identifier: BSD-3-Clause
 /*
- * Copyright (c) 2022, MediaTek Inc. All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright (C) 2022 MediaTek Inc.
  */
 
 #include <arch_helpers.h>
@@ -14,7 +13,7 @@
 #define MP0_CLUSTER_CFG0_L3_SHARE_PRE_EN BIT(8)
 #define MP0_CLUSTER_CFG0_L3_SHARE_EN BIT(9)
 
-int mtk_soc_disable_l2c_sram(void)
+int mtk_soc_disable_l3c_sram(void)
 {
 	unsigned long v;
 
@@ -36,4 +35,4 @@ int mtk_soc_disable_l2c_sram(void)
 	return 0;
 }
 
-MTK_ARCH_INIT(mtk_soc_disable_l2c_sram);
+MTK_ARCH_INIT(mtk_soc_disable_l3c_sram);

@@ -6,8 +6,8 @@
 
 LOCAL_DIR := $(call GET_LOCAL_DIR)
 
-MODULE := l2c
-LOCAL_SRCS-y := $(LOCAL_DIR)/l2c.c
+MODULE := l3c
+LOCAL_SRCS-y := $(LOCAL_DIR)/l3c.c
 
 PLAT_INCLUDES += -I${LOCAL_DIR}
 
