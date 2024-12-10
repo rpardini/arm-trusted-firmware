@@ -24,6 +24,7 @@ MODULES-y += $(MTK_PLAT)/helpers
 MODULES-y += $(MTK_PLAT)/lib/mtk_init
 MODULES-y += $(MTK_PLAT)/lib/pm
 MODULES-y += $(MTK_PLAT)/topology
+MODULES-y += $(MTK_PLAT)/drivers/l3c
 MODULES-y += $(MTK_PLAT)/drivers/uart
 MODULES-y += $(MTK_PLAT)/drivers/timer
 
