@@ -54,6 +54,14 @@ struct mtk_bl31_params {
 	image_info_t *bl33_image_info;
 };
 
+#define BOOT_ARGUMENT_MAGIC	0x504c504c
+#define BOOT_ARGUMENT		((struct boot_argument *)BOOT_ARGUMENT_LOCATION)
+
+struct boot_argument {
+	unsigned int magic_number;
+	uint64_t dram_size;
+};
+
 /* Declarations for mtk_plat_common.c */
 uint32_t plat_get_spsr_for_bl32_entry(void);
 uint32_t plat_get_spsr_for_bl33_entry(void);
