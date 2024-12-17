@@ -6,8 +6,11 @@
 
 # Expand include modules
 
+ifeq ($(MAKECMDGOALS),bl2)
 $(eval $(call INCLUDE_MODULES,$(MODULES-BL2-y),bl2))
+else
 $(eval $(call INCLUDE_MODULES,$(MODULES-y),bl31))
+endif
 
 # Make next section align to page size
 ifneq ($(MTK_EXTRA_LINKERFILE),)
