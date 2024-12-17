@@ -109,6 +109,9 @@ void bl2_platform_setup(void)
 	blkdev_set_dramk_data_offset(get_part_addr("dramk"));
 	mt_mem_init();
 
+	BOOT_ARGUMENT->dram_size = platform_memory_size();
+	BOOT_ARGUMENT->magic_number = BOOT_ARGUMENT_MAGIC;
+
 	/* change storage read buffer to DRAM */
 	boot_dev_spec->buffer.offset = 0x41000000;
 	boot_dev_spec->buffer.length = 0x1000000;
