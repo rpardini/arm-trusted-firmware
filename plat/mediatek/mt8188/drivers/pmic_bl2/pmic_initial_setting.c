@@ -7,7 +7,6 @@
 #include <common/debug.h>
 
 #include <pmic_initial_setting.h>
-#include <pmic_wrap_init.h>
 
 static const struct pmic_setting init_setting[] = {
 	{0x20, 0xA, 0xA, 0},

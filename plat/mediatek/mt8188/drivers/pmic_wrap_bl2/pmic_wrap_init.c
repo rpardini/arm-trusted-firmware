@@ -7,7 +7,7 @@
 #define PMIC_WRAP_PRELOADER 1
 #define PMIC_WRAP_DEBUG 1
 
-#include <pmic_wrap_init.h>
+#include <stdint.h>
 #include <reg_PMIC_WRAP.h>
 #include <reg_PMIC_WRAP_mac.h>
 #include <upmu_hw.h>
