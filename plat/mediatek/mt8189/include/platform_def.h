@@ -79,6 +79,15 @@
 #define IOMMU_REG_RNG_SIZE	(0x5000)
 
 /*******************************************************************************
+ * CIRQ related constants
+ ******************************************************************************/
+#define SYS_CIRQ_BASE		(IO_PHYS + 204000)
+#define MD_WDT_IRQ_BIT_ID	(519)
+#define CIRQ_REG_NUM		(19)
+#define CIRQ_SPI_START		(128)
+#define CIRQ_IRQ_NUM		(598)
+
+/*******************************************************************************
  * System counter frequency related constants
  ******************************************************************************/
 #define SYS_COUNTER_FREQ_IN_HZ  (13000000)
@@ -241,15 +250,6 @@
 #define SYSTIMER_IRQ_BIT_ID     281 /* 249 + 32 = 281 */
 #define WDT_IRQ_BIT_ID          519
 #define FIQ_SMP_CALL_SGI        13
-#define MD_WDT_IRQ_BIT_ID       523
-
-/*******************************************************************************
- * syscirq definitions
- ******************************************************************************/
-#define SYS_CIRQ_BASE           (IO_PHYS + 0x204000)
-#define CIRQ_REG_NUM            19
-#define CIRQ_SPI_START          96
-#define CIRQ_IRQ_NUM            598
 
 #define DBGSYS_BASE             (0x0D000000)
 #define DBGAO_BASE              (0x0D01A000)

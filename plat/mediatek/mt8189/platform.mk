@@ -28,6 +28,7 @@ MODULES-y += $(MTK_PLAT)/lib/system_reset
 MODULES-y += $(MTK_PLAT)/topology
 MODULES-y += $(MTK_PLAT)/drivers/l3c
 MODULES-y += $(MTK_PLAT)/drivers/cpu_pm
+MODULES-y += $(MTK_PLAT)/drivers/cirq
 MODULES-y += $(MTK_PLAT)/drivers/gic600
 MODULES-y += $(MTK_PLAT)/drivers/uart
 MODULES-y += $(MTK_PLAT)/drivers/iommu
