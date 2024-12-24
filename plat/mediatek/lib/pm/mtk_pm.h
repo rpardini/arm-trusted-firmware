@@ -199,6 +199,7 @@ struct mt_cpupm_event_data {
 #define MT_PLAT_PWR_STATE_SYSTEM_MEM	(0x0030)
 #define MT_PLAT_PWR_STATE_SYSTEM_PLL	(0x0040)
 #define MT_PLAT_PWR_STATE_SYSTEM_BUS	(0x0050)
+#define MT_PLAT_PWR_STATE_SYSTEM_VCORE	(0x00FF)
 #define MT_PLAT_PWR_STATE_SUSPEND	(0x00f0)
 
 #define IS_MT_PLAT_PWR_STATE(state, target_state)	((state & target_state) == target_state)

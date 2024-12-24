@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Mediatek Inc. All rights reserved.
+ * Copyright (c) 2023-2024, MediaTek Inc. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -28,6 +28,5 @@
 #define MT_SPM_VCORE	BIT(MT_SPM_BIT_VCORE)
 #define MT_SPM_EMI	BIT(MT_SPM_BIT_EMI)
 #define MT_SPM_PMIC	BIT(MT_SPM_BIT_PMIC)
-
 
 #endif /* MT_SPM_RESOURCE_REQ_H */
