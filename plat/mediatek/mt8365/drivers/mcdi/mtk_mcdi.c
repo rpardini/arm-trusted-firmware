@@ -70,6 +70,7 @@ static int mcdi_parse_firmware(void)
 	int i;
 	int offset = 0;
 	int mcupm_fw_count = 0;
+	int ret;
 
 	if (dyna_load_fw_done)
 		return err;
@@ -125,8 +126,14 @@ static int mcdi_parse_firmware(void)
 		memcpy(pdesc, ptr + offset, copy_size);
 
 		/* fw version */
-		snprintf(dyna_load_mcupm[i].version, MCUPM_FW_VERSION_SIZE - 1,
+		ret = snprintf(dyna_load_mcupm[i].version, MCUPM_FW_VERSION_SIZE - 1,
 				"%s", pdesc->version);
+		if (ret < 0) {
+			ERROR("[mcdi] snprintf error for version of dyna_load_mcupm_path\n");
+		} else if (ret >= MCUPM_FW_VERSION_SIZE - 1) {
+			WARN("[mcdi] version string for %s was truncated\n",
+			     dyna_load_mcupm_path[i]);
+		}
 #endif /* MCUPM_FW_USE_PARTITION */
 
 		INFO("[mcdi] use mcupmfw partition for %s - %s\n",
