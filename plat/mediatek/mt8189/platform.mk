@@ -37,6 +37,7 @@ MODULES-y += $(MTK_PLAT)/drivers/pmic_wrap
 MODULES-y += $(MTK_PLAT)/drivers/smpu
 MODULES-y += $(MTK_PLAT)/drivers/spm
 MODULES-y += $(MTK_PLAT)/drivers/rtc
+MODULES-$(CONFIG_MTK_SPMI) += $(MTK_PLAT)/drivers/spmi
 
 PLAT_BL_COMMON_SOURCES := common/desc_image_load.c \
 			  drivers/ti/uart/aarch64/16550_console.S \

@@ -673,4 +673,22 @@
 #define THERM_CTRL_MCU_BASE     (IO_PHYS + 0x00316000)
 #define THERM_MCU_REG_SIZE      (0x1000)
 
+/*******************************************************************************
+ * SPMI related definitions
+ ******************************************************************************/
+#define SPMI_MST_P_BASE			(IO_PHYS + 0x0CC00000)
+#define PMIF_SPMI_P_BASE		(IO_PHYS + 0x0CC06000)
+#define SPMI_MST_P_SIZE			(0x1000)
+
+/*******************************************************************************
+ * Differentiate between 3G and 2.6G-related definitions
+ ******************************************************************************/
+#define EFUSEC_BASE			(IO_PHYS + 0x01F10000)
+#define CHIP_ID_REG			(EFUSEC_BASE + 0x7A0)
+#define CPU_SEG_ID_REG			(EFUSEC_BASE + 0x7E0)
+
+#define MTK_CPU_ID_MT8189		0x81890000
+#define MTK_CPU_SEG_ID_MT8189G		0x20
+#define MTK_CPU_SEG_ID_MT8189H		0x21
+
 #endif /* PLATFORM_DEF_H */
