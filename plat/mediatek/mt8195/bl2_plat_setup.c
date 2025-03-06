@@ -500,8 +500,8 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 #if defined(STORAGE_NOR)
 		partition_entry_t storage;
 
-		storage.start = 0x400000;
-		storage.length = 0x400000;
+		storage.start = BL2_STORAGE_NOR_START_ADDR;
+		storage.length = BL2_STORAGE_NOR_LENGTH;
 		entry = &storage;
 #else
 		if((entry = get_partition_entry(name)) == NULL) {
