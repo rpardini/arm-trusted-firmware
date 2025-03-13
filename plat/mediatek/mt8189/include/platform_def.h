@@ -353,6 +353,17 @@
 #define EFUSEC_BASE             (IO_PHYS + 0x01F10000)
 #define EFUSE_SIZE              0x1000
 
+#define SPM_VLP_MCUSYS_PWR_CON	           (SPM_BASE + 0x260)
+#define SPM_VLP_MP0_CPUTOP_PWR_CON         (SPM_BASE + 0x264)
+#define SPM_VLP_CPU0_PWR_CON               (SPM_BASE + 0x268)
+#define SPM_VLP_CPU1_PWR_CON               (SPM_BASE + 0x26C)
+#define SPM_VLP_CPU2_PWR_CON               (SPM_BASE + 0x270)
+#define SPM_VLP_CPU3_PWR_CON               (SPM_BASE + 0x274)
+#define SPM_VLP_CPU4_PWR_CON               (SPM_BASE + 0x278)
+#define SPM_VLP_CPU5_PWR_CON               (SPM_BASE + 0x27C)
+#define SPM_VLP_CPU6_PWR_CON               (SPM_BASE + 0x280)
+#define SPM_VLP_CPU7_PWR_CON               (SPM_BASE + 0x284)
+
 /*******************************************************************************
  * CPU PM definitions
  ******************************************************************************/

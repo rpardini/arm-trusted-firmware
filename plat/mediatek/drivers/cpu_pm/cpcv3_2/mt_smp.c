@@ -49,7 +49,11 @@ int mt_smp_power_core_on(unsigned int cpu_id, struct cpu_pwr_ctrl *pwr_ctrl)
 
 	CPU_PM_ASSERT(pwr_ctrl);
 
-	mmio_clrbits_32(pwr_ctrl->pwpr, RESETPWRON_CONFIG);
+	if (pwr_ctrl->pwpr_intermediate)
+		mmio_clrbits_32(pwr_ctrl->pwpr_intermediate, RESETPWRON_CONFIG);
+	else
+		mmio_clrbits_32(pwr_ctrl->pwpr, RESETPWRON_CONFIG);
+
 	if (val == 0) {
 		/*
 		 * Set to 0 after BIG VPROC bulk powered on (configure in MCUPM) and
@@ -63,7 +67,10 @@ int mt_smp_power_core_on(unsigned int cpu_id, struct cpu_pwr_ctrl *pwr_ctrl)
 		dsbsy();
 
 		/* set mp0_spmc_pwr_on_cpuX = 1 */
-		mmio_setbits_32(pwr_ctrl->pwpr, PWR_ON);
+		if (pwr_ctrl->pwpr_intermediate)
+			mmio_setbits_32(pwr_ctrl->pwpr_intermediate, PWR_ON);
+		else
+			mmio_setbits_32(pwr_ctrl->pwpr, PWR_ON);
 
 		val = 0;
 		while (is_core_power_status_on(cpu_id) == 0) {
