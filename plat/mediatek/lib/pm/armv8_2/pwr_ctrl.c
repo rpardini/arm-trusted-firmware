@@ -17,7 +17,9 @@
 #include <plat/arm/common/plat_arm.h>
 #include <plat/common/platform.h>
 
+#if CONFIG_MTK_DFD_SUPPORT
 #include <dfd.h>
+#endif
 #include <lib/mtk_init/mtk_init.h>
 #include <lib/pm/mtk_pm.h>
 #include <mt_gic_v3.h>
@@ -107,7 +109,9 @@ static void armv8_2_mcusys_pwr_on_common(const struct mtk_cpupm_pwrstate *state)
 	mt_gic_distif_restore();
 	gic_sgi_restore_all();
 
+#if CONFIG_MTK_DFD_SUPPORT
 	dfd_resume();
+#endif
 
 	/* Add code here that behavior before system enter mcusys'on */
 	if (IS_CPUIDLE_FN_ENABLE(MTK_CPUPM_FN_RESUME_MCUSYS)) {
