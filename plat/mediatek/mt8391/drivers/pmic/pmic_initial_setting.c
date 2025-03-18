@@ -221,6 +221,7 @@ void pmic_default_voltage(void)
 	struct mtk_regulator reg_vio18 = empty_regulator;
 	struct mtk_regulator reg_vcpub = empty_regulator;
 	struct mtk_regulator reg_vdd2h = empty_regulator;
+	struct mtk_regulator reg_vdd2 = empty_regulator;
 	struct mtk_regulator reg_vmddq = empty_regulator;
 
 	/*--Get regulator handle--*/
@@ -263,8 +264,13 @@ void pmic_default_voltage(void)
 	if (mtk_regulator_get("vcpub", &reg_vcpub))
 		ret |= (1 << 12);
 
-	if (mtk_regulator_get("vdd2h", &reg_vdd2h))
-		ret |= (1 << 13);
+	if (mt_get_dram_type() == TYPE_LPDDR5) {
+		if (mtk_regulator_get("vdd2h", &reg_vdd2h))
+			ret |= (1 << 13);
+	} else {
+		if (mtk_regulator_get("vdd2", &reg_vdd2))
+			ret |= (1 << 13);
+	}
 
 	if (mtk_regulator_get("vmddq", &reg_vmddq))
 		ret |= (1 << 14);
@@ -323,8 +329,13 @@ void pmic_default_voltage(void)
 		mtk_regulator_is_enabled(&reg_vio18) ? "enabled" : "disabled");
 	INFO("vcpub = %d uV, %s\n", mtk_regulator_get_voltage(&reg_vcpub),
 		mtk_regulator_is_enabled(&reg_vcpub) ? "enabled" : "disabled");
-	INFO("vdd2h = %d uV, %s\n", mtk_regulator_get_voltage(&reg_vdd2h),
-		mtk_regulator_is_enabled(&reg_vdd2h) ? "enabled" : "disabled");
+	if (mt_get_dram_type() == TYPE_LPDDR5) {
+		INFO("vdd2h = %d uV, %s\n", mtk_regulator_get_voltage(&reg_vdd2h),
+			mtk_regulator_is_enabled(&reg_vdd2h) ? "enabled" : "disabled");
+	} else {
+		INFO("vdd2 = %d uV, %s\n", mtk_regulator_get_voltage(&reg_vdd2),
+			mtk_regulator_is_enabled(&reg_vdd2) ? "enabled" : "disabled");
+	}
 	INFO("vmddq = %d uV, %s\n", mtk_regulator_get_voltage(&reg_vmddq),
 		mtk_regulator_is_enabled(&reg_vmddq) ? "enabled" : "disabled");
 }
