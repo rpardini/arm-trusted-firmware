@@ -47,9 +47,18 @@ BL2_SOURCES += lib/cpus/aarch64/cortex_a55.S \
 	       lib/libc/strncmp.c \
 	       lib/libc/strlen.c \
 
+ifeq (${STORAGE_UFS},1)
+PLAT_PARTITION_BLOCK_SIZE := 4096
+else
+PLAT_PARTITION_BLOCK_SIZE := 512
+endif
+
+$(eval $(call add_define,PLAT_PARTITION_BLOCK_SIZE))
+
 MODULES-BL2-y				+= $(MTK_PLAT)/drivers/uart
 MODULES-BL2-y				+= ${MTK_PLAT}/common/drivers/blkdev
 MODULES-BL2-$(CONFIG_MTK_MMC_SUPPORT)	+= ${MTK_PLAT}/common/drivers/mmc
+MODULES-BL2-$(CONFIG_MTK_UFS_SUPPORT)	+= ${MTK_PLAT}/common/drivers/ufs
 MODULES-BL2-y				+= ${MTK_PLAT}/drivers/wdt
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/libdram
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/pll

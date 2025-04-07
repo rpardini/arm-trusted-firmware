@@ -14,18 +14,28 @@
 #include "platform_def.h"
 #include "mtk_bl2_common.h"
 #include "mmc/mtk-sd.h"
+#include "ufs/mtk-ufs.h"
 #include "mtk_plat_common.h"
 #include "wdt.h"
 #include "pll.h"
 #include "libdram.h"
 #include "pmic_initial_setting.h"
 #include "blkdev/blkdev-mmc.h"
+#include "blkdev/blkdev-ufs.h"
 
 uint32_t g_ddr_reserve_enable;
 uint32_t g_ddr_reserve_success;
 
 static uint32_t buf_in_sram[PLAT_PARTITION_BLOCK_SIZE / sizeof(uint32_t)];
 static io_block_dev_spec_t *boot_dev_spec;
+
+static uint32_t ufs_desc_in_sram[0x8000] __aligned(4096);
+static ufs_params_t ufs_params = {
+	.reg_base = 0x112b0000,
+	.desc_base = &ufs_desc_in_sram,
+	.desc_size = 0x8000,
+	.flags = 0
+};
 
 static struct msdc_compatible msdc_compat = {
 	.clk_div_bits = 12,
@@ -37,6 +47,29 @@ static struct msdc_compatible msdc_compat = {
 	.enhance_rx = true,
 	.use_dma_mode = true,
 	.top_base = MSDC0_TOP_BASE,
+};
+
+#define MAIN_STORAGE_LUN 2
+size_t mtk_ufs_read(int lba, uintptr_t buf, size_t size)
+{
+	return ufs_read_blocks(MAIN_STORAGE_LUN, lba, buf, size);
+}
+
+size_t mtk_ufs_write(int lba, uintptr_t buf, size_t size)
+{
+	return ufs_write_blocks(MAIN_STORAGE_LUN, lba, buf, size);
+}
+
+static io_block_dev_spec_t ufs_dev_spec = {
+	.buffer = {
+		.offset = (size_t)buf_in_sram,
+		.length = PLAT_PARTITION_BLOCK_SIZE,
+	},
+	.ops = {
+		.read = mtk_ufs_read,
+		.write = mtk_ufs_write,
+	},
+	.block_size = UFS_BLOCK_SIZE,
 };
 
 static io_block_dev_spec_t emmc_dev_spec = {
@@ -101,6 +134,10 @@ void bl2_platform_setup(void)
 		boot_dev_spec = &emmc_dev_spec;
 		mtk_mmc_init(MSDC0_BASE, &msdc_compat, 400000000);
 		mmc_register_blkdev();
+	} else if (storage_type == STORAGE_UFS) {
+		boot_dev_spec = &ufs_dev_spec;
+		mtk_ufs_init(&ufs_params);
+		ufs_register_blkdev();
 	}
 
 	mtk_io_setup((uintptr_t)boot_dev_spec);

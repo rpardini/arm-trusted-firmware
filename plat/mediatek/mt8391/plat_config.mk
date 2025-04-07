@@ -29,3 +29,6 @@ ERRATA_A78_2395406 := 1
 CONFIG_ARCH_ARM_V8_2 := y
 CONFIG_MTK_MMC_SUPPORT := y
 $(eval $(call add_defined_option,CONFIG_MTK_MMC_SUPPORT))
+
+CONFIG_MTK_UFS_SUPPORT := y
+$(eval $(call add_defined_option,CONFIG_MTK_UFS_SUPPORT))
