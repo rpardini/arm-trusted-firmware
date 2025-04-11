@@ -28,6 +28,7 @@ MODULES-y += $(MTK_PLAT)/drivers/l3c
 MODULES-y += $(MTK_PLAT)/drivers/cpu_pm
 MODULES-y += $(MTK_PLAT)/drivers/gic600
 MODULES-y += $(MTK_PLAT)/drivers/uart
+MODULES-y += $(MTK_PLAT)/drivers/iommu
 MODULES-y += $(MTK_PLAT)/drivers/timer
 MODULES-y += $(MTK_PLAT)/drivers/mcusys
 MODULES-y += $(MTK_PLAT)/drivers/pmic
