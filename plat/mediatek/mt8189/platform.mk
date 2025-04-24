@@ -32,6 +32,7 @@ MODULES-y += $(MTK_PLAT)/drivers/timer
 MODULES-y += $(MTK_PLAT)/drivers/mcusys
 MODULES-y += $(MTK_PLAT)/drivers/pmic
 MODULES-y += $(MTK_PLAT)/drivers/pmic_wrap
+MODULES-y += $(MTK_PLAT)/drivers/spm
 MODULES-y += $(MTK_PLAT)/drivers/rtc
 
 PLAT_BL_COMMON_SOURCES := common/desc_image_load.c \
