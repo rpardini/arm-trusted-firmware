@@ -912,11 +912,11 @@ void mt_pll_init(void)
     DRV_WriteReg32(APLL1_TUNER_CON0, 0x6F28BD4D);
 
     /* APLL2=196.608Mhz */
-    DRV_WriteReg32(APLL2_CON2, 0x78FD5265);
+    DRV_WriteReg32(APLL2_CON2, 0x78FD5264);
 
     /* [26:24] (APLL2 posdiv=4) */
     DRV_WriteReg32(APLL2_CON1, 0x84000000);
-    DRV_WriteReg32(APLL2_TUNER_CON0, 0x78FD5266);
+    DRV_WriteReg32(APLL2_TUNER_CON0, 0x78FD5265);
 
     /* CCIPLL=1140Mhz */
     DRV_WriteReg32(CCIPLL_CON1, 0x8115EC4E);
