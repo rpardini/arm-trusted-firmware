@@ -1457,6 +1457,8 @@ void mt_pll_init(void)
 #else
     /* enable CGs*/
 #endif
+    /* pwm clock source switch */
+    DRV_WriteReg32(PERICFG_AO_CLOCK_CON, DRV_Reg32(PERICFG_AO_CLOCK_CON) | 0x1550);
 
     NOTICE( "Pll init Done!!\n");
 }
