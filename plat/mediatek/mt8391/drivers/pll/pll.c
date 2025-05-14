@@ -831,13 +831,14 @@ void mt_pll_init(void)
     unsigned int temp;
     unsigned int ucSpare0 = 0, ucSpare1 = 0, ucSpare2 = 0, ucSpare3 = 0, ucSpare4 = 0;
 
+    ucSpare0 = 0xFFFFFFFF;
+    ucSpare1 = 0xFFFFFFFF;
+    ucSpare2 = 0xFFFFFFFF;
+    ucSpare3 = 0xFFFFFFFF;
+    ucSpare4 = 0xFFFFFFFF;
+
     NOTICE( "Pll init start...\n");
 
-    ucSpare0 = 0;
-    ucSpare1 = 0;
-    ucSpare2 = 0;
-    ucSpare3 = 0;
-    ucSpare4 = 0;
     INFO("ucSpare0=%d, ucSpare1=%d, ucSpare2=%d, ucSpare3=%d, ucSpare4=%d\n",
     ucSpare0, ucSpare1, ucSpare2, ucSpare3, ucSpare4);
     spm_power_on();
