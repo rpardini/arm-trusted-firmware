@@ -33,6 +33,7 @@ MODULES-y += $(MTK_PLAT)/drivers/timer
 MODULES-y += $(MTK_PLAT)/drivers/mcusys
 MODULES-y += $(MTK_PLAT)/drivers/pmic
 MODULES-y += $(MTK_PLAT)/drivers/pmic_wrap
+MODULES-y += $(MTK_PLAT)/drivers/smpu
 MODULES-y += $(MTK_PLAT)/drivers/spm
 MODULES-y += $(MTK_PLAT)/drivers/rtc
 
