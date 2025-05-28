@@ -179,6 +179,7 @@
  ******************************************************************************/
 #define DEVAPC_INFRA_AO_BASE            (IO_PHYS + 0x00030000)
 #define DEVAPC_INFRA_AO1_BASE           (IO_PHYS + 0x00034000)
+#define DEVAPC_INFRA_SECU_AO_BASE       (IO_PHYS + 0x0001C000)
 #define DEVAPC_PERI_PAR_AO_BASE         (IO_PHYS + 0x0103C000)
 #define DEVAPC_VLP_AO_BASE              (IO_PHYS + 0x0C018000)
 #define DEVAPC_ADSP_AO_BASE             (IO_PHYS + 0x0E340000)
