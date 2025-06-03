@@ -30,12 +30,12 @@ MODULES-y += $(MTK_PLAT)/drivers/cpu_pm
 MODULES-y += $(MTK_PLAT)/drivers/gic600
 MODULES-y += $(MTK_PLAT)/drivers/uart
 MODULES-y += $(MTK_PLAT)/drivers/iommu
+MODULES-y += $(MTK_PLAT)/drivers/spm
 MODULES-y += $(MTK_PLAT)/drivers/timer
 MODULES-y += $(MTK_PLAT)/drivers/mcusys
 MODULES-y += $(MTK_PLAT)/drivers/pmic
 MODULES-y += $(MTK_PLAT)/drivers/pmic_wrap
 MODULES-y += $(MTK_PLAT)/drivers/smpu
-MODULES-y += $(MTK_PLAT)/drivers/spm
 MODULES-y += $(MTK_PLAT)/drivers/rtc
 MODULES-$(CONFIG_MTK_SPMI) += $(MTK_PLAT)/drivers/spmi
 
