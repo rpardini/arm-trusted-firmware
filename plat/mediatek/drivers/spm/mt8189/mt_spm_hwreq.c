@@ -1,114 +1,15 @@
-// SPDX-License-Identifier: BSD-3-Clause
 /*
- * Copyright (C) 2025 MediaTek Inc.
+ * Copyright (c) 2025, Mediatek Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <common/debug.h>
 #include <lib/mmio.h>
+
+#include <mt_spm_hwreq.h>
+#include <mt_spm_reg.h>
 #include <platform_def.h>
-#include <lib/mtk_init/mtk_init.h>
-
-#include "mt_spm_hwreq.h"
-#include "mt_spm_reg.h"
-
-/* ddren, apsrc and emi resource have become hw resource_req.
- * So we don't need to use HW CG for request resource.
- */
-#define SPM_HWCG_DDREN_PWR_MASK_B		(0)
-#define SPM_HWCG_DDREN_PWR_MSB_MASK_B		(0)
-#define SPM_HWCG_DDREN_MODULE_BUSY_MASK_B	(0)
-
-/* VRF18 */
-#define SPM_HWCG_VRF18_PWR_MASK_B	(BIT(HWCG_PWR_ISP_IMG1) \
-					| BIT(HWCG_PWR_ISP_IMG2) \
-					| BIT(HWCG_PWR_ISP_IPE) \
-					| BIT(HWCG_PWR_VDE0) \
-					| BIT(HWCG_PWR_VEN0) \
-					| BIT(HWCG_PWR_CAM_MAIN) \
-					| BIT(HWCG_PWR_CAM_SUBA) \
-					| BIT(HWCG_PWR_CAM_SUBB) \
-					| BIT(HWCG_PWR_CAM_VCORE) \
-					| BIT(HWCG_PWR_MDP0) \
-					| BIT(HWCG_PWR_MM_INFRA))
-
-#define SPM_HWCG_VRF18_PWR_MSB_MASK_B	(BIT(HWCG_PWR_DP_TX) \
-					| BIT(HWCG_PWR_EMI0) \
-					| BIT(HWCG_PWR_CSI_RX) \
-					| BIT(HWCG_PWR_SSRSYS) \
-					| BIT(HWCG_PWR_SSPM) \
-					| BIT(HWCG_PWR_EDP_TX) \
-					| BIT(HWCG_PWR_PCIE) \
-					| BIT(HWCG_PWR_PCIE_PHY))
-
-#define SPM_HWCG_VRF18_MODULE_BUSY_MASK_B	(0)
-
-/* INFRA */
-#define SPM_HWCG_INFRA_PWR_MASK_B		(SPM_HWCG_VRF18_PWR_MASK_B)
-#define SPM_HWCG_INFRA_PWR_MSB_MASK_B		(SPM_HWCG_VRF18_PWR_MSB_MASK_B)
-#define SPM_HWCG_INFRA_MODULE_BUSY_MASK_B	(0)
-
-/* PMIC */
-#define SPM_HWCG_PMIC_PWR_MASK_B		(SPM_HWCG_INFRA_PWR_MASK_B)
-
-#define SPM_HWCG_PMIC_PWR_MSB_MASK_B		(SPM_HWCG_INFRA_PWR_MSB_MASK_B)
-#define SPM_HWCG_PMIC_MODULE_BUSY_MASK_B	(0)
-
-/* F26M */
-#define SPM_HWCG_F26M_PWR_MASK_B		((SPM_HWCG_PMIC_PWR_MASK_B) \
-						| BIT(HWCG_PWR_AUDIO))
-
-#define SPM_HWCG_F26M_PWR_MSB_MASK_B		(SPM_HWCG_PMIC_PWR_MSB_MASK_B)
-
-#define SPM_HWCG_F26M_MODULE_BUSY_MASK_B	(BIT(HWCG_MODULE_MMPLL) \
-						| BIT(HWCG_MODULE_UFSPLL) \
-						| BIT(HWCG_MODULE_MSDCPLL) \
-						| BIT(HWCG_MODULE_UNIVPLL))
-
-/* VCORE */
-#define SPM_HWCG_VCORE_PWR_MASK_B		((SPM_HWCG_F26M_PWR_MASK_B) \
-						| BIT(HWCG_PWR_UFS0))
-
-#define SPM_HWCG_VCORE_PWR_MSB_MASK_B		(SPM_HWCG_F26M_PWR_MSB_MASK_B)
-#define SPM_HWCG_VCORE_MODULE_BUSY_MASK_B	(SPM_HWCG_F26M_MODULE_BUSY_MASK_B)
-
-
-#define INFRA_SW_CG_MASK_B			(0)
-
-struct spm_hwcg_info {
-	uint32_t pwr;
-	uint32_t pwr_msb;
-	uint32_t module_busy;
-};
-
-#define HWCG_INFO_INIT(_info) ({\
-	_info.pwr = _info.pwr_msb = _info.module_busy = 0; })
-
-#define DECLARE_HWCG_REG(_name_, _info) ({\
-	_info.pwr = REG_PWR_STATUS_##_name_##_REQ_MASK;\
-	_info.pwr_msb = REG_PWR_STATUS_MSB_##_name_##_REQ_MASK;\
-	_info.module_busy = REG_MODULE_BUSY_##_name_##_REQ_MASK; })
-
-#define DECLARE_HWCG_DEFAULT(_name_, _info) ({\
-	_info.pwr = SPM_HWCG_##_name_##_PWR_MASK_B;\
-	_info.pwr_msb = SPM_HWCG_##_name_##_PWR_MSB_MASK_B;\
-	_info.module_busy = SPM_HWCG_##_name_##_MODULE_BUSY_MASK_B; })
-
-#define PERI_REQ_EN_INFO_INIT(_info) ({\
-	_info.req_en = 0; })
-
-#define PERI_REQ_STA_INFO_INIT(_info) ({\
-	_info.req_sta = 0; })
-
-#define DECLARE_PERI_REQ_EN_REG(_offset, _info) ({\
-	_info.req_en = REG_PERI_REQ_EN(_offset); })
-
-#define DECLARE_PERI_REQ_STA_REG(_offset, _info) ({\
-	_info.req_sta = REG_PERI_REQ_STA(_offset); })
-
-#define DECLARE_PERI_REQ_DEFAULT(_name_, _info) ({\
-	_info.req_en = PERI_REQ_##_name_##_MASK_B; })
-
-#define PERI_REQ_EN_MASK	0x3FFFF
 
 static uint32_t spm_hwcg_index2res(uint32_t idx)
 {
@@ -140,7 +41,6 @@ static uint32_t spm_hwcg_index2res(uint32_t idx)
 		res = 0;
 	}
 	return res;
-
 }
 
 static uint32_t spm_hwcg_ctrl_get(struct spm_hwcg_info *info,
@@ -166,8 +66,8 @@ static uint32_t spm_hwcg_ctrl_get(struct spm_hwcg_info *info,
 }
 
 static void __spm_hwcg_ctrl(struct spm_hwcg_info *info,
-			    enum spm_hwcg_setting type,
-			    uint32_t is_set, uint32_t val)
+			    enum spm_hwcg_setting type, uint32_t is_set,
+			    uint32_t val)
 {
 	uint32_t reg;
 
@@ -182,8 +82,8 @@ static void __spm_hwcg_ctrl(struct spm_hwcg_info *info,
 		mmio_clrbits_32(reg, val);
 }
 
-void spm_hwcg_ctrl(uint32_t res, enum spm_hwcg_setting type,
-		   uint32_t is_set, uint32_t val)
+void spm_hwcg_ctrl(uint32_t res, enum spm_hwcg_setting type, uint32_t is_set,
+		   uint32_t val)
 {
 	struct spm_hwcg_info info;
 
@@ -273,16 +173,16 @@ static uint32_t spm_hwcg_get_default(uint32_t res, enum spm_hwcg_setting type)
 	return spm_hwcg_ctrl_get(&info, type);
 }
 
-#define _APMIXEDSYS(ofs)	(APMIXEDSYS + ofs)
-#define PLL_UNIV		_APMIXEDSYS(0x314)
-#define PLL_MM			_APMIXEDSYS(0x324)
-#define PLL_MSDC		_APMIXEDSYS(0x35C)
-#define PLL_UFS			_APMIXEDSYS(0x36C)
-#define PLLEN_ALL		_APMIXEDSYS(0x070)
-#define PLL_UNIV_MERG		BIT(5)
-#define PLL_MM_MERG		BIT(3)
-#define PLL_MSDC_MERG		BIT(4)
-#define PLL_UFS_MERG		BIT(2)
+#define _APMIXEDSYS(ofs) (APMIXEDSYS + ofs)
+#define PLL_UNIV _APMIXEDSYS(0x314)
+#define PLL_MM _APMIXEDSYS(0x324)
+#define PLL_MSDC _APMIXEDSYS(0x35C)
+#define PLL_UFS _APMIXEDSYS(0x36C)
+#define PLLEN_ALL _APMIXEDSYS(0x070)
+#define PLL_UNIV_MERG BIT(5)
+#define PLL_MM_MERG BIT(3)
+#define PLL_MSDC_MERG BIT(4)
+#define PLL_UFS_MERG BIT(2)
 
 uint32_t spm_hwcg_get_status(uint32_t idx, enum spm_hwcg_setting type)
 {
@@ -299,9 +199,11 @@ uint32_t spm_hwcg_get_status(uint32_t idx, enum spm_hwcg_setting type)
 	default:
 		pllen_all = mmio_read_32(PLLEN_ALL);
 
-		if ((mmio_read_32(PLL_UNIV) & 0x1) || (pllen_all & PLL_UNIV_MERG))
+		if ((mmio_read_32(PLL_UNIV) & 0x1) ||
+		    (pllen_all & PLL_UNIV_MERG))
 			val |= BIT(HWCG_MODULE_UNIVPLL);
-		if ((mmio_read_32(PLL_MSDC) & 0x1) || (pllen_all & PLL_MSDC_MERG))
+		if ((mmio_read_32(PLL_MSDC) & 0x1) ||
+		    (pllen_all & PLL_MSDC_MERG))
 			val |= BIT(HWCG_MODULE_MSDCPLL);
 		if ((mmio_read_32(PLL_UFS) & 0x1) || (pllen_all & PLL_UFS_MERG))
 			val |= BIT(HWCG_MODULE_UFSPLL);
@@ -313,8 +215,7 @@ uint32_t spm_hwcg_get_status(uint32_t idx, enum spm_hwcg_setting type)
 }
 
 int spm_hwcg_get_setting(uint32_t res, enum spm_hwcg_sta_type sta_type,
-			 enum spm_hwcg_setting type,
-			 struct spm_hwcg_sta *sta)
+			 enum spm_hwcg_setting type, struct spm_hwcg_sta *sta)
 {
 	int ret = 0;
 
@@ -336,8 +237,7 @@ int spm_hwcg_get_setting(uint32_t res, enum spm_hwcg_sta_type sta_type,
 	return ret;
 }
 
-int spm_hwcg_get_setting_by_index(uint32_t idx,
-				  enum spm_hwcg_sta_type sta_type,
+int spm_hwcg_get_setting_by_index(uint32_t idx, enum spm_hwcg_sta_type sta_type,
 				  enum spm_hwcg_setting type,
 				  struct spm_hwcg_sta *sta)
 {
@@ -346,121 +246,96 @@ int spm_hwcg_get_setting_by_index(uint32_t idx,
 	return spm_hwcg_get_setting(res, sta_type, type, sta);
 }
 
-int spm_hwcg_name(uint32_t idex, char *name, size_t sz)
-{
-	int ret = 0;
-
-	if (!name)
-		return -1;
-
-	switch (idex) {
-	case HWCG_DDREN:
-		ret = snprintf(name, sz - 1, "dram");
-		break;
-	case HWCG_VRF18:
-		ret = snprintf(name, sz - 1, "vrf18");
-		break;
-	case HWCG_INFRA:
-		ret = snprintf(name, sz - 1, "infra");
-		break;
-	case HWCG_PMIC:
-		ret = snprintf(name, sz - 1, "pmic");
-		break;
-	case HWCG_F26M:
-		ret = snprintf(name, sz - 1, "26m");
-		break;
-	case HWCG_VCORE:
-		ret = snprintf(name, sz - 1, "vcore");
-		break;
-	default:
-		ret = -1;
-		break;
-	}
-
-	if (ret < 0)
-		ret = -1;
-
-	name[sz-1] = '\0';
-
-	return ret;
-}
-
 static void spm_infra_swcg_init(void)
 {
-	mmio_write_32(INFRA_SW_CG_0_MASK, ~INFRA_SW_CG_MASK_B);
-	mmio_write_32(INFRA_SW_CG_1_MASK, ~INFRA_SW_CG_MASK_B);
-	mmio_write_32(INFRA_SW_CG_2_MASK, ~INFRA_SW_CG_MASK_B);
-	mmio_write_32(INFRA_SW_CG_3_MASK, ~INFRA_SW_CG_MASK_B);
-	mmio_write_32(INFRA_SW_CG_4_MASK, ~INFRA_SW_CG_MASK_B);
+	mmio_write_32(INFRA_SW_CG_0_MASK, ~INFRA_SW_CG_MB);
+	mmio_write_32(INFRA_SW_CG_1_MASK, ~INFRA_SW_CG_MB);
+	mmio_write_32(INFRA_SW_CG_2_MASK, ~INFRA_SW_CG_MB);
+	mmio_write_32(INFRA_SW_CG_3_MASK, ~INFRA_SW_CG_MB);
+	mmio_write_32(INFRA_SW_CG_4_MASK, ~INFRA_SW_CG_MB);
 }
 
 static void spm_hwcg_init(void)
 {
 	/* HW CG for ddren, apsrc, emi resource req */
-	mmio_write_32(REG_PWR_STATUS_DDREN_REQ_MASK, ~SPM_HWCG_DDREN_PWR_MASK_B);
-	mmio_write_32(REG_PWR_STATUS_MSB_DDREN_REQ_MASK, ~SPM_HWCG_DDREN_PWR_MSB_MASK_B);
-	mmio_write_32(REG_MODULE_BUSY_DDREN_REQ_MASK, ~SPM_HWCG_DDREN_MODULE_BUSY_MASK_B);
+	mmio_write_32(REG_PWR_STATUS_DDREN_REQ_MASK,
+		      ~SPM_HWCG_DDREN_PWR_MB);
+	mmio_write_32(REG_PWR_STATUS_MSB_DDREN_REQ_MASK,
+		      ~SPM_HWCG_DDREN_PWR_MSB_MB);
+	mmio_write_32(REG_MODULE_BUSY_DDREN_REQ_MASK,
+		      ~SPM_HWCG_DDREN_MODULE_BUSY_MB);
 
 	/* HW CG for vrf18 resource req */
-	mmio_write_32(REG_PWR_STATUS_VRF18_REQ_MASK, (uint32_t)(~SPM_HWCG_VRF18_PWR_MASK_B));
+	mmio_write_32(REG_PWR_STATUS_VRF18_REQ_MASK,
+		      (uint32_t)(~SPM_HWCG_VRF18_PWR_MB));
 	mmio_write_32(REG_PWR_STATUS_MSB_VRF18_REQ_MASK,
-		      (uint32_t)(~SPM_HWCG_VRF18_PWR_MSB_MASK_B));
+		      (uint32_t)(~SPM_HWCG_VRF18_PWR_MSB_MB));
 	mmio_write_32(REG_MODULE_BUSY_VRF18_REQ_MASK,
-		      (uint32_t)(~SPM_HWCG_VRF18_MODULE_BUSY_MASK_B));
+		      (uint32_t)(~SPM_HWCG_VRF18_MODULE_BUSY_MB));
 
 	/* HW CG for infra resource req */
-	mmio_write_32(REG_PWR_STATUS_INFRA_REQ_MASK, (uint32_t)(~SPM_HWCG_INFRA_PWR_MASK_B));
+	mmio_write_32(REG_PWR_STATUS_INFRA_REQ_MASK,
+		      (uint32_t)(~SPM_HWCG_INFRA_PWR_MB));
 	mmio_write_32(REG_PWR_STATUS_MSB_INFRA_REQ_MASK,
-		      (uint32_t)(~SPM_HWCG_INFRA_PWR_MSB_MASK_B));
+		      (uint32_t)(~SPM_HWCG_INFRA_PWR_MSB_MB));
 	mmio_write_32(REG_MODULE_BUSY_INFRA_REQ_MASK,
-		      (uint32_t)(~SPM_HWCG_INFRA_MODULE_BUSY_MASK_B));
+		      (uint32_t)(~SPM_HWCG_INFRA_MODULE_BUSY_MB));
 
 	/* HW CG for pmic resource req */
-	mmio_write_32(REG_PWR_STATUS_PMIC_REQ_MASK, (uint32_t)(~SPM_HWCG_PMIC_PWR_MASK_B));
+	mmio_write_32(REG_PWR_STATUS_PMIC_REQ_MASK,
+		      (uint32_t)(~SPM_HWCG_PMIC_PWR_MB));
 	mmio_write_32(REG_PWR_STATUS_MSB_PMIC_REQ_MASK,
-		      (uint32_t)(~SPM_HWCG_PMIC_PWR_MSB_MASK_B));
+		      (uint32_t)(~SPM_HWCG_PMIC_PWR_MSB_MB));
 	mmio_write_32(REG_MODULE_BUSY_PMIC_REQ_MASK,
-		      (uint32_t)(~SPM_HWCG_PMIC_MODULE_BUSY_MASK_B));
+		      (uint32_t)(~SPM_HWCG_PMIC_MODULE_BUSY_MB));
 
 	/* HW CG for f26m resource req */
-	mmio_write_32(REG_PWR_STATUS_F26M_REQ_MASK, (uint32_t)(~SPM_HWCG_F26M_PWR_MASK_B));
-	mmio_write_32(REG_PWR_STATUS_MSB_F26M_REQ_MASK, (uint32_t)(~SPM_HWCG_F26M_PWR_MSB_MASK_B));
-	mmio_write_32(REG_MODULE_BUSY_F26M_REQ_MASK, (uint32_t)(~SPM_HWCG_F26M_MODULE_BUSY_MASK_B));
+	mmio_write_32(REG_PWR_STATUS_F26M_REQ_MASK,
+		      (uint32_t)(~SPM_HWCG_F26M_PWR_MB));
+	mmio_write_32(REG_PWR_STATUS_MSB_F26M_REQ_MASK,
+		      (uint32_t)(~SPM_HWCG_F26M_PWR_MSB_MB));
+	mmio_write_32(REG_MODULE_BUSY_F26M_REQ_MASK,
+		      (uint32_t)(~SPM_HWCG_F26M_MODULE_BUSY_MB));
 
 	/* HW CG for vcore resource req */
-	mmio_write_32(REG_PWR_STATUS_VCORE_REQ_MASK, (uint32_t)(~SPM_HWCG_VCORE_PWR_MASK_B));
+	mmio_write_32(REG_PWR_STATUS_VCORE_REQ_MASK,
+		      (uint32_t)(~SPM_HWCG_VCORE_PWR_MB));
 	mmio_write_32(REG_PWR_STATUS_MSB_VCORE_REQ_MASK,
-		      (uint32_t)(~SPM_HWCG_VCORE_PWR_MSB_MASK_B));
+		      (uint32_t)(~SPM_HWCG_VCORE_PWR_MSB_MB));
 	mmio_write_32(REG_MODULE_BUSY_VCORE_REQ_MASK,
-		      (uint32_t)(~SPM_HWCG_VCORE_MODULE_BUSY_MASK_B));
+		      (uint32_t)(~SPM_HWCG_VCORE_MODULE_BUSY_MB));
 }
 
-#define PERI_CG(ofs)		(PERICFG_AO_BASE + 0x10 + (0x4 * ofs))
-#define PERI_REQ_DDREN_MASK_B	(BIT(PERI_REQ_EN_DMA) \
-					| BIT(PERI_REQ_EN_UART1) \
-					| BIT(PERI_REQ_EN_UART2) \
-					| BIT(PERI_REQ_EN_PWM) \
-					| BIT(PERI_REQ_EN_SPI0) \
-					| BIT(PERI_REQ_EN_SPI1) \
-					| BIT(PERI_REQ_EN_SPI2) \
-					| BIT(PERI_REQ_EN_SPI3) \
-					| BIT(PERI_REQ_EN_SPI4) \
-					| BIT(PERI_REQ_EN_SPI5) \
-					| BIT(PERI_REQ_EN_SPI6) \
-					| BIT(PERI_REQ_EN_SPI7) \
-					| BIT(PERI_REQ_EN_I2C) \
-					| BIT(PERI_REQ_EN_MSDC0) \
-					| BIT(PERI_REQ_EN_MSDC1) \
-					| BIT(PERI_REQ_EN_SSUSB) \
-					| BIT(PERI_REQ_EN_AFE) \
-					| BIT(PERI_REQ_EN_PCIE))
+#define PERI_CG(ofs) (PERICFG_AO_BASE + 0x10 + (0x4 * ofs))
+#define PERI_REQ_DDREN_MB	(BIT(PERI_REQ_EN_DMA)	|\
+				BIT(PERI_REQ_EN_UART1)	|\
+				BIT(PERI_REQ_EN_UART2)	|\
+				BIT(PERI_REQ_EN_UART3)	|\
+				BIT(PERI_REQ_EN_PWM)	|\
+				BIT(PERI_REQ_EN_SPI0)	|\
+				BIT(PERI_REQ_EN_SPI1)	|\
+				BIT(PERI_REQ_EN_SPI2)	|\
+				BIT(PERI_REQ_EN_SPI3)	|\
+				BIT(PERI_REQ_EN_SPI4)	|\
+				BIT(PERI_REQ_EN_SPI5)	|\
+				BIT(PERI_REQ_EN_I2C)	|\
+				BIT(PERI_REQ_EN_MSDC0)	|\
+				BIT(PERI_REQ_EN_MSDC1)	|\
+				BIT(PERI_REQ_EN_MSDC2)	|\
+				BIT(PERI_REQ_EN_SSUSB0)	|\
+				BIT(PERI_REQ_EN_SSUSB1)	|\
+				BIT(PERI_REQ_EN_SSUSB2)	|\
+				BIT(PERI_REQ_EN_SSUSB3)	|\
+				BIT(PERI_REQ_EN_SSUSB4)	|\
+				BIT(PERI_REQ_EN_PEXTP)	|\
+				BIT(PERI_REQ_EN_AFE))
 
-#define PERI_REQ_APSRC_MASK_B		(PERI_REQ_DDREN_MASK_B)
-#define PERI_REQ_EMI_MASK_B		(PERI_REQ_DDREN_MASK_B)
-#define PERI_REQ_INFRA_MASK_B		(PERI_REQ_DDREN_MASK_B)
-#define PERI_REQ_SYSPLL_MASK_B		(PERI_REQ_DDREN_MASK_B)
-#define PERI_REQ_PMIC_MASK_B		(PERI_REQ_DDREN_MASK_B)
-#define PERI_REQ_F26M_MASK_B		(PERI_REQ_DDREN_MASK_B)
+#define PERI_REQ_APSRC_MB (PERI_REQ_DDREN_MB)
+#define PERI_REQ_EMI_MB (PERI_REQ_DDREN_MB)
+#define PERI_REQ_INFRA_MB (PERI_REQ_DDREN_MB)
+#define PERI_REQ_SYSPLL_MB (PERI_REQ_DDREN_MB)
+#define PERI_REQ_PMIC_MB (PERI_REQ_DDREN_MB)
+#define PERI_REQ_F26M_MB (PERI_REQ_DDREN_MB)
 
 uint32_t spm_peri_req_get_status(uint32_t idx, enum spm_peri_req_status type)
 {
@@ -557,8 +432,7 @@ int spm_peri_req_name(uint32_t idex, char *name, size_t sz)
 }
 
 uint32_t spm_peri_req_get_status_raw(enum spm_peri_req_status_raw type,
-				     uint32_t idx,
-				     char *name, size_t sz)
+				     uint32_t idx, char *name, size_t sz)
 {
 	return 0;
 }
@@ -583,7 +457,6 @@ static uint32_t spm_peri_req_get_default(uint32_t res)
 		DECLARE_PERI_REQ_DEFAULT(F26M, info);
 	else
 		PERI_REQ_EN_INFO_INIT(info);
-
 
 	return info.req_en;
 }
@@ -620,8 +493,7 @@ static uint32_t spm_peri_req_mask_get(uint32_t res)
 	return raw_val;
 }
 
-int spm_peri_req_get_setting(uint32_t res,
-			     enum spm_peri_req_sta_type sta_type,
+int spm_peri_req_get_setting(uint32_t res, enum spm_peri_req_sta_type sta_type,
 			     struct spm_peri_req_sta *sta)
 {
 	int ret = 0;
@@ -677,7 +549,6 @@ static uint32_t spm_peri_req_index2res(uint32_t idx)
 		res = 0;
 	}
 	return res;
-
 }
 
 int spm_peri_req_get_setting_by_index(uint32_t idx,
@@ -689,10 +560,13 @@ int spm_peri_req_get_setting_by_index(uint32_t idx,
 	return spm_peri_req_get_setting(res, sta_type, sta);
 }
 
-static void __spm_peri_req_ctrl(struct spm_peri_req_info *info,
-				uint32_t is_set, uint32_t val)
+static void __spm_peri_req_ctrl(struct spm_peri_req_info *info, uint32_t is_set,
+				uint32_t val)
 {
 	uint32_t reg;
+
+	if (!info)
+		return;
 
 	reg = info->req_en;
 
@@ -705,8 +579,7 @@ static void __spm_peri_req_ctrl(struct spm_peri_req_info *info,
 		mmio_clrbits_32(reg, val);
 }
 
-void spm_peri_req_ctrl(uint32_t res,
-		       uint32_t is_set, uint32_t val)
+void spm_peri_req_ctrl(uint32_t res, uint32_t is_set, uint32_t val)
 {
 	struct spm_peri_req_info info;
 
@@ -731,8 +604,7 @@ void spm_peri_req_ctrl(uint32_t res,
 		__spm_peri_req_ctrl(&info, is_set, val);
 }
 
-void spm_peri_req_ctrl_by_index(uint32_t idx,
-				uint32_t is_set, uint32_t val)
+void spm_peri_req_ctrl_by_index(uint32_t idx, uint32_t is_set, uint32_t val)
 {
 	uint32_t res = spm_peri_req_index2res(idx);
 
@@ -742,35 +614,24 @@ void spm_peri_req_ctrl_by_index(uint32_t idx,
 
 static void spm_peri_req_init(void)
 {
-	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_DDREN),
-					PERI_REQ_DDREN_MASK_B);
+	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_DDREN), PERI_REQ_DDREN_MB);
 
-	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_EMI),
-					PERI_REQ_EMI_MASK_B);
+	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_EMI), PERI_REQ_EMI_MB);
 
-	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_APSRC),
-					PERI_REQ_APSRC_MASK_B);
+	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_APSRC), PERI_REQ_APSRC_MB);
 
-	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_INFRA),
-					PERI_REQ_INFRA_MASK_B);
+	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_INFRA), PERI_REQ_INFRA_MB);
 
-	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_SYSPLL),
-					PERI_REQ_SYSPLL_MASK_B);
+	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_SYSPLL), PERI_REQ_SYSPLL_MB);
 
-	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_PMIC),
-					PERI_REQ_PMIC_MASK_B);
+	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_PMIC), PERI_REQ_PMIC_MB);
 
-	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_F26M),
-					PERI_REQ_F26M_MASK_B);
+	mmio_write_32(REG_PERI_REQ_EN(PERI_REQ_F26M), PERI_REQ_F26M_MB);
 }
 
-int spm_hwreq_init(void)
+void spm_hwreq_init(void)
 {
 	spm_infra_swcg_init();
 	spm_hwcg_init();
 	spm_peri_req_init();
-
-	return 0;
 }
-
-MTK_PLAT_SETUP_0_INIT(spm_hwreq_init);
