@@ -18,6 +18,7 @@
 #include "mtk_plat_common.h"
 #include "wdt.h"
 #include "pll.h"
+#include "mt_thermal.h"
 #include "libdram.h"
 #include "pmic_initial_setting.h"
 #include "blkdev/blkdev-mmc.h"
@@ -120,6 +121,8 @@ void bl2_platform_setup(void)
 	mtk_wdt_init();
 
 	mt_pll_init();
+
+	thermal_init();
 
 	pmifclkmgr_init();
 	pmif_spmi_init(SPMI_MASTER_P_1);

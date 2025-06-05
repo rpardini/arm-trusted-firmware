@@ -62,6 +62,7 @@ MODULES-BL2-$(CONFIG_MTK_UFS_SUPPORT)	+= ${MTK_PLAT}/common/drivers/ufs
 MODULES-BL2-y				+= ${MTK_PLAT}/drivers/wdt
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/libdram
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/pll
+MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/thermal
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/mtcmos
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/pmic
 
