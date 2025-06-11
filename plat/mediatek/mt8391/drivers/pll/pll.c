@@ -1455,9 +1455,25 @@ void mt_pll_init(void)
 #else
     DRV_WriteReg32(MMINFRA_CONFIG_MMINFRA_CG_0_CLR, 0x00000007);
     DRV_WriteReg32(MMINFRA_CONFIG_MMINFRA_CG_1_CLR, 0x00020000);
+
+    /* enable CGs*/
+    /* MMSYS_CONFIG CG Clear*/
+    DRV_WriteReg32(MMSYS_CONFIG_MMSYS_CG_0_CLR, 0xFFFFFFFF);
+    DRV_WriteReg32(MMSYS_CONFIG_MMSYS_CG_1_CLR, 0xFFFFFFFF);
+    DRV_WriteReg32(MMSYS_CONFIG_MMSYS_CG_0_SET, 0xCF8FFFcc);
+    DRV_WriteReg32(MMSYS_CONFIG_MMSYS_CG_1_SET, 0x4);
 #endif
     /* pwm clock source switch */
     DRV_WriteReg32(PERICFG_AO_CLOCK_CON, DRV_Reg32(PERICFG_AO_CLOCK_CON) | 0x1550);
+
+    /* disable display secure register settings */
+    DRV_WriteReg32(MMSYS_DIS_SHADOW, 0x00000001);
+    DRV_WriteReg32(MMSYS_CROSS_SHADOW, 0x00FF0000);
+    DRV_WriteReg32(MMSYS_SECURE, 0xFFFFFFFF);
+    DRV_WriteReg32(MMSYS_SECURE_1, 0xFFFFFFFF);
+    DRV_WriteReg32(MMSYS_SECURE_2, 0xFFFFFFFF);
+    /* set gce select register settings */
+    DRV_WriteReg32(MMSYS_GCE_EVENT_SEL, 0x3);
 
     NOTICE( "Pll init Done!!\n");
 }
