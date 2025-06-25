@@ -1,0 +1,5 @@
+** Build from MediaTek Internal **
+
+# Version 1.0
+1. Initial release.
+365d2eaa6a22673aa4ce422de910d7db *mcupm.bin
