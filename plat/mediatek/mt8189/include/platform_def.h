@@ -170,6 +170,8 @@
 #define CAMSYS_RAWB_BASE                (IO_PHYS + 0x0A06F000)
 #define IPE_BASE                        (IO_PHYS + 0x0B000000)
 #define DVFSRC_TOP_BASE                 (IO_PHYS + 0x0C00F000)
+#define SSPM_SRAM_BASE                  (IO_PHYS + 0x0C300000)
+#define SSPM_CFG_BASE                   (IO_PHYS + 0x0C340000)
 #define GCE_BASE                        (IO_PHYS + 0x0E980000)
 #define MDP_GCE_BASE                    (IO_PHYS + 0x0E990000)
 #define MDPSYS_CONFIG_BASE              (IO_PHYS + 0x0F000000)
