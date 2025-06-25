@@ -13,5 +13,6 @@ BL31_SOURCES += ${MTK_PLAT}/common/mtk_hwid.c \
 
 MODULES-y += $(MTK_PLAT_SOC)/drivers/spmfw
 MODULES-y += $(MTK_PLAT_SOC)/drivers/sspmfw
+MODULES-y += $(MTK_PLAT_SOC)/drivers/dpmfw
 
 endif
