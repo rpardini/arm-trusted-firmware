@@ -1,0 +1,8 @@
+** Build from MediaTek Internal **
+
+# Version 2.0
+1. Support suspend/resume function.
+31ff9acd31e359fbe014aed2650ea0ee *spm_firmware.bin
+
+# Version 1.0
+1. Initial release.
