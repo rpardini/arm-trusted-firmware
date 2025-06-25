@@ -1,0 +1,6 @@
+** Build from MediaTek Internal **
+
+# Version 1.0
+1. Add DRAM suspend/DVFS support.
+6fa9f237daf252cb890fcecf60a0886a *dpm.dm
+97284fe3fbe99329ab7ec0bcca508645 *dpm.pm
