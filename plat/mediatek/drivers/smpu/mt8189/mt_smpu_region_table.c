@@ -10,6 +10,7 @@ const struct smpu_region_info smpu_region_info_table[MAX_REGION_NUM] = {
 		/* NSR */
 		.region_num = 0,
 		.region_perm = {
+			{1, RW}, {8, RW},
 			{15, RW}, {31, RW}, {33, RW}, {56, RW}, {57, RW}, {65, RW},
 			{67, RW}, {68, RW}, {69, RW}, {70, RW}, {71, RW}, {73, RW},
 			{81, RW}, {91, RW}, {97, RW}, {98, RW}, {99, RW}, {101, RW},
@@ -30,13 +31,13 @@ const struct smpu_region_info smpu_region_info_table[MAX_REGION_NUM] = {
 	{
 		/* BL31-reserved */
 		.region_num = 1,
-		.region_perm = {{52, RW}, {240, RW}},
+		.region_perm = {{8, RW}, {52, RW}, {240, RW}},
 		.region_perm_drm = {{240, RW}},
 	},
 	{
 		/* TEE-reserved */
 		.region_num = 2,
-		.region_perm = {{52, RW}, {240, RW}},
+		.region_perm = {{8, RW}, {52, RW}, {240, RW}},
 		.region_perm_drm = {{240, RW}},
 	},
 	{
