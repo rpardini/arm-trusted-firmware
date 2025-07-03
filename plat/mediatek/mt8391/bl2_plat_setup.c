@@ -23,6 +23,7 @@
 #include "pmic_initial_setting.h"
 #include "blkdev/blkdev-mmc.h"
 #include "blkdev/blkdev-ufs.h"
+#include "mminfra.h"
 
 uint32_t g_ddr_reserve_enable;
 uint32_t g_ddr_reserve_success;
@@ -131,6 +132,8 @@ void bl2_platform_setup(void)
 	i2c_hw_init();
 	pmic_init();
 	pmic_initial_setting();
+
+	mminfra_init();
 
 	storage_type = mt_get_storage_type();
 	if (storage_type == STORAGE_EMMC) {
