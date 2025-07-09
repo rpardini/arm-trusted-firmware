@@ -382,7 +382,7 @@ unsigned int mt_get_abist_freq(unsigned int ID)
     {
         udelay(10);
         i++;
-        if(i > 100)
+        if (i > 100)
             break;
     }
 
@@ -432,7 +432,7 @@ static unsigned int mt_get_ckgen_freq(unsigned int ID)
     {
         udelay(10);
         i++;
-        if(i > 100)
+        if (i > 100)
             break;
     }
 
@@ -499,7 +499,7 @@ static unsigned int mt_get_subsys_freq(struct fmeter_data fm_data, unsigned int 
         {
             udelay(10);
             i++;
-            if(i > 100)
+            if (i > 100)
                 break;
         }
     }
@@ -790,9 +790,9 @@ void set_pll_rate(enum PLL_LIST pll_id, uint32_t khz)
 {
     if (pll_id == ARMPLL_LL_RATE)
         set_armpll_ll_rate(khz);
-    else if(pll_id == ARMPLL_BL_RATE)
+    else if (pll_id == ARMPLL_BL_RATE)
         set_armpll_bl_rate(khz);
-    else if(pll_id == CCIPLL_RATE)
+    else if (pll_id == CCIPLL_RATE)
         set_ccipll_rate(khz);
     else
 		return;
@@ -1218,19 +1218,19 @@ void mt_pll_init(void)
     spm_mtcmos_ctrl_audio(STA_POWER_ON);
     INFO("audio mtcmos Done!\n");
 
-    if(!(ucSpare1 & EFUSE_MTCMOS_ADSP_AO_DIS_S1B17)) {
+    if (!(ucSpare1 & EFUSE_MTCMOS_ADSP_AO_DIS_S1B17)) {
         INFO("adsp_ao mtcmos Start..\n");
         spm_mtcmos_ctrl_adsp_ao(STA_POWER_ON);
         INFO("adsp_ao mtcmos Done!\n");
     }
 
-    if(!(ucSpare1 & EFUSE_MTCMOS_ADSP_INFRA_DIS_S1B16)) {
+    if (!(ucSpare1 & EFUSE_MTCMOS_ADSP_INFRA_DIS_S1B16)) {
         INFO("adsp_infra mtcmos Start..\n");
         spm_mtcmos_ctrl_adsp_infra(STA_POWER_ON);
         INFO("adsp_infra mtcmos Done!\n");
     }
 
-    if(!(ucSpare1 & EFUSE_MTCMOS_ADSP_TOP_DIS_S1B15)) {
+    if (!(ucSpare1 & EFUSE_MTCMOS_ADSP_TOP_DIS_S1B15)) {
         INFO("adsp_top_shutdown mtcmos Start..\n");
         spm_mtcmos_ctrl_adsp_top_shutdown(STA_POWER_ON);
         INFO("adsp_top_shutdown mtcmos Done!\n");
@@ -1240,19 +1240,19 @@ void mt_pll_init(void)
     spm_mtcmos_ctrl_mm_infra(STA_POWER_ON);
     INFO("mm_infra mtcmos Done!\n");
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_ISP_IMG1_DIS_S2B18)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_ISP_IMG1_DIS_S2B18)) {
         INFO("isp_img1 mtcmos Start..\n");
         spm_mtcmos_ctrl_isp_img1(STA_POWER_ON);
         INFO("isp_img1 mtcmos Done!\n");
     }
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_ISP_IMG2_DIS_S2B19)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_ISP_IMG2_DIS_S2B19)) {
         INFO("isp_img2 mtcmos Start..\n");
         spm_mtcmos_ctrl_isp_img2(STA_POWER_ON);
         INFO("isp_img2 mtcmos Done!\n");
     }
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_ISP_IPE_DIS_S2B20)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_ISP_IPE_DIS_S2B20)) {
         INFO("isp_ipe mtcmos Start..\n");
         spm_mtcmos_ctrl_isp_ipe(STA_POWER_ON);
         INFO("isp_ipe mtcmos Done!\n");
@@ -1266,19 +1266,19 @@ void mt_pll_init(void)
     spm_mtcmos_ctrl_ven0(STA_POWER_ON);
     INFO("ven0 mtcmos Done!\n");
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_CAM_MAIN_DIS_S2B23)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_CAM_MAIN_DIS_S2B23)) {
         INFO("cam_main mtcmos Start..\n");
         spm_mtcmos_ctrl_cam_main(STA_POWER_ON);
         INFO("cam_main mtcmos Done!\n");
     }
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_CAM_RAWA_DIS_S2B21)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_CAM_RAWA_DIS_S2B21)) {
         INFO("cam_suba mtcmos Start..\n");
         spm_mtcmos_ctrl_cam_suba(STA_POWER_ON);
         INFO("cam_suba mtcmos Done!\n");
     }
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_CAM_RAWB_DIS_S2B22)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_CAM_RAWB_DIS_S2B22)) {
         INFO("cam_subb mtcmos Start..\n");
         spm_mtcmos_ctrl_cam_subb(STA_POWER_ON);
         INFO("cam_subb mtcmos Done!\n");
@@ -1292,55 +1292,55 @@ void mt_pll_init(void)
     spm_mtcmos_ctrl_disp(STA_POWER_ON);
     INFO("disp mtcmos Done!\n");
 
-    if(!(ucSpare1 & EFUSE_MTCMOS_DPTX_DIS_S1B10)) {
+    if (!(ucSpare1 & EFUSE_MTCMOS_DPTX_DIS_S1B10)) {
         INFO("dp_tx mtcmos Start..\n");
         spm_mtcmos_ctrl_dp_tx(STA_POWER_ON);
         INFO("dp_tx mtcmos Done!\n");
     }
 
-    if(!(ucSpare4 & EFUSE_MTCMOS_CSI_DIS_S4B27)) {
+    if (!(ucSpare4 & EFUSE_MTCMOS_CSI_DIS_S4B27)) {
         INFO("csi_rx mtcmos Start..\n");
         spm_mtcmos_ctrl_csi_rx(STA_POWER_ON);
         INFO("csi_rx mtcmos Done!\n");
     }
 
-    if(!(ucSpare4 & EFUSE_MTCMOS_SSUSB_DIS_S4B26)) {
+    if (!(ucSpare4 & EFUSE_MTCMOS_SSUSB_DIS_S4B26)) {
         INFO("ssusb mtcmos Start..\n");
         spm_mtcmos_ctrl_ssusb(STA_POWER_ON);
         INFO("ssusb mtcmos Done!\n");
     }
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_MFG0_DIS_S2B0)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_MFG0_DIS_S2B0)) {
         INFO("mfg0 mtcmos Start..\n");
         spm_mtcmos_ctrl_mfg0(STA_POWER_ON);
         INFO("mfg0 mtcmos Done!\n");
     }
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_MFG1_DIS_S2B1)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_MFG1_DIS_S2B1)) {
         INFO("mfg1 mtcmos Start..\n");
         spm_mtcmos_ctrl_mfg1(STA_POWER_ON);
         INFO("mfg1 mtcmos Done!\n");
     }
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_MFG2_DIS_S2B2)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_MFG2_DIS_S2B2)) {
         INFO("mfg2 mtcmos Start..\n");
         spm_mtcmos_ctrl_mfg2(STA_POWER_ON);
         INFO("mfg2 mtcmos Done!\n");
     }
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_MFG3_DIS_S2B3)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_MFG3_DIS_S2B3)) {
         INFO("mfg3 mtcmos Start..\n");
         spm_mtcmos_ctrl_mfg3(STA_POWER_ON);
         INFO("mfg3 mtcmos Done!\n");
     }
 
-    if(!(ucSpare2 & EFUSE_MTCMOS_EDPTX_DIS_S2B15)) {
+    if (!(ucSpare2 & EFUSE_MTCMOS_EDPTX_DIS_S2B15)) {
         INFO("edp_tx_shutdown mtcmos Start..\n");
         spm_mtcmos_ctrl_edp_tx_shutdown(STA_POWER_ON);
         INFO("edp_tx_shutdown mtcmos Done!\n");
     }
 
-    if(!(ucSpare3 & EFUSE_MTCMOS_PCIE_DIS_S3B24)) {
+    if (!(ucSpare3 & EFUSE_MTCMOS_PCIE_DIS_S3B24)) {
         INFO("pcie mtcmos Start..\n");
         spm_mtcmos_ctrl_pcie(STA_POWER_ON);
         INFO("pcie mtcmos Done!\n");
@@ -1382,12 +1382,9 @@ void mt_pll_init(void)
     /* SCP CG Clear*/
     DRV_WriteReg32(SCP_AP_SPI_CG, DRV_Reg32(SCP_AP_SPI_CG) | 0x00000003);
     /* VAD CG Clear*/
-    if(!(ucSpare1 & EFUSE_MTCMOS_ADSP_AO_DIS_S1B17)) {
+    if (!(ucSpare1 & EFUSE_MTCMOS_ADSP_AO_DIS_S1B17))
         DRV_WriteReg32(VAD_VADSYS_CK_EN, DRV_Reg32(VAD_VADSYS_CK_EN) | 0x0001003D);
-        DRV_WriteReg32(VAD_VOW_AUDIODSP_SW_CG, DRV_Reg32(VAD_VOW_AUDIODSP_SW_CG) & ~(0x00000024));
-    }
-    /* IPE CG Clear*/
-    DRV_WriteReg32(IPE_IMG_CG_CLR, 0x0000013F);
+
     /* VLPCFG_AO_REG CG Clear*/
     DRV_WriteReg32(VLPCFG_AO_REG_DEBUGTOP_VLPAO_CTRL, DRV_Reg32(VLPCFG_AO_REG_DEBUGTOP_VLPAO_CTRL) & ~(0x00000100));
     /* VLPCFG_REG CG Clear*/
@@ -1426,13 +1423,13 @@ void mt_pll_init(void)
     DRV_WriteReg32(MDP_GCE_GCE_CTL_INT0, DRV_Reg32(MDP_GCE_GCE_CTL_INT0) & ~(0x00010000));
 
     /* IMGSYS1 CG Clear*/
-    if(!(ucSpare2 & EFUSE_MTCMOS_ISP_IMG1_DIS_S2B18))
+    if (!(ucSpare2 & EFUSE_MTCMOS_ISP_IMG1_DIS_S2B18))
         DRV_WriteReg32(IMGSYS1_IMG_CG_CLR, 0x00001007);
     /* IMGSYS2 CG Clear*/
-    if(!(ucSpare2 & EFUSE_MTCMOS_ISP_IMG2_DIS_S2B19))
+    if (!(ucSpare2 & EFUSE_MTCMOS_ISP_IMG2_DIS_S2B19))
         DRV_WriteReg32(IMGSYS2_IMG_CG_CLR, 0x000011C3);
     /* IPE CG Clear*/
-    if(!(ucSpare2 & EFUSE_MTCMOS_ISP_IPE_DIS_S2B20))
+    if (!(ucSpare2 & EFUSE_MTCMOS_ISP_IPE_DIS_S2B20))
         DRV_WriteReg32(IPE_IMG_CG_CLR, 0x0000013F);
     /* VDEC_CORE CG Clear*/
     DRV_WriteReg32(VDEC_CORE_LARB_CKEN_CON, DRV_Reg32(VDEC_CORE_LARB_CKEN_CON) | 0x00000001);
@@ -1440,22 +1437,24 @@ void mt_pll_init(void)
     /* VENC_GCON CG Clear*/
     DRV_WriteReg32(VENC_GCON_VENCSYS_CG_SET, 0x90011111);
     /* CAMSYS_MAIN CG Clear*/
-    if(!(ucSpare2 & EFUSE_MTCMOS_CAM_MAIN_DIS_S2B23))
+    if (!(ucSpare2 & EFUSE_MTCMOS_CAM_MAIN_DIS_S2B23))
         DRV_WriteReg32(CAMSYS_MAIN_CAMSYS_CG_CLR, 0x003A1DC5);
     /* CAMSYS_RAWA CG Clear*/
-    if(!(ucSpare2 & EFUSE_MTCMOS_CAM_RAWA_DIS_S2B21))
+    if (!(ucSpare2 & EFUSE_MTCMOS_CAM_RAWA_DIS_S2B21))
         DRV_WriteReg32(CAMSYS_RAWA_CAMSYS_CG_CLR, 0x00000007);
     /* CAMSYS_RAWB CG Clear*/
-    if(!(ucSpare2 & EFUSE_MTCMOS_CAM_RAWB_DIS_S2B22))
+    if (!(ucSpare2 & EFUSE_MTCMOS_CAM_RAWB_DIS_S2B22))
         DRV_WriteReg32(CAMSYS_RAWB_CAMSYS_CG_CLR, 0x00000007);
     /* MMSYS_CONFIG CG Clear*/
     DRV_WriteReg32(MMSYS_CONFIG_MMSYS_CG_0_CLR, 0xFF7FFFFF);
     DRV_WriteReg32(MMSYS_CONFIG_MMSYS_CG_1_CLR, 0x0000007B);
     /* MFG CG Clear*/
-    DRV_WriteReg32(MFG_MFG_CG_CON_CLR, 0x00000001);
+    if (!(ucSpare2 & EFUSE_MTCMOS_MFG0_DIS_S2B0))
+        DRV_WriteReg32(MFG_MFG_CG_CON_CLR, 0x00000001);
     INFO("subsysCG enable done...\n");
 #else
-    /* enable CGs*/
+    DRV_WriteReg32(MMINFRA_CONFIG_MMINFRA_CG_0_CLR, 0x00000007);
+    DRV_WriteReg32(MMINFRA_CONFIG_MMINFRA_CG_1_CLR, 0x00020000);
 #endif
     /* pwm clock source switch */
     DRV_WriteReg32(PERICFG_AO_CLOCK_CON, DRV_Reg32(PERICFG_AO_CLOCK_CON) | 0x1550);

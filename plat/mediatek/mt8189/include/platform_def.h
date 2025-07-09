@@ -227,6 +227,8 @@
 #define CIRQ_IRQ_NUM            598
 
 #define DBGSYS_BASE             (0x0D000000)
+#define DBGAO_BASE              (0x0D01A000)
+#define DEM_BASE                (0x0D0A0000)
 
 /*******************************************************************************
  * Systracker related constants
