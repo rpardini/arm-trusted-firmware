@@ -11,6 +11,7 @@ HUK_EFUSE_HWID := 1
 $(eval $(call add_define,HUK_EFUSE_HWID))
 BL31_SOURCES += ${MTK_PLAT}/common/mtk_hwid.c \
 
+MODULES-y += $(MTK_PLAT_SOC)/drivers/cpudvfs
 MODULES-y += $(MTK_PLAT_SOC)/drivers/spmfw
 MODULES-y += $(MTK_PLAT_SOC)/drivers/sspmfw
 MODULES-y += $(MTK_PLAT_SOC)/drivers/dpmfw
