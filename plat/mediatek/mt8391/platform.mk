@@ -73,5 +73,6 @@ else	# bl31
 
 override PLAT := mt8189
 include plat/mediatek/${PLAT}/platform.mk
+BL31_LIBS += ${LIBBASE}
 
 endif

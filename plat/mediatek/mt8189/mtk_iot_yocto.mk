@@ -6,11 +6,13 @@
 
 ifeq (${MTK_IOT_YOCTO},1)
 
-# TODO: remove after libbase done
-HUK_EFUSE_HWID := 1
+# Use the EFUSE HWID as HUK
+# Warning: Unsafe for secure storage
+ifeq (${HUK_EFUSE_HWID},1)
 $(eval $(call add_define,HUK_EFUSE_HWID))
-BL31_SOURCES += ${MTK_PLAT}/common/mtk_hwid.c \
+endif
 
+MODULES-y += $(MTK_PLAT_SOC)/drivers/binfo
 MODULES-y += $(MTK_PLAT_SOC)/drivers/cpudvfs
 MODULES-y += $(MTK_PLAT_SOC)/drivers/spmfw
 MODULES-y += $(MTK_PLAT_SOC)/drivers/sspmfw
