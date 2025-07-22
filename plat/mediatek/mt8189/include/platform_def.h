@@ -449,12 +449,6 @@
  * TRNG related constants
  ******************************************************************************/
 #define TRNG_BASE           (IO_PHYS + 0x00221000)
-#define MTK_TRNG_REG_SIZE   (0x1000)
-#define RNG_DEFAULT_CUTOFF  (0x09C8AE1A)
-
-/* External swrst */
-#define TRNG_SWRST_STA_REG  (INFRACFG_AO_BASE + 0x34)
-#define RNG_SWRST_B         BIT(5)
 
 /*******************************************************************************
  * CKSYS related constants

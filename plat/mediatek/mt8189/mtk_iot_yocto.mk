@@ -14,6 +14,7 @@ endif
 
 MODULES-y += $(MTK_PLAT_SOC)/drivers/binfo
 MODULES-y += $(MTK_PLAT_SOC)/drivers/cpudvfs
+MODULES-y += $(MTK_PLAT_SOC)/drivers/rng
 MODULES-y += $(MTK_PLAT_SOC)/drivers/spmfw
 MODULES-y += $(MTK_PLAT_SOC)/drivers/sspmfw
 MODULES-y += $(MTK_PLAT_SOC)/drivers/dpmfw
