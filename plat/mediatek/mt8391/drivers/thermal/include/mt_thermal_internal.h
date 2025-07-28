@@ -183,9 +183,6 @@ static struct mtk_infracfg_regs *const
 static struct mtk_infracfg_ao_regs *const
 	mtk_infracfg_ao  = (void *)INFRACFG_AO_BASE;
 
-static struct mtk_efusec_regs *const
-	mtk_efusec = (void *)EFUSEC_BASE;
-
 struct mtk_thermal_controller_regs {
 	uint32_t lvtsmonctl0_0;
 	uint32_t lvtsmonctl1_0;
@@ -259,10 +256,4 @@ struct mtk_infracfg_ao_regs {
 };
 
 check_member(mtk_infracfg_ao_regs, therm_module_sw_cg_0_clr, 0x0084);
-
-struct mtk_efusec_regs {
-	uint32_t reserved1[105];
-	uint32_t lvts_address_index_addr[LVTS_ADDRESS_INDEX_NUM];
-};
-check_member(mtk_efusec_regs, lvts_address_index_addr, 0x01A4);
 #endif /* __SOC_MEDIATEK_MT8189_INCLUDE_SOC_MT_THERMAL_INTERNAL_H__ */

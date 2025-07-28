@@ -309,56 +309,57 @@ static void lvts_device_enable_init_all_devices(void)
 
 static void lvts_thermal_cal_prepare(void)
 {
-	uint32_t temp[LVTS_ADDRESS_INDEX_NUM];
+	uint32_t *temp;
 	uint32_t i, cnt;
 	int lvts_coef_a;
 
-	for (i = 0, cnt = 0; i < ARRAY_SIZE(temp); i++) {
-		temp[i] = read32(&mtk_efusec->lvts_address_index_addr[i]);
+	mtk_plat_get_lvts_raw(&temp, LVTS_ADDRESS_INDEX_NUM);
+
+	for (i = 0, cnt = 0; i < LVTS_ADDRESS_INDEX_NUM; i++) {
 		printf("[lvts_cali] %d: 0x%x\n", i, temp[i]);
 
 		if (temp[i] == 0)
 			cnt++;
 	}
 
-	/*0x11F1_01A4,LVTS1*/
+	/*LVTS1*/
 	g_cali_mode = ((temp[0] & GENMASK(31, 31)) >> 31);
 	g_golden_temp_ht = ((temp[0] & GENMASK(15, 8)) >> 8);
 	g_golden_temp = (temp[0] & GENMASK(7, 0));
 
-	g_count_r[L_TS_LVTS1_0] = (temp[1] & GENMASK(23, 0)); /*0x11F1_01A8,LVTS1_0*/
-	g_count_r[L_TS_LVTS1_1] = (temp[2] & GENMASK(23, 0)); /*0x11F1_01AC,LVTS1_1*/
-	g_count_r[L_TS_LVTS1_2] = (temp[3] & GENMASK(23, 0)); /*0x11F1_01B0,LVTS1_2*/
-	g_count_r[L_TS_LVTS1_3] = (temp[4] & GENMASK(23, 0)); /*0x11F1_01B4,LVTS1_3*/
-	g_count_r[L_TS_LVTS2_0] = (temp[6] & GENMASK(23, 0)); /*0x11F1_01BC,LVTS2_0*/
-	g_count_r[L_TS_LVTS2_1] = (temp[7] & GENMASK(23, 0)); /*0x11F1_01C0,LVTS2_1*/
-	g_count_r[L_TS_LVTS2_2] = (temp[8] & GENMASK(23, 0)); /*0x11F1_01C4,LVTS2_2*/
-	g_count_r[L_TS_LVTS2_3] = (temp[9] & GENMASK(23, 0)); /*0x11F1_01C8,LVTS2_3*/
-	g_count_r[L_TS_LVTS3_0] = (temp[11] & GENMASK(23, 0)); /*0x11F1_01D0,LVTS3_0*/
-	g_count_r[L_TS_LVTS3_1] = (temp[12] & GENMASK(23, 0)); /*0x11F1_01D4,LVTS3_1*/
-	g_count_r[L_TS_LVTS3_2] = (temp[13] & GENMASK(23, 0)); /*0x11F1_01D8,LVTS3_2*/
-	g_count_r[L_TS_LVTS3_3] = (temp[14] & GENMASK(23, 0)); /*0x11F1_01DC,LVTS3_3*/
-	g_count_r[L_TS_LVTS4_0] = (temp[16] & GENMASK(23, 0)); /*0x11F1_01E4,LVTS4_0*/
-	g_count_r[L_TS_LVTS4_1] = (temp[17] & GENMASK(23, 0)); /*0x11F1_01E8,LVTS4_1*/
-	g_count_r[L_TS_LVTS4_2] = (temp[18] & GENMASK(23, 0)); /*0x11F1_01EC,LVTS4_2*/
-	g_count_r[L_TS_LVTS4_3] = (temp[19] & GENMASK(23, 0)); /*0x11F1_01F0,LVTS4_3*/
-	g_count_r[L_TS_LVTS5_0] = (temp[21] & GENMASK(23, 0)); /*0x11F1_01EC,LVTS5_0*/
-	g_count_r[L_TS_LVTS5_1] = (temp[22] & GENMASK(23, 0)); /*0x11F1_01F0,LVTS5_1*/
+	g_count_r[L_TS_LVTS1_0] = (temp[1] & GENMASK(23, 0)); /*LVTS1_0*/
+	g_count_r[L_TS_LVTS1_1] = (temp[2] & GENMASK(23, 0)); /*LVTS1_1*/
+	g_count_r[L_TS_LVTS1_2] = (temp[3] & GENMASK(23, 0)); /*LVTS1_2*/
+	g_count_r[L_TS_LVTS1_3] = (temp[4] & GENMASK(23, 0)); /*LVTS1_3*/
+	g_count_r[L_TS_LVTS2_0] = (temp[6] & GENMASK(23, 0)); /*LVTS2_0*/
+	g_count_r[L_TS_LVTS2_1] = (temp[7] & GENMASK(23, 0)); /*LVTS2_1*/
+	g_count_r[L_TS_LVTS2_2] = (temp[8] & GENMASK(23, 0)); /*LVTS2_2*/
+	g_count_r[L_TS_LVTS2_3] = (temp[9] & GENMASK(23, 0)); /*LVTS2_3*/
+	g_count_r[L_TS_LVTS3_0] = (temp[11] & GENMASK(23, 0)); /*LVTS3_0*/
+	g_count_r[L_TS_LVTS3_1] = (temp[12] & GENMASK(23, 0)); /*LVTS3_1*/
+	g_count_r[L_TS_LVTS3_2] = (temp[13] & GENMASK(23, 0)); /*LVTS3_2*/
+	g_count_r[L_TS_LVTS3_3] = (temp[14] & GENMASK(23, 0)); /*LVTS3_3*/
+	g_count_r[L_TS_LVTS4_0] = (temp[16] & GENMASK(23, 0)); /*LVTS4_0*/
+	g_count_r[L_TS_LVTS4_1] = (temp[17] & GENMASK(23, 0)); /*LVTS4_1*/
+	g_count_r[L_TS_LVTS4_2] = (temp[18] & GENMASK(23, 0)); /*LVTS4_2*/
+	g_count_r[L_TS_LVTS4_3] = (temp[19] & GENMASK(23, 0)); /*LVTS4_3*/
+	g_count_r[L_TS_LVTS5_0] = (temp[21] & GENMASK(23, 0)); /*LVTS5_0*/
+	g_count_r[L_TS_LVTS5_1] = (temp[22] & GENMASK(23, 0)); /*LVTS5_1*/
 
-	/*0x11F1_01A4,LVTS1*/
+	/*LVTS1*/
 	g_count_rc[LVTS_MCU_CONTROLLER0] = ((temp[0] & GENMASK(31, 8)) >> 8);
-	/*0x11F1_01B8,LVTS2*/
+	/*LVTS2*/
 	g_count_rc[LVTS_MCU_CONTROLLER1] = (temp[5] & GENMASK(23, 0));
-	/*0x11F1_01CC,LVTS3*/
+	/*LVTS3*/
 	g_count_rc[LVTS_MCU_CONTROLLER2] = (temp[10] & GENMASK(23, 0));
 
-	/*0x11F1_01E0,LVTS4*/
+	/*LVTS4*/
 	g_count_rc[LVTS_AP_CONTROLLER0] = (temp[15] & GENMASK(23, 0));
 
-	/*0x11F1_01F4,LVTS5*/
+	/*LVTS5*/
 	g_count_rc[LVTS_MFG_CONTROLLER0] = (temp[20] & GENMASK(23, 0));
 
-	if (cnt == ARRAY_SIZE(temp)) {
+	if (cnt == LVTS_ADDRESS_INDEX_NUM) {
 		/* It means all efuse data are equal to 0 */
 		printf("[lvts_cal] This sample is not calibrated, fake !!\n");
 		g_golden_temp = DEFAULT_EFUSE_GOLDEN_TEMP;

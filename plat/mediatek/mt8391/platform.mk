@@ -68,6 +68,7 @@ MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/mtcmos
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/pmic
 
 include plat/mediatek/build_helpers/mtk_build_helpers_epilogue.mk
+BL2_LIBS += ${LIBBASE}
 
 else	# bl31
 
