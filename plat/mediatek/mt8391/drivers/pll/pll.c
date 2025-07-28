@@ -826,20 +826,24 @@ void mt_set_topck_default(void)
     DRV_WriteReg32(CLK_CFG_UPDATE2, 0x0000FFFF);
 }
 
+int mtk_plat_get_spare_id(uint32_t **spid);
+
 void mt_pll_init(void)
 {
     unsigned int temp;
     unsigned int ucSpare0 = 0, ucSpare1 = 0, ucSpare2 = 0, ucSpare3 = 0, ucSpare4 = 0;
+    unsigned int *pSpare = NULL;
 
-    ucSpare0 = 0x440000;
-    ucSpare1 = 0x1C000;
-    ucSpare2 = 0x400000;
-    ucSpare3 = 0x400;
-    ucSpare4 = 0x3200003;
+    mtk_plat_get_spare_id(&pSpare);
+    ucSpare0 = pSpare[0];
+    ucSpare1 = pSpare[1];
+    ucSpare2 = pSpare[2];
+    ucSpare3 = pSpare[3];
+    ucSpare4 = pSpare[4];
 
     NOTICE( "Pll init start...\n");
 
-    INFO("ucSpare0=%x, ucSpare1=%x, ucSpare2=%x, ucSpare3=%x, ucSpare4=%x\n",
+    NOTICE("ucSpare0=%x, ucSpare1=%x, ucSpare2=%x, ucSpare3=%x, ucSpare4=%x\n",
           ucSpare0, ucSpare1, ucSpare2, ucSpare3, ucSpare4);
     spm_power_on();
 
