@@ -56,7 +56,7 @@ static int mtk_iommu_initial_banks_hw(struct iommu_pgtable *pgt)
 	unsigned int i, nr, mmu_id;
 
 	if (!pgt->mmu_bank_msk) {
-		ERROR("[iommu_ptbl] %s: fail (pgd 0x%llx|0x%x)\n",
+		ERROR("[iommu_ptbl] %s: fail (pgd 0x%lx|0x%x)\n",
 		      __func__, pgt->pgd_pa, pgt->pgd_size);
 		return -EFAULT;
 	}
@@ -79,7 +79,9 @@ static int mtk_iommu_initial_banks_hw(struct iommu_pgtable *pgt)
 		mmio_write_32(bank_base + MMU_INT_CONTROL0,
 			      (F_INT_CLR_BIT | F_INT_CTRL0_MSK));
 		mmio_write_32(bank_base + MMU_INT_CONTROL1, F_REG_MMU_INT_MASK);
-
+#ifdef ATF_MTK_IOMMU_SR_INFO_SUPPORT
+		mmio_write_32(bank_base + REG_MMU_TEE_SRINFO, F_MMU_SRINFO_VAL);
+#endif
 		DEBUG_LOG("[iommu_ptbl] iommu.%x is inited (pgt 0x%x)\n",
 			  bank_base, mmio_read_32(bank_base + MMU_PT_BASE_ADDR));
 	}
@@ -134,8 +136,11 @@ static void mtk_iommu_map_reserved_mem(struct iommu_reserved_mem *resv_mem,
 	uint64_t iova = resv_mem->iova, pa = resv_mem->pa, mapped_size = 0ULL;
 	uint32_t is_ns = (IOMMU_GET_MEM_TYPE(resv_mem->type) == SECURE_MEM) ?
 			 0 : 1;
-
+#ifdef ATF_MTK_IOMMU_SR_INFO_SUPPORT
+	pgd_dsc_msk = F_PGD_NS_BIT_SECTION(is_ns) | F_PGD_TYPE_SECTION | SEC_SR_INFO;
+#else
 	pgd_dsc_msk = F_PGD_NS_BIT_SECTION(is_ns) | F_PGD_TYPE_SECTION;
+#endif
 	pgd_entry = pgt->pgd_base + mmu_pgd_index(iova);
 
 	while (mapped_size < resv_mem->size) {
@@ -173,7 +178,7 @@ uint64_t mtk_iommu_linear_secure_map(uint64_t mem_pa, uint64_t mem_size,
 
 		if ((g_mmu_resv_mem[idx].pa != 0) ||
 		    (g_mmu_resv_mem[idx].max_size < mem_size)) {
-			ERROR("[iommu_ptbl] %s: conflict 0x%llx|0x%llx:0x%llx\n",
+			ERROR("[iommu_ptbl] %s: conflict 0x%lx|0x%lx:0x%lx\n",
 			      __func__, g_mmu_resv_mem[idx].pa,
 			      g_mmu_resv_mem[idx].size,
 			      g_mmu_resv_mem[idx].max_size);
@@ -210,7 +215,7 @@ uint64_t mtk_iommu_linear_secure_map(uint64_t mem_pa, uint64_t mem_size,
 	return resv_mem->iova;
 
 map_fail:
-	ERROR("[iommu_ptbl] %s: map %u(0x%llx|0x%llx-%u:%u) fail\n",
+	ERROR("[iommu_ptbl] %s: map %u(0x%lx|0x%lx-%u:%u) fail\n",
 	      __func__, idx, mem_pa, mem_size, mem_type, mod_id);
 
 	return 0ULL;
