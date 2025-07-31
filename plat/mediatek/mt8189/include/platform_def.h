@@ -369,9 +369,6 @@
 #define SPM_BASE                (IO_PHYS + 0x0C001000)
 #define SPM_REG_SIZE            (0x1000)
 
-#define EFUSEC_BASE             (IO_PHYS + 0x01F10000)
-#define EFUSE_SIZE              0x1000
-
 #define SPM_VLP_MCUSYS_PWR_CON	           (SPM_BASE + 0x260)
 #define SPM_VLP_MP0_CPUTOP_PWR_CON         (SPM_BASE + 0x264)
 #define SPM_VLP_CPU0_PWR_CON               (SPM_BASE + 0x268)

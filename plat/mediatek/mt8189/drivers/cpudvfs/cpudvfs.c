@@ -14,8 +14,9 @@
 
 __attribute__((weak)) uint32_t get_cpu_segment_id(void)
 {
-	uint32_t id = mmio_read_32(EFUSEC_BASE + 0x7E0);
+	uint32_t id = 0;
 
+	mtk_plat_get_segment_id(&id);
 	NOTICE("CPU Segment ID: 0x%x\n", id);
 
 	return id;
