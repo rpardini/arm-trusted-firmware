@@ -1,8 +1,7 @@
 ** Build from MediaTek Internal **
 
 # Version 2.0
-1. Support AOC feature in suspend/resume scenarios.
-d009bf8ebd913be709807ae88f7ca388 *sspm.bin
+1. Support mminfra feature in suspend/resume scenarios.
 
 # Version 1.0
 1. Initial release.
