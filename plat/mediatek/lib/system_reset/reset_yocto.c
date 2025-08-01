@@ -11,8 +11,12 @@
 #include <lib/mtk_init/mtk_init.h>
 #include <lib/pm/mtk_pm.h>
 #include <plat_params.h>
+#if CONFIG_MTK_PMIC_SHUTDOWN_CFG
+#include <drivers/pmic/pmic_psc.h>
+#else
 #include <pmic.h>
 #include <rtc.h>
+#endif
 #include <mtk_rgu.h>
 
 static void __dead2 mtk_system_reset_yocto(void)
@@ -32,7 +36,13 @@ static void __dead2 mtk_system_off_yocto(void)
 
 	plat_rgu_request_dis(MTK_WDT_REQ_MODE_SYSRST);
 	rtc_power_off_sequence();
+
+#if CONFIG_MTK_PMIC_SHUTDOWN_CFG
+	platform_power_hold(false);
+	mdelay(1000);
+#else
 	pmic_power_off();
+#endif
 
 	wfi();
 	ERROR("MTK System Off: operation not handled.\n");
