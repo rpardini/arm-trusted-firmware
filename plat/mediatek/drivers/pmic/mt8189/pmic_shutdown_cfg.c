@@ -62,14 +62,18 @@ static void shutdown_slave_dev(struct spmi_device *dev)
 int spmi_shutdown(void)
 {
 	struct spmi_device *mt6319_sdev;
+	uint32_t partid = 0;
+	uint32_t segid = 0;
+
+	mtk_plat_get_partid(&partid);
+	mtk_plat_get_segment_id(&segid);
 
 	mt6319_sdev = get_spmi_device(SPMI_MASTER_P_1, SPMI_SLAVE_7);
 	if (!mt6319_sdev)
 		return -ENODEV;
 	shutdown_slave_dev(mt6319_sdev);
 
-	if (mmio_read_32((uintptr_t)CHIP_ID_REG) == MTK_CPU_ID_MT8189 &&
-	    mmio_read_32((uintptr_t)CPU_SEG_ID_REG) == MTK_CPU_SEG_ID_MT8189H) {
+	if ((partid == MTK_CPU_ID_MT8189 && segid == MTK_CPU_SEG_ID_MT8189H)) {
 		mt6319_sdev = get_spmi_device(SPMI_MASTER_P_1, SPMI_SLAVE_8);
 		if (!mt6319_sdev)
 			return -ENODEV;
