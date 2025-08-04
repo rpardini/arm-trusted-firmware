@@ -168,7 +168,8 @@ int platform_pmif_spmi_init(void)
 	mtk_plat_get_partid(&partid);
 	mtk_plat_get_segment_id(&segid);
 
-	if ((partid == MTK_CPU_ID_MT8189 && segid == MTK_CPU_SEG_ID_MT8189G))
+	if ((partid == MTK_CPU_ID_MT8189 && segid == MTK_CPU_SEG_ID_MT8189G) ||
+	    (partid == MTK_CPU_ID_MT8391))
 		spmi_device_register(spmi_dev, 1);
 	else
 		spmi_device_register(spmi_dev, ARRAY_SIZE(spmi_dev));

@@ -705,4 +705,6 @@
 #define MTK_CPU_SEG_ID_MT8189G		0x20
 #define MTK_CPU_SEG_ID_MT8189H		0x21
 
+#define MTK_CPU_ID_MT8391		0x8391
+
 #endif /* PLATFORM_DEF_H */
