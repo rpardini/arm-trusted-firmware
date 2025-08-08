@@ -53,6 +53,11 @@ else
 PLAT_PARTITION_BLOCK_SIZE := 512
 endif
 
+ifeq (${PLAT_HW_CRYPTO},1)
+BL2_LIBS += ${MTK_PLAT}/lib/crypt/libarmcrypt.a
+$(eval $(call add_define,PLAT_HW_CRYPTO))
+endif
+
 $(eval $(call add_define,PLAT_PARTITION_BLOCK_SIZE))
 
 MODULES-BL2-y				+= $(MTK_PLAT)/drivers/uart
@@ -68,6 +73,7 @@ MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/mtcmos
 MODULES-BL2-y				+= ${MTK_PLAT_SOC}/drivers/pmic
 
 include plat/mediatek/build_helpers/mtk_build_helpers_epilogue.mk
+include ${MTK_PLAT}/secure-boot.mk
 BL2_LIBS += ${LIBBASE}
 
 else	# bl31
