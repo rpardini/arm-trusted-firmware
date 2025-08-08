@@ -155,9 +155,10 @@ const struct smpu_region_info smpu_region_info_table[MAX_REGION_NUM] = {
 		.region_perm_drm = {{240, RW}, {241, RW}},
 	},
 	{
+		/* apu_apusys_load */
 		.region_num = 25,
-		.region_perm = {},
-		.region_perm_drm = {},
+		.region_perm = {{240, RW}, {241, READ}},
+		.region_perm_drm = {{240, RW}, {241, READ}},
 	},
 	{
 		.region_num = 26,
