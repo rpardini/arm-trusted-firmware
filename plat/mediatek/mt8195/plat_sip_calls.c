@@ -43,9 +43,13 @@ uintptr_t mediatek_plat_sip_handler(uint32_t smc_fid,
 		ret = dfd_smc_dispatcher(x1, x2, x3, x4);
 		SMC_RET1(handle, ret);
 		break;
-	case MTK_SIP_PARTNAME_ID_AARCH32:
-	case MTK_SIP_PARTNAME_ID_AARCH64:
-		ret = mtk_plat_get_partid(&ret_val);
+	case MTK_SIP_PLAT_BINFO_AARCH32:
+	case MTK_SIP_PLAT_BINFO_AARCH64:
+		if (x1) {
+			ret = MTK_SIP_E_INVALID_PARAM;
+			ret_val = 0;
+		} else
+			ret = mtk_plat_get_partid(&ret_val);
 		SMC_RET2(handle, ret, ret_val);
 		break;
 	case MTK_SIP_IOMMU_CONTROL_AARCH32:
