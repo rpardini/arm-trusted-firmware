@@ -28,4 +28,4 @@ static u_register_t mtk_binfo_handler(u_register_t arg0, u_register_t arg1,
 	}
 	return ret;
 }
-DECLARE_SMC_HANDLER(MTK_SIP_PARTNAME_ID, mtk_binfo_handler);
+DECLARE_SMC_HANDLER(MTK_SIP_PLAT_BINFO, mtk_binfo_handler);
