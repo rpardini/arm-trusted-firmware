@@ -7,6 +7,7 @@
 
 enum PLAT_BINFO {
 	PLAT_BINFO_PART = 0,
+	PLAT_BINFO_SEGM,
 };
 
 static u_register_t mtk_binfo_handler(u_register_t arg0, u_register_t arg1,
@@ -21,10 +22,14 @@ static u_register_t mtk_binfo_handler(u_register_t arg0, u_register_t arg1,
 		ret = mtk_plat_get_partid(&ret_val);
 		res->a1 = ret_val;
 		break;
+	case PLAT_BINFO_SEGM:
+		ret = mtk_plat_get_segment_id(&ret_val);
+		res->a1 = ret_val;
+		break;
 	default:
 		ret = MTK_SIP_E_INVALID_PARAM;
 		break;
 	}
 	return ret;
 }
-DECLARE_SMC_HANDLER(MTK_SIP_PARTNAME_ID, mtk_binfo_handler);
+DECLARE_SMC_HANDLER(MTK_SIP_PLAT_BINFO, mtk_binfo_handler);
