@@ -14,6 +14,7 @@
 #include "mt_cpu_pm.h"
 #include "mt_cpu_pm_cpc.h"
 #include "mt_cpu_pm_mbox.h"
+#include <mt_lp_rm.h>
 #include "mt_smp.h"
 #include <mtk_mmap_pool.h>
 #include <platform_def.h>
