@@ -16,7 +16,19 @@
 #include "apusys.h"
 #include "apusys_power.h"
 
-#define LOCAL_DEBUG	(0)
+#ifdef CONFIG_MTK_APUSYS_COMMON
+#include "apusys_rv.h"
+#endif
+
+#ifdef CONFIG_MTK_APUSYS_AOV
+#include "apusys_aov/apusys_aovdram.h"
+#endif
+
+#ifdef CONFIG_MTK_APUSYS_KERNEL_LOAD_IMAGE
+#include "apusys_rv_load_img.h"
+#endif
+
+#define LOCAL_DEBUG	(1)
 #define MODULE_TAG	"[APUSYS]"
 
 /* Weak definitions can be overridden in specific platform */
@@ -51,6 +63,56 @@
 #pragma weak apusys_kernel_apusys_pwr_rcx
 #pragma weak apusys_kernel_apusys_setup_secure_mem
 #pragma weak apusys_kernel_apusys_rv_load_image
+
+#ifdef CONFIG_MTK_APUSYS_COMMON
+struct apusys_rv_plat_ops apusys_rv_ops = {
+	.apusys_rv_ops_setup_reviser = NULL,
+	.apusys_rv_ops_setup_apummu = NULL,
+	.apusys_rv_ops_pwr_ctrl = NULL,
+	.apusys_rv_ops_reset_mp = NULL,
+	.apusys_rv_ops_setup_boot = NULL,
+	.apusys_rv_ops_start_mp = NULL,
+	.apusys_rv_ops_stop_mp = NULL,
+	.apusys_rv_ops_drv_init = NULL,
+	.apusys_rv_ops_mbox_mpu_init = NULL,
+	.apusys_rv_ops_setup_ce_bin = NULL,
+	.apusys_rv_ops_setup_normal_mem = NULL,
+	.apusys_rv_ops_setup_secure_mem = NULL,
+	.apusys_rv_ops_setup_aee_coredump_mem = NULL,
+	.apusys_rv_ops_disable_wdt_isr = NULL,
+	.apusys_rv_ops_clear_wdt_isr = NULL,
+	.apusys_rv_ops_cg_gating = NULL,
+	.apusys_rv_ops_cg_ungating = NULL,
+	.apusys_rv_ops_coredump_shadow_copy = NULL,
+	.apusys_rv_ops_tcmdump = NULL,
+	.apusys_rv_ops_tcmdump_wa = NULL,
+	.apusys_rv_ops_ramdump = NULL,
+	.apusys_rv_ops_tbufdump = NULL,
+	.apusys_rv_ops_cachedump = NULL,
+	.apusys_rv_ops_dbg_apb_attach = NULL,
+	.apusys_rv_ops_regdump = NULL,
+	.apusys_rv_ops_ce_reset = NULL,
+	.apusys_rv_ops_ce_regdump = NULL,
+	.apusys_rv_ops_ce_mask_init = NULL,
+	.apusys_rv_ops_ce_sram_dump = NULL,
+	.apusys_rv_ops_release_scp_hw_sem = NULL,
+	.apusys_rv_ops_logtop_reg_dump = NULL,
+	.apusys_rv_ops_logtop_reg_write = NULL,
+	.apusys_rv_ops_logtop_reg_w1c = NULL,
+	.apusys_rv_ops_decode_apu_exp_irq = NULL,
+	.apusys_rv_ops_ce_debug_regdump = NULL,
+	.apusys_rv_ops_setup_tcm_log_mem = NULL,
+	.apusys_rv_ops_dump_tcm_log = NULL,
+	.apusys_rv_ops_ce_reg_write = NULL,
+};
+#endif
+
+#ifdef CONFIG_MTK_APUSYS_AOV
+struct apusys_aov_plat_ops apusys_aov_ops = {
+	.apusys_setup_aovdram_data_iova = NULL,
+	.apusys_setup_aovdram_ctrl_iova = NULL,
+};
+#endif
 
 int32_t start_apusys_devapc_ao(void)
 {
@@ -255,6 +317,7 @@ int32_t apusys_kernel_apusys_rv_load_image(uint64_t res_mem_start,
 	return -EOPNOTSUPP;
 }
 
+#ifndef CONFIG_MTK_APUSYS_COMMON
 static u_register_t apusys_kernel_handler(u_register_t x1,
 	u_register_t x2,
 	u_register_t x3,
@@ -359,6 +422,243 @@ static u_register_t apusys_kernel_handler(u_register_t x1,
 
 	return ret;
 }
+#else
+static u_register_t apusys_kernel_handler(u_register_t x1,
+	u_register_t x2,
+	u_register_t x3,
+	u_register_t x4,
+	void *handle,
+	struct smccc_res *smccc_ret)
+{
+	uint32_t request_ops;
+	int32_t ret = -EIO;
+
+#if LOCAL_DEBUG
+	INFO("%s %s\n", MODULE_TAG, __func__);
+#endif
+	request_ops = (uint32_t)x1;
+
+	if (request_ops != MTK_APUSYS_KERNEL_OP_APUSYS_LOGTOP_REG_DUMP &&
+		request_ops != MTK_APUSYS_KERNEL_OP_APUSYS_LOGTOP_REG_WRITE &&
+		request_ops != MTK_APUSYS_KERNEL_OP_APUSYS_LOGTOP_REG_W1C)
+		INFO("%s %s(%u)\n", MODULE_TAG, __func__, request_ops);
+
+	switch (request_ops) {
+	case MTK_APUSYS_KERNEL_OP_REVISER_SET_BOUNDARY:
+		break;
+	case MTK_APUSYS_KERNEL_OP_SET_AO_DBG_SEL:
+		break;
+	case MTK_APUSYS_KERNEL_OP_REVISER_SET_DEFAULT_IOVA:
+		break;
+	case MTK_APUSYS_KERNEL_OP_REVISER_GET_INTERRUPT_STATUS:
+		break;
+	case MTK_APUSYS_KERNEL_OP_REVISER_SET_CONTEXT_ID:
+		break;
+	case MTK_APUSYS_KERNEL_OP_REVISER_SET_REMAP_TABLE:
+		break;
+	case MTK_APUSYS_KERNEL_OP_REVISER_CHK_VALUE:
+		break;
+	case MTK_APUSYS_KERNEL_OP_DEVAPC_INIT_RCX:
+		ret = start_apusys_devapc_rcx();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_REVISER:
+		ret = apusys_kernel_apusys_rv_setup_reviser();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_RESET_MP:
+		ret = apusys_kernel_apusys_rv_reset_mp();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_BOOT:
+		ret = apusys_kernel_apusys_rv_setup_boot();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_START_MP:
+		ret = apusys_kernel_apusys_rv_start_mp();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_STOP_MP:
+		ret = apusys_kernel_apusys_rv_stop_mp();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_DISABLE_WDT_ISR:
+		ret = apusys_kernel_apusys_rv_disable_wdt_isr();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_CLEAR_WDT_ISR:
+		ret = apusys_kernel_apusys_rv_clear_wdt_isr();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_CG_GATING:
+		ret = apusys_kernel_apusys_rv_cg_gating();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_CG_UNGATING:
+		ret = apusys_kernel_apusys_rv_cg_ungating();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_COREDUMP_SHADOW_COPY:
+		ret = apusys_kernel_apusys_rv_coredump_shadow_copy();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_TCMDUMP:
+		ret = apusys_kernel_apusys_rv_tcmdump();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_RAMDUMP:
+		ret = apusys_kernel_apusys_rv_ramdump();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_TBUFDUMP:
+		ret = apusys_kernel_apusys_rv_tbufdump();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_CACHEDUMP:
+		ret = apusys_kernel_apusys_rv_cachedump();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_DBG_APB_ATTACH:
+		ret = apusys_kernel_apusys_rv_dbg_apb_attach();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_REGDUMP:
+		ret = apusys_kernel_apusys_rv_regdump((uint32_t)x2);
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_PWR_DUMP:
+		ret = apusys_kernel_apusys_pwr_dump((uint32_t)x2);
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_REGDUMP:
+		ret = apusys_kernel_apusys_regdump();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_PWR_RCX:
+		ret = apusys_kernel_apusys_pwr_rcx((uint32_t)x2);
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_SETUP_SECURE_MEM:
+		ret = apusys_kernel_apusys_setup_secure_mem();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_LOAD_IMAGE:
+		ret = apusys_kernel_apusys_rv_load_image(0, (uint64_t)x2,
+						(uint64_t)x3);
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_MAP_SECURE_IOVA:
+		ret = apusys_kernel_apusys_map_secure_iova();
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_CE_RESET:
+		if (apusys_rv_ops.apusys_rv_ops_ce_reset != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_ce_reset(smccc_ret);
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_CE_REGDUMP:
+		if (apusys_rv_ops.apusys_rv_ops_ce_regdump != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_ce_regdump((uint32_t)x2, smccc_ret);
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_CE_MASK_INIT:
+		if (apusys_rv_ops.apusys_rv_ops_ce_mask_init != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_ce_mask_init();
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_SETUP_APUMMU:
+		if (apusys_rv_ops.apusys_rv_ops_setup_apummu != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_setup_apummu();
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_PWR_CTRL:
+		if (apusys_rv_ops.apusys_rv_ops_pwr_ctrl != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_pwr_ctrl((uint32_t)x2);
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_CE_SRAM_DUMP:
+		if (apusys_rv_ops.apusys_rv_ops_ce_sram_dump != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_ce_sram_dump();
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RELESE_SCP_HW_SEM:
+		if (apusys_rv_ops.apusys_rv_ops_release_scp_hw_sem != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_release_scp_hw_sem();
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_LOGTOP_REG_DUMP:
+		if (apusys_rv_ops.apusys_rv_ops_logtop_reg_dump != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_logtop_reg_dump((uint32_t)x2, smccc_ret);
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_TCMDUMP_WA:
+		if (apusys_rv_ops.apusys_rv_ops_tcmdump_wa != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_tcmdump_wa();
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_LOGTOP_REG_WRITE:
+		if (apusys_rv_ops.apusys_rv_ops_logtop_reg_write != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_logtop_reg_write(
+					(uint32_t)x2, (uint32_t)x3, smccc_ret);
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_LOGTOP_REG_W1C:
+		if (apusys_rv_ops.apusys_rv_ops_logtop_reg_w1c != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_logtop_reg_w1c((uint32_t)x2, smccc_ret);
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_OP_DECODE_APU_EXP_IRQ:
+		if (apusys_rv_ops.apusys_rv_ops_decode_apu_exp_irq != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_decode_apu_exp_irq();
+		else
+			ret = -EOPNOTSUPP;
+		break;
+#ifdef CONFIG_MTK_APUSYS_AOV
+	case MTK_APUSYS_KERNEL_OP_APUSYS_AOVDRAM_DATA_IOVA:
+		if (apusys_aov_ops.apusys_setup_aovdram_data_iova != NULL)
+			ret = apusys_aov_ops.apusys_setup_aovdram_data_iova(smccc_ret);
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_AOVDRAM_CTRL_IOVA:
+		if (apusys_aov_ops.apusys_setup_aovdram_ctrl_iova != NULL)
+			ret = apusys_aov_ops.apusys_setup_aovdram_ctrl_iova(smccc_ret);
+		else
+			ret = -EOPNOTSUPP;
+		break;
+#endif
+	case MTK_APUSYS_KERNEL_OP_APUSYS_CE_DEBUG_REGDUMP:
+		if (apusys_rv_ops.apusys_rv_ops_ce_debug_regdump != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_ce_debug_regdump();
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_SETUP_TCM_LOG_MEM:
+		if (apusys_rv_ops.apusys_rv_ops_setup_tcm_log_mem != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_setup_tcm_log_mem(x2, x3);
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_DUMP_TCM_LOG:
+		if (apusys_rv_ops.apusys_rv_ops_dump_tcm_log != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_dump_tcm_log();
+		else
+			ret = -EOPNOTSUPP;
+		break;
+
+	case MTK_APUSYS_KERNEL_OP_APUSYS_COLD_BOOT_CLR_MBOX_DUMMY:
+		if (apusys_rv_ops.apusys_rv_ops_cold_boot_clr_mbox_dummy != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_cold_boot_clr_mbox_dummy();
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_CE_REG_WRITE:
+		if (apusys_rv_ops.apusys_rv_ops_ce_reg_write != NULL)
+			ret = apusys_rv_ops.apusys_rv_ops_ce_reg_write(
+				(uint32_t)x2, (uint32_t)x3);
+		else
+			ret = -EOPNOTSUPP;
+		break;
+	case MTK_APUSYS_KERNEL_OP_APUSYS_RV_INIT:
+		INFO("MTK_APUSYS_KERNEL_OP_APUSYS_RV_INIT\n");
+		ret = apusys_init();
+		break;
+	default:
+		ERROR("%s unknown request_ops = %x\n", MODULE_TAG, request_ops);
+		break;
+	}
+
+	return ret;
+}
+#endif
 
 /* Register SiP SMC service */
 DECLARE_SMC_HANDLER(MTK_SIP_APUSYS_CONTROL, apusys_kernel_handler);
@@ -376,20 +676,39 @@ DECLARE_SMC_HANDLER(MTK_SIP_APUSYS_CONTROL, apusys_kernel_handler);
  */
 int apusys_init(void)
 {
+	int32_t ret = -EIO;
+
 #if LOCAL_DEBUG
 	NOTICE("%s %s + \n", MODULE_TAG, __func__);
 #endif
 
-	apusys_rv_init();
+	ret = apusys_rv_init();
+	if (ret)
+		ERROR("%s apusys_rv_init failed, ret = %d\n", __func__, ret);
+
+	/* power init */
 	apusys_power_init();
-	start_apusys_devapc_ao();
-	apusys_security_ctrl_init();
-	apusys_rv_mbox_mpu_init();
+
+	ret = start_apusys_devapc_ao();
+	if (ret)
+		ERROR("%s start_apusys_devapc_ao failed, ret = %d\n", __func__, ret);
+
+	ret = apusys_security_ctrl_init();
+	if (ret)
+		ERROR("%s apusys_security_ctrl_init failed, ret = %d\n", __func__, ret);
+
+	ret = apusys_rv_mbox_mpu_init();
+	if (ret)
+		ERROR("%s apusys_rv_mbox_mpu_init failed, ret = %d\n", __func__, ret);
 
 #if LOCAL_DEBUG
 	NOTICE("%s %s - \n", MODULE_TAG, __func__);
 #endif
-	return 0;
+
+	return ret;
 }
 
+#ifndef CONFIG_MTK_APUSYS_COMMON
 MTK_PLAT_SETUP_1_INIT(apusys_init);
+#endif
+
