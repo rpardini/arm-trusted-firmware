@@ -40,6 +40,7 @@ MODULES-y += $(MTK_PLAT)/drivers/pmic
 MODULES-y += $(MTK_PLAT)/drivers/pmic_wrap
 MODULES-y += $(MTK_PLAT)/drivers/smpu
 MODULES-y += $(MTK_PLAT)/drivers/rtc
+MODULES-$(CONFIG_MTK_APUSYS) += $(MTK_PLAT)/drivers/apusys
 MODULES-$(CONFIG_MTK_SPMI) += $(MTK_PLAT)/drivers/spmi
 MODULES-$(CONFIG_MTK_CPU_PM_SUPPORT) += $(MTK_PLAT)/drivers/cpu_pm
 
