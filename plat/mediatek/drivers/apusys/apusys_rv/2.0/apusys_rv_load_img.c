@@ -24,6 +24,8 @@ extern void emi_mpu_set_protection(u_register_t start, u_register_t end, u_regis
 #endif
 #endif
 
+#define NEED_VERIFY_IMG	(1)
+
 #if NEED_VERIFY_IMG
 #include "apusys_secure_boot.h"
 #endif
