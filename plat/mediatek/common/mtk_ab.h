@@ -28,9 +28,11 @@
 #define PART_BOOT_B				1
 #define PART_SUFFIX_A			"bootloaders"
 #define PART_SUFFIX_B			"bootloaders_b"
-#define PART_BOOT_A_NOR			0x400000
-#define PART_BOOT_B_NOR			0x800000
-#define PART_BOOT_SIZE			0x400000
+#if defined(STORAGE_NOR)
+#define PART_BOOT_A_NOR			BL2_STORAGE_NOR_START_ADDR
+#define PART_BOOT_B_NOR			(BL2_STORAGE_NOR_START_ADDR + BL2_STORAGE_NOR_LENGTH)
+#define PART_BOOT_SIZE			BL2_STORAGE_NOR_LENGTH
+#endif
 
 struct mtk_bl_ctrl {
 	uint32_t slot_suffix;
