@@ -47,13 +47,13 @@ include lib/zlib/zlib.mk
 BL2_SOURCES += ${MTK_PLAT}/common/mtk_ab.c \
 	        $(ZLIB_SOURCES) \
 $(eval $(call add_define,PLAT_AB_BOOT_ENABLE))
-else
+endif
+
 ifeq (${STORAGE_NOR},1)
 BL2_STORAGE_NOR_START_ADDR := 0x400000
 BL2_STORAGE_NOR_LENGTH := 0x400000
 $(eval $(call add_define,BL2_STORAGE_NOR_START_ADDR))
 $(eval $(call add_define,BL2_STORAGE_NOR_LENGTH))
-endif
 endif
 
 ifeq (${STORAGE_NOR},1)
