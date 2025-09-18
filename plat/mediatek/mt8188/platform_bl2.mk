@@ -52,8 +52,10 @@ endif
 ifeq (${STORAGE_NOR},1)
 BL2_STORAGE_NOR_START_ADDR := 0x400000
 BL2_STORAGE_NOR_LENGTH := 0x400000
+BL2_STORAGE_NOR_BOOTCTRL := 0x1480000
 $(eval $(call add_define,BL2_STORAGE_NOR_START_ADDR))
 $(eval $(call add_define,BL2_STORAGE_NOR_LENGTH))
+$(eval $(call add_define,BL2_STORAGE_NOR_BOOTCTRL))
 endif
 
 ifeq (${STORAGE_NOR},1)
