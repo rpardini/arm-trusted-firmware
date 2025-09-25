@@ -68,4 +68,9 @@ include lib/libfdt/libfdt.mk
 else
 BL2_SOURCES += drivers/mmc/mmc.c \
             ${MTK_PLAT}/common/drivers/mmc/mtk-sd.c
+ifeq (${STORAGE_APPEND_FIP},1)
+$(eval $(call add_define,STORAGE_APPEND_FIP))
+$(eval $(call add_define_val,STORAGE_FIP_OFFSET,${STORAGE_FIP_OFFSET}))
+$(eval $(call add_define_val,STORAGE_BOOT_LENGTH,${STORAGE_BOOT_LENGTH}))
+endif
 endif

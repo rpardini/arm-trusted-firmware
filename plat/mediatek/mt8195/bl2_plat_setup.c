@@ -137,7 +137,11 @@ static uintptr_t fip_dev_handle;
 static uint32_t mmc_buf_in_sram[PLAT_PARTITION_BLOCK_SIZE / sizeof(uint32_t)];
 
 #if defined(STORAGE_UFS)
+#if defined(STORAGE_APPEND_FIP)
+#define MAIN_STORAGE_LUN 0
+#else
 #define MAIN_STORAGE_LUN 2
+#endif /* STORAGE_APPEND_FIP */
 size_t mtk_ufs_read(int lba, uintptr_t buf, size_t size)
 {
 	return ufs_read_blocks(MAIN_STORAGE_LUN, lba, buf, size);
@@ -186,8 +190,13 @@ static io_block_dev_spec_t emmc_dev_spec = {
 		.length = PLAT_PARTITION_BLOCK_SIZE,
 	},
 	.ops = {
+#if defined(STORAGE_APPEND_FIP)
+		.read = mmc_boot_part_read_blocks,
+		.write = NULL,
+#else
 		.read = mmc_read_blocks,
 		.write = mmc_write_blocks,
+#endif
 	},
 	.block_size = MMC_BLOCK_SIZE,
 };
@@ -502,6 +511,12 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 
 		storage.start = BL2_STORAGE_NOR_START_ADDR;
 		storage.length = BL2_STORAGE_NOR_LENGTH;
+		entry = &storage;
+#elif defined(STORAGE_APPEND_FIP)
+		partition_entry_t storage;
+
+		storage.start = STORAGE_FIP_OFFSET;
+		storage.length = STORAGE_BOOT_LENGTH;
 		entry = &storage;
 #else
 		if((entry = get_partition_entry(name)) == NULL) {

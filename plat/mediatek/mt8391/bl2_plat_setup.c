@@ -51,7 +51,11 @@ static struct msdc_compatible msdc_compat = {
 	.top_base = MSDC0_TOP_BASE,
 };
 
+#if defined(STORAGE_APPEND_FIP)
+#define MAIN_STORAGE_LUN 0
+#else
 #define MAIN_STORAGE_LUN 2
+#endif /* STORAGE_APPEND_FIP */
 size_t mtk_ufs_read(int lba, uintptr_t buf, size_t size)
 {
 	return ufs_read_blocks(MAIN_STORAGE_LUN, lba, buf, size);
@@ -80,8 +84,13 @@ static io_block_dev_spec_t emmc_dev_spec = {
 		.length = PLAT_PARTITION_BLOCK_SIZE,
 	},
 	.ops = {
+#if defined(STORAGE_APPEND_FIP)
+		.read = mmc_boot_part_read_blocks,
+		.write = NULL,
+#else
 		.read = mmc_read_blocks,
 		.write = mmc_write_blocks,
+#endif
 	},
 	.block_size = MMC_BLOCK_SIZE,
 };

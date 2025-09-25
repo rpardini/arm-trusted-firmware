@@ -82,6 +82,12 @@ BL2_SOURCES     += ${MTK_PLAT}/common/mtk_ab.c                        \
 $(eval $(call add_define,PLAT_AB_BOOT_ENABLE))
 endif
 
+ifeq (${STORAGE_APPEND_FIP},1)
+$(eval $(call add_define,STORAGE_APPEND_FIP))
+$(eval $(call add_define_val,STORAGE_FIP_OFFSET,${STORAGE_FIP_OFFSET}))
+$(eval $(call add_define_val,STORAGE_BOOT_LENGTH,${STORAGE_BOOT_LENGTH}))
+endif
+
 BL31_SOURCES    += common/desc_image_load.c                              \
                    drivers/delay_timer/delay_timer.c                     \
                    drivers/delay_timer/generic_delay_timer.c             \

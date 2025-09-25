@@ -371,6 +371,12 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 		storage.start = BL2_STORAGE_NOR_START_ADDR;
 		storage.length = BL2_STORAGE_NOR_LENGTH;
 		entry = &storage;
+#elif defined(STORAGE_APPEND_FIP)
+		partition_entry_t storage;
+
+		storage.start = STORAGE_FIP_OFFSET;
+		storage.length = STORAGE_BOOT_LENGTH;
+		entry = &storage;
 #else
 		entry = get_partition_entry(name);
 		if (entry == NULL) {

@@ -69,6 +69,12 @@ else
 PLAT_PARTITION_BLOCK_SIZE := 512
 endif
 
+ifeq (${STORAGE_APPEND_FIP},1)
+$(eval $(call add_define,STORAGE_APPEND_FIP))
+$(eval $(call add_define_val,STORAGE_FIP_OFFSET,${STORAGE_FIP_OFFSET}))
+$(eval $(call add_define_val,STORAGE_BOOT_LENGTH,${STORAGE_BOOT_LENGTH}))
+endif
+
 ifeq (${PLAT_HW_CRYPTO},1)
 BL2_LIBS += ${MTK_PLAT}/lib/crypt/libarmcrypt.a
 $(eval $(call add_define,PLAT_HW_CRYPTO))

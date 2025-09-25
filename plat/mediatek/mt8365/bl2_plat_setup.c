@@ -146,8 +146,13 @@ static const io_block_dev_spec_t emmc_dev_spec = {
 		.length = 0x1000000,
 	},
 	.ops = {
+#if defined(STORAGE_APPEND_FIP)
+		.read = mmc_boot_part_read_blocks,
+		.write = NULL,
+#else
 		.read = mmc_read_blocks,
 		.write = mmc_write_blocks,
+#endif
 	},
 	.block_size = MMC_BLOCK_SIZE,
 };
@@ -436,6 +441,12 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 		const char *ab_boot = plat_ab_handle_boot();
 
 		entry = get_partition_entry(ab_boot);
+#elif defined(STORAGE_APPEND_FIP)
+		partition_entry_t storage;
+
+		storage.start = STORAGE_FIP_OFFSET;
+		storage.length = STORAGE_BOOT_LENGTH;
+		entry = &storage;
 #else
 		partition_init(GPT_IMAGE_ID);
 		entry = get_partition_entry(name);

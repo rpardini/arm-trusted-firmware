@@ -156,8 +156,13 @@ static io_block_dev_spec_t emmc_dev_spec = {
 		.length = PLAT_PARTITION_BLOCK_SIZE,
 	},
 	.ops = {
+#if defined(STORAGE_APPEND_FIP)
+		.read = mmc_boot_part_read_blocks,
+		.write = NULL,
+#else
 		.read = mmc_read_blocks,
 		.write = mmc_write_blocks,
+#endif
 	},
 	.block_size = MMC_BLOCK_SIZE,
 };
@@ -474,6 +479,12 @@ int bl2_plat_handle_pre_image_load(unsigned int image_id)
 
 		storage.start = BL2_STORAGE_NOR_START_ADDR;
 		storage.length = BL2_STORAGE_NOR_LENGTH;
+		entry = &storage;
+#elif defined(STORAGE_APPEND_FIP)
+		partition_entry_t storage;
+
+		storage.start = STORAGE_FIP_OFFSET;
+		storage.length = STORAGE_BOOT_LENGTH;
 		entry = &storage;
 #else
 		if((entry = get_partition_entry(name)) == NULL) {
