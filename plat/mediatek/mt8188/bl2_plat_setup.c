@@ -33,6 +33,7 @@
 #if defined(PLAT_AB_BOOT_ENABLE)
 #include <mtk_ab.h>
 #endif
+#include "libdram.h"
 
 void pwrap_init(void);
 void mt_mem_init(void);
@@ -396,6 +397,10 @@ void bl2_platform_setup(void)
 	load_partition_table(GPT_IMAGE_ID);
 	blkdev_set_dramk_data_offset(get_part_addr("dramk"));
 	mt_mem_init();
+
+	BOOT_ARGUMENT->magic_number = BOOT_ARGUMENT_MAGIC;
+	BOOT_ARGUMENT->dram_size = platform_memory_size();
+
 	/* change emmc read buffer to DRAM */
 	boot_dev_spec->buffer.offset = 0x41000000;
 	boot_dev_spec->buffer.length = 0x1000000;
