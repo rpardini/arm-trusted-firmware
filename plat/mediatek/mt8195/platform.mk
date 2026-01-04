@@ -103,6 +103,7 @@ endif
 endif
 
 MODULES-BL2-y += ${MTK_PLAT}/common/drivers/blkdev
+MODULES-BL2-y += $(MTK_PLAT_SOC)/drivers/libdram
 
 $(eval $(call add_define,PLAT_PARTITION_BLOCK_SIZE))
 

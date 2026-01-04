@@ -202,6 +202,8 @@
 #define BL2_BASE		(0x201000)
 #define BL2_LIMIT		(0x400000)
 
+#define BOOT_ARGUMENT_LOCATION	(0x40000100) // Gotta match u-boot's arch/arm/include/asm/arch-mediatek/misc.h
+
 #define MAX_IO_DEVICES			U(3)
 #define MAX_IO_HANDLES			U(4)
 #define MAX_IO_BLOCK_DEVICES			1
