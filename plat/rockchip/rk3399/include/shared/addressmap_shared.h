@@ -64,7 +64,7 @@
 #define PMUGRF_SIZE		SIZE_K(64)
 #define SGRF_SIZE		SIZE_K(64)
 #define PMUSRAM_SIZE		SIZE_K(64)
-#define PMUSRAM_RSIZE		SIZE_K(8)
+#define PMUSRAM_RSIZE		SIZE_K(16)
 #define PWM_SIZE		SIZE_K(64)
 #define CIC_SIZE		SIZE_K(4)
 #define DCF_SIZE		SIZE_K(4)
